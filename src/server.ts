@@ -9,7 +9,7 @@ const port = process.env.PORT ? Number(process.env.PORT) : 3333;
 app.post('/webhook/group-message', (request, res) => {
   const payload = request.body as GroupMessage;
 
-  const padrao = /🌎 ([^>]+) &amp;gt; ([^>]+)\n✈️ Internacional\n📍 ([^]+)\n💰 A partir de (\d{1,3}(?:\.\d{3})*(?:,\d{2})?) milhas trecho/;
+  const padrao = /🌎 ([^>]+) &amp;gt; ([^>]+)\n(?:✈️ (Internacional|Nacional)\n)?📍 ([^]+)\n💰 A partir de (\d{1,3}(?:\.\d{3})*(?:,\d{2})?) milhas trecho/;
 
   if (padrao.test(payload.message.text)) {
 
