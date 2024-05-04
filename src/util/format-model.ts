@@ -3,7 +3,8 @@ export function formatMessageText(text: string): string {
   const arraySplitted = text.split("\n")
 
   if (arraySplitted[2].includes('Internacional')) {
-    const affiliatesProgram = arraySplitted[0]
+    const regexAffiliates = /(?:🚨)(.*?)(?:🚨)/g;
+    const affiliatesProgram = arraySplitted[0].replace(regexAffiliates, '$1')
     const country = arraySplitted[1].replace('🌎 ', '').split(' &amp;gt; ')
     const trip = `${arraySplitted[2].replace('✈️', '')} - ${country[0]} > ${country[1]}`
     const route = arraySplitted[3].replace('📍 ', '')
@@ -26,7 +27,7 @@ export function formatMessageText(text: string): string {
 
 🌍 Explore o Mundo com Facilidade 🌍
 
-✈️ Programa de Afiliados: ${affiliatesProgram}
+🚨 Programa de Afiliados: ${affiliatesProgram}
 ✈️ Rota: ${trip}
 📍 De: ${route}
 💰 ${miles}
