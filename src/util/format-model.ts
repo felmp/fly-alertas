@@ -5,8 +5,8 @@ export function formatMessageText(text: string): string {
   if (arraySplitted[2].includes('Internacional')) {
     const regexAffiliates = /(?:🚨)(.*?)(?:🚨)/g;
     const affiliatesProgram = arraySplitted[0].replace(regexAffiliates, '$1')
-    const country = arraySplitted[1].replace('🌎 ', '').split(' &amp;gt; ')
-    const trip = `${arraySplitted[2].replace('✈️', '')} - ${country[0]} > ${country[1]}`
+    const country = arraySplitted[1].replace('🌎 ', '').replace(/&amp;gt;/g, '&gt;').split('&gt;').map(item => item.trim());
+    const trip = `${arraySplitted[2].replace('✈️ ', '')} - ${country[0]} > ${country[1]}`
     const route = arraySplitted[3].replace('📍 ', '')
     const miles = arraySplitted[4].replace('💰 ', '').replace('milhas trecho', 'milhas por trecho')
     const typeTrip = arraySplitted[5].replace('💺 Classe ', '')
@@ -19,7 +19,7 @@ export function formatMessageText(text: string): string {
     let restante = "";
 
     for (let i = 8; i < arraySplitted.length; i++) {
-      restante += `${arraySplitted[i].replace('🗓️ Datas: ', '')}\n`;
+      restante += `${arraySplitted[i].replace(/🗓️\s?Datas?:/g, '')}\n`;
     }
 
     const formattedText = `
@@ -28,7 +28,7 @@ export function formatMessageText(text: string): string {
 🌍 Explore o Mundo com Facilidade 🌍
 
 🚨 Programa de Afiliados: ${affiliatesProgram}
-✈️ Rota: ${trip}
+✈️  Rota: ${trip}
 📍 De: ${route}
 💰 ${miles}
 💺 Viaje com Estilo: ${typeTrip}
@@ -43,8 +43,9 @@ Experimente luxo, flexibilidade e arranjos de viagem sem complicações. Reserve
     return formattedText.trim();
 
   } else {
-    const affiliatesProgram = arraySplitted[0]
-    const trip = arraySplitted[1].replace('✈️', '')
+    const regexAffiliates = /(?:🚨)(.*?)(?:🚨)/g;
+    const affiliatesProgram = arraySplitted[0].replace(regexAffiliates, '$1')
+    const trip = arraySplitted[1].replace('✈️ ', '')
     const route = arraySplitted[2].replace('📍 ', '')
     const miles = arraySplitted[3].replace('💰 ', '').replace('milhas trecho', 'milhas por trecho')
     const typeTrip = arraySplitted[4].replace('💺 Classe ', '')
@@ -57,7 +58,7 @@ Experimente luxo, flexibilidade e arranjos de viagem sem complicações. Reserve
     let restante = "";
 
     for (let i = 7; i < arraySplitted.length; i++) {
-      restante += `${arraySplitted[i].replace('🗓️ Datas: ', '')}\n`;
+      restante += `${arraySplitted[i].replace(/🗓️\s?Datas?:/g, '')}\n`;
     }
 
     const formattedText = `
