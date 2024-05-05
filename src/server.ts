@@ -11,7 +11,7 @@ app.post('/webhook', (request, res) => {
 
   const padrao = /🌎 ([^>]+) (&amp;gt;|&gt;) ([^\n]+)\n(?:✈️ (Internacional|Nacional)\n)?📍 ([^\n]+)\n💰 A partir de (\d{1,3}(?:\.\d{3})*(?:,\d{3})*(?:\.\d{2})?) milhas/;
 
-  if (padrao.test(payload.message.text)) {
+  if (padrao.test(payload.message.text) && payload.contact.friendly_name == 'Espelho Emissões Y1') {
 
     const formattedText = formatMessageText(payload.message.text)
 
@@ -39,7 +39,7 @@ app.post('/webhook', (request, res) => {
       .catch(function (error) {
         console.log(error);
       });
-  } else {
+  } else if(payload.contact.friendly_name == 'Espelho Emissões Y1') {
     //ENVIAR O ERRO PARA VALIDAÇÃO NO WPP
     var data = JSON.stringify({
       "to_number": "+5585991694005",
