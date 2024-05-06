@@ -9,7 +9,14 @@ const port = process.env.PORT ? Number(process.env.PORT) : 3333;
 app.post('/webhook', (request, res) => {
   const payload = request.body as GroupMessage;
 
-  const padrao = /🌎 ([^>]+) (&amp;gt;|&gt;) ([^\n]+)\n(?:✈️ (Internacional|Nacional)\n)?📍 ([^\n]+)\n💰 A partir de (\d{1,3}(?:\.\d{3})*(?:,\d{3})*(?:\.\d{2})?) milhas/;
+  // const padrao = /🌎 ([^>]+) (&amp;gt;|&gt;) ([^\n]+)\n(?:✈️ (Internacional|Nacional)\n)?📍 ([^\n]+)\n💰 A partir de (\d{1,3}(?:\.\d{3})*(?:,\d{3})*(?:\.\d{2})?) milhas/;
+  payload.message.text = payload.message.text.replace(/(\s+)([\uD800-\uDBFF][\uDC00-\uDFFF])(\s+)/g, "$2");
+
+  const padrao2 = /🚨([^]+)\n✈️ (Internacional|Nacional)\n📍([^]+)\n💰 A partir de (\d{1,3}(?:\.\d{3})*(?:,\d{3})*(?:\.\d{2})?) milhas/
+  const padrao =/🌎 ([^>\n]+) (>) ([^\n]+)\n(?:✈️ (Internacional|Nacional)\n)?📍 ([^\n]+)\n💰 A partir de (\d{1,3}(?:\.\d{3})*(?:,\d{3})*(?:\.\d{2})?) milhas/
+
+  console.log(formatMessageText(payload.message.text))
+  return;
 
   if (padrao.test(payload.message.text) && payload.contact.friendly_name == 'Espelho Emissões Y1') {
 

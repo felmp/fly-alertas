@@ -2,14 +2,16 @@
 export function formatMessageText(text: string): string {
   const arraySplitted = text.split("\n")
 
+  console.log(arraySplitted)
+
   if (arraySplitted[2].includes('Internacional')) {
     const regexAffiliates = /(?:🚨)(.*?)(?:🚨)/g;
     const affiliatesProgram = arraySplitted[0].replace(regexAffiliates, '$1')
-    const country = arraySplitted[1].replace('🌎 ', '').replace(/&amp;gt;/g, '&gt;').split('&gt;').map(item => item.trim());
-    const trip = `${arraySplitted[2].replace('✈️ ', '')} - ${country[0]} > ${country[1]}`
-    const route = arraySplitted[3].replace('📍 ', '')
-    const miles = arraySplitted[4].replace('💰 ', '').replace('milhas trecho', 'milhas por trecho')
-    const typeTrip = arraySplitted[5].replace('💺 Classe ', '')
+    const country = arraySplitted[1].replace('🌎', '').replace(/&amp;gt;/g, '&gt;').split('&gt;').map(item => item.trim());
+    const trip = `${arraySplitted[2].replace('✈️', '')} - ${country[0]} > ${country[1]}`
+    const route = arraySplitted[3].replace('📍', '')
+    const miles = arraySplitted[4].replace('💰', '').replace('milhas trecho', 'milhas por trecho')
+    const typeTrip = arraySplitted[5].replace('💺Classe', '')
     const flex = [
       'Opções de Reserva Flexíveis Disponíveis',
       'Reserva Fixa'
@@ -27,8 +29,7 @@ export function formatMessageText(text: string): string {
 
 🌍 Explore o Mundo com Facilidade 🌍
 
-🚨 Programa de Afiliados: ${affiliatesProgram}
-✈️  Rota: ${trip}
+🚨 Programa de Afiliados: ${affiliatesProgram}\n✈️ Rota: ${trip}
 📍 De: ${route}
 💰 ${miles}
 💺 Viaje com Estilo: ${typeTrip}
