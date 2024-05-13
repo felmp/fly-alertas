@@ -2,6 +2,7 @@ import axios from 'axios';
 import fastify from 'fastify';
 import { GroupMessage } from './models/group-message';
 import { formatMessageText } from './util/format-model';
+import { formatMoneyMessageText } from './util/format-model-money';
 
 const app = fastify();
 const port = process.env.PORT ? Number(process.env.PORT) : 3333;
@@ -9,22 +10,22 @@ const port = process.env.PORT ? Number(process.env.PORT) : 3333;
 app.post('/webhook', (request, res) => {
   const payload = request.body as GroupMessage;
 
-  // const padrao = /🌎 ([^>]+) (&amp;gt;|&gt;) ([^\n]+)\n(?:✈️ (Internacional|Nacional)\n)?📍 ([^\n]+)\n💰 A partir de (\d{1,3}(?:\.\d{3})*(?:,\d{3})*(?:\.\d{2})?) milhas/;
-  payload.message.text = payload.message.text.replace(/(\s+)([\uD800-\uDBFF][\uDC00-\uDFFF])(\s+)/g, "$2");
+  const padrao = /(.*?)\n✈️(.*?)\n📍(.*?)\n💰(.*?)\n💺(.*?)\n((.*?)📈|📈)(.*?)\n🛫(.*?)\n/
+  const padrao2 = /(.*?)\n(🌍|🌎)(.*?)\n✈️(.*?)\n📍(.*?)\n💰(.*?)\n💺(.*?)\n/
 
-  const padrao2 = /🚨([^]+)\n✈️ (Internacional|Nacional)\n📍([^]+)\n💰 A partir de (\d{1,3}(?:\.\d{3})*(?:,\d{3})*(?:\.\d{2})?) milhas/
-  const padrao =/🌎 ([^>\n]+) (>) ([^\n]+)\n(?:✈️ (Internacional|Nacional)\n)?📍 ([^\n]+)\n💰 A partir de (\d{1,3}(?:\.\d{3})*(?:,\d{3})*(?:\.\d{2})?) milhas/
+  const resultado = padrao.test(payload.message.text) || padrao2.test(payload.message.text);
 
-  console.log(formatMessageText(payload.message.text))
-  return;
+  if (resultado && payload.contact.friendly_name == 'Espelho Emissões Y1') {
 
-  if (padrao.test(payload.message.text) && payload.contact.friendly_name == 'Espelho Emissões Y1') {
+    const formattedText = formatMoneyMessageText(payload.message.text)
 
-    const formattedText = formatMessageText(payload.message.text)
+    console.log(formattedText);
+    return
 
     var data = JSON.stringify({
       // "to_group_uuid": "WAGed8f75a5-1d1d-4d13-8c1c-7ce5298632b2",
-      "to_group_uuid": "WAGb20bcd1c-1bfd-447a-bc33-594a10952708", //certo
+      // "to_group_uuid": "WAGb20bcd1c-1bfd-447a-bc33-594a10952708", //certo
+      "to_group_uuid": "WAG2a2d7898-305f-4b21-8528-b26f36f3a342", //grupo para testes em real
       "from_number": "+5579920012363",
       "text": formattedText
     });
@@ -47,6 +48,8 @@ app.post('/webhook', (request, res) => {
         console.log(error);
       });
   } else if(payload.contact.friendly_name == 'Espelho Emissões Y1') {
+    console.log(resultado)
+    return
     //ENVIAR O ERRO PARA VALIDAÇÃO NO WPP
     var data = JSON.stringify({
       "to_number": "+5585991694005",

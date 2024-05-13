@@ -1,22 +1,26 @@
+import { converter } from "./conversion";
 
-export function formatMessageText(text: string): string {
+const formatter = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL' 
+});
+
+export function formatMoneyMessageText(text: string): string {
   const arraySplitted = text.split("\n")
-
-  console.log(arraySplitted)
 
   if (arraySplitted[2].includes('Internacional')) {
     const regexAffiliates = /(?:🚨)(.*?)(?:🚨)/g;
     const affiliatesProgram = arraySplitted[0].replace(regexAffiliates, '$1').replace('amp;amp;', '')
     const country = arraySplitted[1].replace('🌎', '').replace(/&amp;gt;/g, '&gt;').split('&gt;').map(item => item.trim());
     const trip = `${arraySplitted[2].replace('✈️', '')} - ${country[0]} > ${country[1]}`
-    const route = arraySplitted[3].replace('📍', '').trim()
+    const route = arraySplitted[3].replace('📍', '').replace('📍', '')
     const miles = arraySplitted[4].replace('💰', '').replace('milhas trecho', 'milhas por trecho')
-    const typeTrip = arraySplitted[5].replace('💺Classe', '')
+    const typeTrip = arraySplitted[5].replace('💺Classe', '').replace('💺  Classe ', '').replace('💺', '').replace('Classe', '')
     const flex = [
       'Opções de Reserva Flexíveis Disponíveis',
       'Reserva Fixa'
     ];
-    const airlines = arraySplitted[7].replace('🛫 Voando ', '')
+    const airlines = arraySplitted[7].replace('🛫 Voando ', '').replace('🛫  Voando ', '')
 
     let restante = "";
 
@@ -24,19 +28,29 @@ export function formatMessageText(text: string): string {
       restante += `${arraySplitted[i].replace(/🗓️\s?Datas?:/g, '')}\n`;
     }
 
+    const regexCatchMiles = /\d+(\.\d+)?/g;
+
+    const onlyMiles = miles.match(regexCatchMiles);
+
+    var price = 0;
+    if (onlyMiles !== null)
+      price = converter.filter(e => e.affiliateProgram == affiliatesProgram)[0].price * parseFloat(onlyMiles[0])
+
+
     const formattedText = `
 🚀 Fly Alertas 🚀
 
 🌍 Explore o Mundo com Facilidade 🌍
 
-🚨 Programa de Afiliados: ${affiliatesProgram.trim()}\n✈️ Rota: ${trip.trim()}
+🚨 Programa de Afiliados: ${affiliatesProgram.trim()}
+✈️  Rota: ${trip.trim()}
 📍 De: ${route.trim()}
-💰 ${miles.trim()}
+💰 A partir de ${formatter.format(price)} + taxas ida e volta
 💺 Viaje com Estilo: ${typeTrip.trim()}
 📈 ${arraySplitted[6].includes('fixa') ? flex[1] : flex[0]}
 🛫 Companhia Aérea Parceira: ${airlines.trim()}
 
-🗓️ Alerta de Data Especial: ${restante}
+🗓️  Alerta de Data Especial: ${restante}
 
 🎉 Deixe Sua Jornada Começar com a Fly Alertas! 🎉
 
@@ -47,20 +61,28 @@ Experimente luxo, flexibilidade e arranjos de viagem sem complicações. Reserve
     const regexAffiliates = /(?:🚨)(.*?)(?:🚨)/g;
     const affiliatesProgram = arraySplitted[0].replace(regexAffiliates, '$1').replace('amp;amp;', '')
     const trip = arraySplitted[1].replace('✈️ ', '')
-    const route = arraySplitted[2].replace('📍 ', '')
+    const route = arraySplitted[2].replace('📍 ', '').replace('📍', '')
     const miles = arraySplitted[3].replace('💰 ', '').replace('milhas trecho', 'milhas por trecho')
-    const typeTrip = arraySplitted[4].replace('💺 Classe ', '')
+    const typeTrip = arraySplitted[4].replace('💺 Classe ', '').replace('💺  Classe ', '').replace('💺', '').replace('Classe', '')
     const flex = [
       'Opções de Reserva Flexíveis Disponíveis',
       'Reserva Fixa'
     ];
     const typeReserve = arraySplitted[5].includes('fixa') ? flex[1] : flex[0]
-    const airlines = arraySplitted[6].replace('🛫 Voando ', '')
+    const airlines = arraySplitted[6].replace('🛫 Voando ', '').replace('🛫  Voando ', '')
     let restante = "";
 
     for (let i = 7; i < arraySplitted.length; i++) {
-      restante += `${arraySplitted[i].replace(/🗓️\s?Datas?:/g, '')}\n`;
+      restante += `${arraySplitted[i].replace(/🗓️ \s?Datas?:/g, '')}\n`;
     }
+
+    const regexCatchMiles = /\d+(\.\d+)?/g;
+
+    const onlyMiles = miles.match(regexCatchMiles);
+
+    var price = 0;
+    if (onlyMiles !== null)
+      price = converter.filter(e => e.affiliateProgram == affiliatesProgram)[0].price * parseFloat(onlyMiles[0])
 
     const formattedText = `
 🚀 Fly Alertas 🚀
@@ -70,7 +92,7 @@ Experimente luxo, flexibilidade e arranjos de viagem sem complicações. Reserve
 🚨 Programa de Afiliados: ${affiliatesProgram.trim()}
 ✈️  Rota: ${trip.trim()}
 📍 De: ${route.trim()}
-💰 ${miles.trim()}
+💰 A partir de ${formatter.format(price)} + taxas ida e volta
 💺 Viaje com Estilo: ${typeTrip.trim()}
 📈 ${typeReserve.trim()}
 🛫 Companhia Aérea Parceira: ${airlines.trim()}
