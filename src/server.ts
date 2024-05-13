@@ -19,8 +19,8 @@ app.post('/webhook', (request, res) => {
 
     const formattedText = formatMoneyMessageText(payload.message.text)
 
-    console.log(formattedText);
-    return
+    // console.log(formattedText);
+    // return
 
     var data = JSON.stringify({
       // "to_group_uuid": "WAGed8f75a5-1d1d-4d13-8c1c-7ce5298632b2",
@@ -48,8 +48,8 @@ app.post('/webhook', (request, res) => {
         console.log(error);
       });
   } else if(payload.contact.friendly_name == 'Espelho Emissões Y1') {
-    console.log(resultado)
-    return
+    // console.log(resultado)
+    // return
     //ENVIAR O ERRO PARA VALIDAÇÃO NO WPP
     var data = JSON.stringify({
       "to_number": "+5585991694005",
