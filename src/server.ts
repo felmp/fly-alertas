@@ -6,11 +6,12 @@ import { formatMoneyMessageText } from './util/format-model-money';
 import { sendMoneyMessage } from './message-senders/sender-group-money';
 import { sendDefaultMessage } from './message-senders/sender-group-default';
 import { setTimeout } from 'timers';
+require('dotenv').config();
 
 const app = fastify();
 const port = process.env.PORT ? Number(process.env.PORT) : 3333;
 
-app.post('/webhook', (request, res) => {
+app.post('/webhook', async (request, res) => {
   const payload = request.body as GroupMessage;
 
   const padrao = /(.*?)\n✈️(.*?)\n📍(.*?)\n💰(.*?)\n💺(.*?)\n((.*?)📈|📈)(.*?)\n🛫(.*?)\n/
@@ -22,14 +23,16 @@ app.post('/webhook', (request, res) => {
 
     const formattedTextMoney = formatMoneyMessageText(payload.message.text)
     const formattedText = formatMessageText(payload.message.text)
-
-    // console.log(formattedText);
-    // return
-    sendMoneyMessage(formattedTextMoney, res)
+ 
     setTimeout(() => {
       sendDefaultMessage(formattedText, res)
     }, 2000)
-  } else if(payload.contact.friendly_name == 'Espelho Emissões Y1') {
+
+    setTimeout(() => {
+      sendMoneyMessage(formattedTextMoney, res)
+    }, 5000)
+
+  } else if (payload.contact.friendly_name == 'Espelho Emissões Y1') {
     // console.log(resultado)
     // return
     //ENVIAR O ERRO PARA VALIDAÇÃO NO WPP
@@ -55,7 +58,7 @@ app.post('/webhook', (request, res) => {
       .catch(function (error) {
         console.log(error);
       });
-      res.send({ message: 'Erro de validação na mensagem.' })
+    res.send({ message: 'Erro de validação na mensagem.' })
   }
 
 })

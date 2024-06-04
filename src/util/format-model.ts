@@ -2,8 +2,6 @@
 export function formatMessageText(text: string): string {
   const arraySplitted = text.split("\n")
 
-  console.log(arraySplitted)
-
   if (arraySplitted[2].includes('Internacional')) {
     const regexAffiliates = /(?:🚨)(.*?)(?:🚨)/g;
     const affiliatesProgram = arraySplitted[0].replace(regexAffiliates, '$1').replace('amp;amp;', '')

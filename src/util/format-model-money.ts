@@ -1,8 +1,9 @@
 import { converter } from "./conversion";
+import axios from 'axios';
 
 const formatter = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
-  currency: 'BRL' 
+  currency: 'BRL'
 });
 
 export function formatMoneyMessageText(text: string): string {
@@ -10,7 +11,7 @@ export function formatMoneyMessageText(text: string): string {
 
   if (arraySplitted[2].includes('Internacional')) {
     const regexAffiliates = /(?:🚨)(.*?)(?:🚨)/g;
-    const affiliatesProgram = arraySplitted[0].replace(regexAffiliates, '$1').replace('amp;amp;', '')
+    const affiliatesProgram = arraySplitted[0].replace(regexAffiliates, '$1').replace('amp;amp;', '').trim()
     const country = arraySplitted[1].replace('🌎', '').replace('🌍', '').replace(/&amp;gt;/g, '&gt;').split('&gt;').map(item => item.trim());
     const trip = `${arraySplitted[2].replace('✈️', '')} - ${country[0]} > ${country[1]}`
     const route = arraySplitted[3].replace('📍', '').trim()
@@ -32,16 +33,15 @@ export function formatMoneyMessageText(text: string): string {
 
     const onlyMiles = miles.match(regexCatchMiles);
 
-    if(converter.filter(e => e.affiliateProgram == affiliatesProgram)[0] == undefined)
-      return 'Programa de afiliados não encontrado'
+    if (converter.filter(e => e.affiliateProgram == affiliatesProgram)[0] == undefined)
+      return 'Programa de afiliados não encontrado: '+ affiliatesProgram
 
     var price = 0;
     if (onlyMiles !== null)
       price = converter.filter(e => e.affiliateProgram == affiliatesProgram)[0].price * parseFloat(onlyMiles[0])
 
 
-
-    const formattedText = `
+    let formattedText = `
 🚀 Fly Alertas 🚀
 
 🌍 Explore o Mundo com Facilidade 🌍
@@ -59,11 +59,12 @@ export function formatMoneyMessageText(text: string): string {
 🎉 Deixe Sua Jornada Começar com a Fly Alertas! 🎉
 
 Experimente luxo, flexibilidade e arranjos de viagem sem complicações. Reserve sua próxima aventura conosco e faça cada milha valer a pena!`;
+
     return formattedText.trim();
 
   } else {
     const regexAffiliates = /(?:🚨)(.*?)(?:🚨)/g;
-    const affiliatesProgram = arraySplitted[0].replace(regexAffiliates, '$1').replace('amp;amp;', '')
+    const affiliatesProgram = arraySplitted[0].replace(regexAffiliates, '$1').replace('amp;amp;', '').trim()
     const trip = arraySplitted[1].replace('✈️ ', '')
     const route = arraySplitted[2].replace('📍 ', '').replace('📍', '')
     const miles = arraySplitted[3].replace('💰 ', '').replace('milhas trecho', 'milhas por trecho').replace('A partir de', '').replace('💰', '')
@@ -84,8 +85,8 @@ Experimente luxo, flexibilidade e arranjos de viagem sem complicações. Reserve
 
     const onlyMiles = miles.match(regexCatchMiles);
 
-    if(converter.filter(e => e.affiliateProgram == affiliatesProgram)[0] == undefined)
-      return 'Programa de afiliados não encontrado'
+    if (converter.filter(e => e.affiliateProgram == affiliatesProgram)[0] == undefined)
+      return 'Programa de afiliados não encontrado: '+ affiliatesProgram
 
     var price = 0;
     if (onlyMiles !== null)
