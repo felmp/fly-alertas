@@ -23,10 +23,10 @@ app.post('/webhook', async (request, res) => {
 
     const formattedTextMoney = formatMoneyMessageText(payload.message.text)
     const formattedText = formatMessageText(payload.message.text)
- 
+
     setTimeout(() => {
       sendDefaultMessage(formattedText, res)
-    }, 2000)
+    }, 1000)
 
     setTimeout(() => {
       sendMoneyMessage(formattedTextMoney, res)

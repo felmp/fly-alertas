@@ -23,23 +23,17 @@ export function formatMessageText(text: string): string {
     }
 
     const formattedText = `
-🚀 Fly Alertas 🚀
-
-🌍 Explore o Mundo com Facilidade 🌍
+⚠️ *OPORTUNIDADE @FLYALERTAS*
 
 🚨 Programa de Afiliados: ${affiliatesProgram.trim()}
-✈️  Rota: ${trip.trim()}
-📍 De: ${route.trim()}
+✈️  Rota: ${trip.trim()} / ${route.trim()}
 💰 ${miles.trim()}
-💺 Viaje com Estilo: ${typeTrip.trim()}
-📈 ${arraySplitted[6].includes('fixa') ? flex[1] : flex[0]}
-🛫 Companhia Aérea Parceira: ${airlines.trim()}
+🛫 Companhia Aérea: ${airlines.trim()}
+💺 Classe: ${typeTrip.trim()}
 
-🗓️  Alerta de Data Especial: ${restante}
+🗓️  Alerta de Data : ${restante}
 
-🎉 Deixe Sua Jornada Começar com a Fly Alertas! 🎉
-
-Experimente luxo, flexibilidade e arranjos de viagem sem complicações. Reserve sua próxima aventura conosco e faça cada milha valer a pena!`;
+_Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     return formattedText.trim();
 
   } else {
@@ -62,22 +56,16 @@ Experimente luxo, flexibilidade e arranjos de viagem sem complicações. Reserve
     }
 
     const formattedText = `
-🚀 Fly Alertas 🚀
-
-🌍 Explore o Mundo com Facilidade 🌍
+⚠️ *OPORTUNIDADE @FLYALERTAS*
 
 🚨 Programa de Afiliados: ${affiliatesProgram.trim()}
-✈️  Rota: ${trip.trim()}
-📍 De: ${route.trim()}
-💰 ${miles.trim()}
-💺 Viaje com Estilo: ${typeTrip.trim()}
-📈 ${typeReserve.trim()}
-🛫 Companhia Aérea Parceira: ${airlines.trim()}
+✈️  Rota: ${trip.trim()} - ${route.trim()}
+💰 ${miles.trim()} + taxas
+🛫 Companhia Aérea: ${airlines.trim()}
+💺 Classe: ${typeTrip.trim()}
 
-🗓️  Alerta de Data Especial: ${restante}
-🎉 Deixe Sua Jornada Começar com a Fly Alertas! 🎉
-
-Experimente luxo, flexibilidade e arranjos de viagem sem complicações. Reserve sua próxima aventura conosco e faça cada milha valer a pena!`;
+🗓️  Alerta de Data: ${restante}
+_Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
 
     return formattedText.trim();
