@@ -1,11 +1,6 @@
 import { createServer } from 'http';
 
 export default function engineV1() {
-
-  const intervalo = 120000;
-
-  setInterval(run, intervalo);
-
   const server = createServer((req, res) => {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
@@ -16,7 +11,9 @@ export default function engineV1() {
     console.log('Engine V1 - Iniciada');
   });
 
-  run();
+  const interval = 120000;
+
+  setInterval(run, interval);
 }
 
 function run() {
