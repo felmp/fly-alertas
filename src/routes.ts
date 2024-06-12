@@ -27,8 +27,6 @@ export async function routes(fastify: FastifyInstance) {
         sendMoneyMessage(formattedTextMoney, res)
       }, 5000)
 
-    } else if (payload.contact.friendly_name != 'Espelho Emissões Y1') {
-      console.log(payload.message.text)
     }
   })
 }

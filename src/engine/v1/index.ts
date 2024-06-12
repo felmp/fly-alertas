@@ -11,11 +11,14 @@ export default function engineV1() {
     console.log('Engine V1 - Iniciada');
   });
 
-  const interval = 120000;
+  const interval = 12000;
 
   setInterval(run, interval);
+
+  function run() {
+    console.log('Engine trabalhando corretamente na data hora de ', new Date().toUTCString());
+
+
+  }
 }
 
-function run() {
-  console.log('Engine trabalhando corretamente na data hora de ', new Date());
-}

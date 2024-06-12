@@ -29,5 +29,6 @@ const engine_v1 = axios.create({
 
 export {
   gpt,
-  wpp
+  wpp,
+  engine_v1
 };
