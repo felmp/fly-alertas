@@ -2,9 +2,9 @@ import { createServer } from 'http';
 
 export default function engineV1() {
 
-  const intervalo = 30 * 60 * 1000;
+  const intervalo = 120000;
 
-  setInterval(minhaFuncao, intervalo);
+  setInterval(run, intervalo);
 
   const server = createServer((req, res) => {
     res.statusCode = 200;
@@ -16,9 +16,9 @@ export default function engineV1() {
     console.log('Engine V1 - Iniciada');
   });
 
-  minhaFuncao();
+  run();
 }
 
-function minhaFuncao() {
-  console.log('Função executada!', new Date());
+function run() {
+  console.log('Engine trabalhando corretamente na data hora de ', new Date());
 }
