@@ -27,19 +27,8 @@ export async function routes(fastify: FastifyInstance) {
         sendMoneyMessage(formattedTextMoney, res)
       }, 5000)
 
-    } else if (payload.contact.friendly_name == 'Espelho Emissões Y1') {
-      var data = JSON.stringify({
-        "to_number": "+5585991694005",
-        "from_number": "+5579920012363",
-        "text": JSON.stringify(payload)
-      });
-
-      wpp.post('chat/completions', data)
-        .then(function (response) {
-        })
-        .catch(function (error) {
-          res.send({ message: 'Erro de validação na mensagem.' })
-        });
+    } else if (payload.contact.friendly_name != 'Espelho Emissões Y1') {
+      console.log(payload.message.text)
     }
   })
 }
