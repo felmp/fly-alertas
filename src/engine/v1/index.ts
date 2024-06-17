@@ -1,4 +1,5 @@
 import { createServer } from 'http';
+import { engine_v1 } from '../../axios';
 
 export default function engineV1() {
   const server = createServer((req, res) => {
@@ -11,7 +12,7 @@ export default function engineV1() {
     console.log('Engine V1 - Iniciada');
   });
 
-  const interval = 12000;
+  const interval = 120000;
 
   setInterval(run, interval);
 
