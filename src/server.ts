@@ -11,14 +11,6 @@ app.register(routes)
 app.get('/', function (req, reply) {
   reply.send('API Running');
 })
-// app.register(require("@fastify/static"), {
-//   root: path.join(__dirname, 'public'),
-//   prefix: '/public/'
-// })
-
-// app.get('/another/path', function (req, reply) {
-//   reply.send()
-// })
 
 // engineV1()
 

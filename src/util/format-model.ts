@@ -1,5 +1,7 @@
+import { AlertService } from "../services/alert.service";
+import { converter } from "./conversion";
 
-export function formatMessageText(text: string): string {
+export async function formatMessageText(text: string, id_payload: string): Promise<string | undefined> {
   const arraySplitted = text.split("\n")
 
   if (arraySplitted[2].includes('Internacional')) {
@@ -10,65 +12,56 @@ export function formatMessageText(text: string): string {
     const route = arraySplitted[3].replace('📍', '').trim()
     const miles = arraySplitted[4].replace('💰', '').replace('milhas trecho', 'milhas por trecho').replace('A partir de', '').replace('💰', '')
     const typeTrip = arraySplitted[5].replace('💺Classe', '').replace('💺  Classe ', '').replace('💺', '').replace('Classe', '')
-    const flex = [
-      'Opções de Reserva Flexíveis Disponíveis',
-      'Reserva Fixa'
-    ];
+
     const airlines = arraySplitted[7].replace('🛫 Voando ', '').replace('🛫  Voando ', '')
 
-    let restante = "";
+    let remaining = "";
 
     for (let i = 8; i < arraySplitted.length; i++) {
-      restante += `${arraySplitted[i].replace(/🗓️ \s?Datas?:/g, '')}\n`;
+      remaining += `${arraySplitted[i].replace(/🗓️ \s?Datas?:/g, '')}\n`;
     }
 
-    const formattedText = `
-⚠️ *OPORTUNIDADE @FLYALERTAS*
+    const regexCatchMiles = /\d+(\.\d+)?/g;
 
-🚨 Programa de Afiliados: ${affiliatesProgram.trim()}
-✈️  Rota: ${trip.trim()} / ${route.trim()}
-💰 ${miles.trim()}
-🛫 Companhia Aérea: ${airlines.trim()}
-💺 Classe: ${typeTrip.trim()}
+    const onlyMiles = miles.match(regexCatchMiles);
 
-🗓️  Alerta de Data : ${restante}
+    if (converter.filter(e => e.affiliateProgram == affiliatesProgram)[0] == undefined)
+      return 'Programa de afiliados não encontrado: ' + affiliatesProgram
 
-_Não tem milhas ? Nós te ajudamos com essa emissão !_`;
-    return formattedText.trim();
-
-  } else {
-    const regexAffiliates = /(?:🚨)(.*?)(?:🚨)/g;
-    const affiliatesProgram = arraySplitted[0].replace(regexAffiliates, '$1').replace('amp;amp;', '')
-    const trip = arraySplitted[1].replace('✈️ ', '')
-    const route = arraySplitted[2].replace('📍 ', '').replace('📍', '')
-    const miles = arraySplitted[3].replace('💰 ', '').replace('milhas trecho', 'milhas por trecho').replace('A partir de', '').replace('💰', '')
-    const typeTrip = arraySplitted[4].replace('💺 Classe ', '').replace('💺  Classe ', '').replace('💺', '').replace('Classe', '')
-    const flex = [
-      'Opções de Reserva Flexíveis Disponíveis',
-      'Reserva Fixa'
-    ];
-    const typeReserve = arraySplitted[5].includes('fixa') ? flex[1] : flex[0]
-    const airlines = arraySplitted[6].replace('🛫 Voando ', '').replace('🛫  Voando ', '')
-    let restante = "";
-
-    for (let i = 7; i < arraySplitted.length; i++) {
-      restante += `${arraySplitted[i].replace(/🗓️ \s?Datas?:/g, '')}\n`;
-    }
-
-    const formattedText = `
-⚠️ *OPORTUNIDADE @FLYALERTAS*
-
-🚨 Programa de Afiliados: ${affiliatesProgram.trim()}
-✈️  Rota: ${trip.trim()} - ${route.trim()}
-💰 ${miles.trim()} + taxas
-🛫 Companhia Aérea: ${airlines.trim()}
-💺 Classe: ${typeTrip.trim()}
-
-🗓️  Alerta de Data: ${restante}
-_Não tem milhas ? Nós te ajudamos com essa emissão !_`;
+    var price = 0;
+    if (onlyMiles !== null)
+      price = converter.filter(e => e.affiliateProgram == affiliatesProgram)[0].price * parseFloat(onlyMiles[0])
 
 
-    return formattedText.trim();
+    const save = new AlertService().saveFormattedText({
+      id: id_payload,
+      affiliates_program: affiliatesProgram,
+      trip,
+      route,
+      miles,
+      type_trip: typeTrip,
+      airlines,
+      remaining,
+      amount: price.toString()
+    })
+
+    const saved = await save as unknown as string
+
+    return saved;
+
+    //     const formattedText = `
+    // ⚠️ *OPORTUNIDADE @FLYALERTAS*
+
+    // 🚨 Programa de Afiliados: ${affiliatesProgram.trim()}
+    // ✈️  Rota: ${trip.trim()} / ${route.trim()}
+    // 💰 ${miles.trim()}
+    // 🛫 Companhia Aérea: ${airlines.trim()}
+    // 💺 Classe: ${typeTrip.trim()}
+
+    // 🗓️  Alerta de Data : ${remaining}
+
+    // _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
+    // return formattedText.trim();
 
   }
 
