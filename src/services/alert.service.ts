@@ -3,26 +3,13 @@ import prismaClient from "../prisma";
 
 class AlertService {
 
-  async savePayload(payload: string) {
+  async createAlert(data: Partial<Alert>) {
+    const { original_message, affiliates_program, amount, trip, route, miles, type_trip, airlines, remaining } = data;
+
     const save = await prismaClient.alerts.create({
       data: {
-        original_message: payload,
-        sent: "waiting"
-      }
-    })
-
-    return save.id
-  }
-
-  async saveFormattedText(
-    data: Partial<Alert>
-  ) {
-    const { id, affiliates_program, amount, trip, route, miles, type_trip, airlines, remaining } = data;
-    const formatted = await prismaClient.alerts.update({
-      where: {
-        id
-      },
-      data: {
+        original_message,
+        sent: "waiting",
         affiliates_program,
         trip,
         route,
@@ -34,8 +21,7 @@ class AlertService {
       }
     })
 
-
-    return formatted
+    return save.id
   }
 }
 

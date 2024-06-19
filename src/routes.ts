@@ -18,11 +18,9 @@ export async function routes(fastify: FastifyInstance) {
     const resultado = padrao.test(payload.message.text) || padrao2.test(payload.message.text);
     console.log(payload.message.text)
     if (resultado && payload.contact.friendly_name == 'Espelho Emissões Y1') {
-      const idPayload = new AlertService().savePayload(payload.message.text)
       
       // await formatMoneyMessageText(payload.message.text, await idPayload)
-      const saveFormatted = await formatMessageText(payload.message.text, await idPayload)
-      console.log(await saveFormatted)
+      const saveFormatted = await formatMessageText(payload.message.text)
 
       // await sentPayload
 
