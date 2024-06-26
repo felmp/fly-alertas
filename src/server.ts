@@ -1,7 +1,7 @@
 import fastify from 'fastify';
 import { routes } from './routes';
-import engineV1 from './engine/v1';
 import path from 'path';
+import engineV1 from './engine/v1';
 require('dotenv').config();
 
 const app = fastify();
@@ -11,17 +11,11 @@ app.register(routes)
 app.get('/', function (req, reply) {
   reply.send('API Running');
 })
-// app.register(require("@fastify/static"), {
-//   root: path.join(__dirname, 'public'),
-//   prefix: '/public/'
-// })
 
-// app.get('/another/path', function (req, reply) {
-//   reply.send()
-// })
+const engine_v1 = new engineV1();
 
-// engineV1()
-
+engine_v1.start()
+  
 app.listen({
   host: '0.0.0.0',
   port
