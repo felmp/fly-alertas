@@ -1,25 +1,72 @@
-import { createServer } from 'http';
 import { engine_v1 } from '../../axios';
+import { sendDefaultMessage } from '../../message-senders/sender-group-default';
+import prismaClient from '../../prisma';
 
-export default function engineV1() {
-  const server = createServer((req, res) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end('Engine rodando\n');
-  });
+class engineV1 {
+  interval: any;
+  is_running: boolean;
 
-  server.listen(3002, '0.0.0.0', () => {
-    console.log('Engine V1 - Iniciada');
-  });
-
-  const interval = 120000;
-
-  setInterval(run, interval);
-
-  function run() {
-    console.log('Engine trabalhando corretamente na data hora de ', new Date().toUTCString());
-
-
+  constructor() {
+    this.is_running = false;
+    this.interval = null;
   }
+
+  async processQueue() {
+    const alerts = await prismaClient.alerts.findMany({
+      where: { sent: 'waiting' },
+      orderBy: { created_at: 'asc' },
+      take: 1
+    });
+
+    for (const alert of alerts) {
+      console.log(`Enviando alert ID: ${alert.id}`);
+
+      const formattedText = `
+⚠️ *OPORTUNIDADE @FLYALERTAS*
+
+🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
+✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
+💰 ${alert.miles?.trim()}
+🛫 Companhia Aérea: ${alert.airlines?.trim()}
+💺 Classe: ${alert.type_trip?.trim()}
+🗓️  Alerta de Data : ${alert.remaining}
+_Não tem milhas ? Nós te ajudamos com essa emissão !_`;
+
+
+      sendDefaultMessage(formattedText)
+
+      await prismaClient.alerts.update({
+        where: { id: alert.id },
+        data: {
+          sent: 'sent',
+          sent_date: new Date()
+        }
+      });
+    }
+  }
+
+  start() {
+    if (!this.is_running) {
+      this.is_running = true;
+      this.interval = setInterval(() => this.processQueue(), 5000);
+
+      console.log('Fila de alertas iniciada.');
+    }
+  }
+
+  stop() {
+    if (this.is_running) {
+      clearInterval(this.interval);
+      this.is_running = false;
+      console.log('Fila de alertas parada.');
+    }
+  }
+
+  // async getSeatsAero() {
+  //   engine_v1.get
+  // }
+
+  
 }
 
+export default engineV1
