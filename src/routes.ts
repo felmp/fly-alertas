@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { formatMessageText } from "./util/format-model";
 import { GroupMessage } from "./models/group-message.model";
+import { wpp } from "./axios";
 
 export async function routes(fastify: FastifyInstance) {
   fastify.post('/webhook', async (request, res) => {
@@ -14,8 +15,22 @@ export async function routes(fastify: FastifyInstance) {
       await formatMessageText(payload.message.text)
     }
 
-    if(payload.contact.friendly_name == 'Flyalertas Diretoria') {
+    if (payload.contact.friendly_name == 'Flyalertas Diretoria') {
       console.log(payload.message.text)
+
+      var data = JSON.stringify({
+        "to_group_uuid": "WAG24e12bd3-a970-4272-9ebc-dcded2a5c6e1",
+        "from_number": "+5579920012363",
+        "text": 'Como posso ajudar? '
+      });
+
+      wpp.post('open/whatsapp/send-message', data)
+        .then(function (response) {
+          res.send(JSON.stringify(response.data))
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     }
   })
 }
