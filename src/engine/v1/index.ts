@@ -33,7 +33,7 @@ class engineV1 {
 
 🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
 ✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
-💰 ${alert.miles?.trim()} milhas ida e volta + taxas
+💰 A partir de ${alert.miles?.trim()} milhas ida e volta + taxas
 🛫 Companhia Aérea: ${alert.airlines?.trim()}
 💺 Classe: ${alert.type_trip?.trim()}
 🗓️  Alerta de Data : ${alert.remaining}
@@ -48,7 +48,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
 🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
 ✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
-💰 ${formatter.format(Number(alert.amount))} ida e volta + taxas
+💰 A partir de ${formatter.format(Number(alert.amount))} ida e volta + taxas
 🛫 Companhia Aérea: ${alert.airlines?.trim()}
 💺 Classe: ${alert.type_trip?.trim()}
 🗓️  Alerta de Data : ${alert.remaining}

@@ -48,9 +48,6 @@ export async function formatMessageText(text: string): Promise<string | undefine
   if (converter.filter(e => e.affiliateProgram == affiliatesProgram)[0] == undefined)
     return 'Programa de afiliados não encontrado: ' + affiliatesProgram
 
-  console.log(miles)
-
-
   var price = 0;
   if (onlyMiles !== null) {
     price = converter.filter(e => e.affiliateProgram == affiliatesProgram)[0].price * parseFloat(onlyMiles[0])
