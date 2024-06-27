@@ -4,7 +4,6 @@ import { GroupMessage } from "./models/group-message.model";
 import { wpp } from "./axios";
 
 export async function routes(fastify: FastifyInstance) {
-
   const sessions = {};
 
   fastify.post('/webhook', async (request, res) => {
@@ -68,6 +67,5 @@ export async function routes(fastify: FastifyInstance) {
 
       await formatMessageText(payload.message.text)
     }
-
   })
 }

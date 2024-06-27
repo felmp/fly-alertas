@@ -6,8 +6,9 @@ export const converter = [
   { affiliateProgram: 'TUDO AZUL', price: 28.00 },
   { affiliateProgram: 'AADVANTAGE - AMERICAN AIRLINES', price: 117.00 },
   { affiliateProgram: 'MILES&GO - TAP', price: 39.00 },
+  { affiliateProgram: 'MILES&amp;GO - TAP', price: 39.00 },
   { affiliateProgram: 'AZUL FIDELIDADE - AZUL PELO MUNDO', price: 21.00 },
   { affiliateProgram: 'AZUL FIDELIDADE', price: 21.00 },
   { affiliateProgram: 'IBERIA PLUS - IBERIA', price: 78.00 },
-  { affiliateProgram: 'CONNECT MILES', price: 85.00 }
+  { affiliateProgram: 'CONNECT MILES', price: 85.00 },
 ]

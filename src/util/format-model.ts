@@ -69,8 +69,4 @@ export async function formatMessageText(text: string): Promise<string | undefine
 
     return saved;
   }
-
-  // return formattedText.trim();
-
-
 }

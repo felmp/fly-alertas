@@ -44,15 +44,15 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
       setTimeout(() => {
         const formattedText = `
-        ⚠️ *OPORTUNIDADE @FLYALERTAS*
-        
-        🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
-        ✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
-        💰 ${formatter.format(Number(alert.amount))} ida e volta + taxas
-        🛫 Companhia Aérea: ${alert.airlines?.trim()}
-        💺 Classe: ${alert.type_trip?.trim()}
-        🗓️  Alerta de Data : ${alert.remaining}
-        _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
+⚠️ *OPORTUNIDADE @FLYALERTAS*
+
+🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
+✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
+💰 ${formatter.format(Number(alert.amount))} ida e volta + taxas
+🛫 Companhia Aérea: ${alert.airlines?.trim()}
+💺 Classe: ${alert.type_trip?.trim()}
+🗓️  Alerta de Data : ${alert.remaining}
+_Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
         sendMoneyMessage(formattedText)
 

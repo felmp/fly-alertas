@@ -11,7 +11,6 @@ export function sendMoneyMessage(message: string) {
   //   + "Faça com que fique entendivel e completamente legivel para meu cliente. "
   //   + "Apague qualquer link ou redirecionamento para site, ou qualquer terminologia ou termo: HTTPS HTTP http www .com .br cartões aluno live "
 
-
   if (message !== 'Programa de afiliados não encontrado') {
 
     var data = JSON.stringify({
