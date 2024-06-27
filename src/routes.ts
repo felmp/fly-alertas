@@ -47,7 +47,8 @@ export async function routes(fastify: FastifyInstance) {
               + "  *(Valor em reais)* ex: 178.34\n"
               + "  *(Classe)* ex: Econômica\n"
               + "  *(Companhia Aerea)* ex: Latam\n"
-              + "  *(Datas)* ex: novembro/24\n\n"
+              + "  *(Datas)* ex: novembro/24\n\n\n\n"
+              + "  digite /sair para cancelar"
               + "————————————————————";
 
             var data = JSON.stringify({
@@ -69,6 +70,10 @@ export async function routes(fastify: FastifyInstance) {
           }
           break;
         case 'awaiting_manual_alert':
+          if (payload.message.text.trim() === '/sair') {
+            delete sessions[payload.participant.phone_number];
+            console.log(`Sessão finalizada para ${payload.participant.phone_number}`);
+          }
 
           const arraySplitted = payload.message.text.split("\n")
           const affiliates_program = arraySplitted[0]
