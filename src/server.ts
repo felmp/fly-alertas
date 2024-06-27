@@ -1,6 +1,5 @@
 import fastify from 'fastify';
 import { routes } from './routes';
-import path from 'path';
 import engineV1 from './engine/v1';
 require('dotenv').config();
 
@@ -14,7 +13,7 @@ app.get('/', function (req, reply) {
 
 const engine_v1 = new engineV1();
 
-engine_v1.start()
+// engine_v1.start()
   
 app.listen({
   host: '0.0.0.0',

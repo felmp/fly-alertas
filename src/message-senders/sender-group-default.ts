@@ -1,5 +1,3 @@
-import axios from 'axios';
-import { FastifyReply } from 'fastify';
 import { wpp } from '../axios';
 
 export function sendDefaultMessage(message: string) {
