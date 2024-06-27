@@ -7,8 +7,8 @@
   },
   "scripts": {
     "dev": "nodemon src/server.ts",
-    "build": "tsup src",
-    "start": "node ./dist/server.js"
+    "build": "tsup src && npx prisma generate",
+    "start": "node ./dist/server.js "
   },
   "keywords": [],
   "author": "",

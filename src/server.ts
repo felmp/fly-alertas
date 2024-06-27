@@ -13,7 +13,7 @@ app.get('/', function (req, reply) {
 
 const engine_v1 = new engineV1();
 
-// engine_v1.start()
+engine_v1.start()
   
 app.listen({
   host: '0.0.0.0',
