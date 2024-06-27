@@ -9,7 +9,7 @@ export async function routes(fastify: FastifyInstance) {
 
     console.log(payload);
 
-    if (payload.contact.friendly_name == 'Flyalertas Diretoria') {
+    if (payload.contact.friendly_name == 'Flyalertas Diretoria \ud83d\uddfa\ufe0f' || payload.contact.friendly_name == 'Flyalertas Diretoria') {
 
       if (payload.message.text == '/bot') {
         var data = JSON.stringify({
