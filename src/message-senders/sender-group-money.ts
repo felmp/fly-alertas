@@ -2,7 +2,7 @@ import axios from 'axios';
 import { FastifyReply } from 'fastify';
 import { gpt, wpp } from '../axios';
 
-export function sendMoneyMessage(message: string, res: FastifyReply) {
+export function sendMoneyMessage(message: string) {
 
   // const prompt = "Preciso que reformule um texto para uma postagem de um GRUPO DE ALERTAS DE PASSAGENS, chamado @FLYALERTAS. "
   //   + "Envie somente 1 mensagem formatada e preparada para o envio ao whatsapp "
@@ -22,7 +22,6 @@ export function sendMoneyMessage(message: string, res: FastifyReply) {
 
     wpp.post('open/whatsapp/send-message', data)
       .then(function (response) {
-        res.send(JSON.stringify(response.data))
       })
       .catch(function (error) {
         console.log(error);

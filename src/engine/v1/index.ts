@@ -1,6 +1,13 @@
 import { engine_v1 } from '../../axios';
 import { sendDefaultMessage } from '../../message-senders/sender-group-default';
+import { sendMoneyMessage } from '../../message-senders/sender-group-money';
 import prismaClient from '../../prisma';
+
+
+const formatter = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+});
 
 class engineV1 {
   interval: any;
@@ -26,7 +33,7 @@ class engineV1 {
 
 🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
 ✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
-💰 ${alert.miles?.trim()}
+💰 ${alert.miles?.trim()} milhas ida e volta + taxas
 🛫 Companhia Aérea: ${alert.airlines?.trim()}
 💺 Classe: ${alert.type_trip?.trim()}
 🗓️  Alerta de Data : ${alert.remaining}
@@ -34,6 +41,24 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
 
       sendDefaultMessage(formattedText)
+
+      setTimeout(() => {
+        const formattedText = `
+        ⚠️ *OPORTUNIDADE @FLYALERTAS*
+        
+        🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
+        ✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
+        💰 ${formatter.format(Number(alert.amount))} ida e volta + taxas
+        🛫 Companhia Aérea: ${alert.airlines?.trim()}
+        💺 Classe: ${alert.type_trip?.trim()}
+        🗓️  Alerta de Data : ${alert.remaining}
+        _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
+
+        sendMoneyMessage(formattedText)
+
+      }, 4000);
+
+      console.log('cheguei aqui')
 
       await prismaClient.alerts.update({
         where: { id: alert.id },
@@ -66,7 +91,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
   //   engine_v1.get
   // }
 
-  
+
 }
 
 export default engineV1
