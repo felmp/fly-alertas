@@ -52,8 +52,6 @@ export async function formatMessageText(text: string): Promise<string | undefine
   if (onlyMiles !== null) {
     price = converter.filter(e => e.affiliateProgram == affiliatesProgram)[0].price * parseFloat(onlyMiles[0])
   
-
-
     const save = new AlertService().createAlert({
       affiliates_program: affiliatesProgram,
       trip,
