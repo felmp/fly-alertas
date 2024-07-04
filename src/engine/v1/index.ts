@@ -24,7 +24,16 @@ class engineV1 {
 
   async processQueueSeatsAero() {
     const alerts = await prismaClient.alerts.findMany({
-      where: { sent: 'test' },
+      where: {
+        AND: [
+          { sent: 'test' },
+          {
+            NOT: {
+              affiliates_program: 'UNITED'
+            }
+          }
+        ]
+      },
       orderBy: { created_at: 'asc' },
       take: 1
     });
@@ -37,7 +46,7 @@ class engineV1 {
 
 🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
 ✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
-💰 A partir de ${alert.miles?.trim()} milhas ida e volta + taxas
+💰 A partir de ${alert.miles?.trim()} trecho + taxas
 🛫 Companhia Aérea: ${alert.airlines?.trim()}
 💺 Classe: ${alert.type_trip?.trim()}
 🗓️  Alerta de Data : ${alert.remaining}
