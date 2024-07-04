@@ -118,7 +118,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       this.is_running = true;
       this.interval = setInterval(() => this.processQueue(), 5000);
       setInterval(() => this.processQueueSeatsAero(), 900000);
-      setInterval(() => this.getNorthAmericaDestination(), 40000);
+      setInterval(() => this.getNorthAmericaDestination(), 3600000);
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -134,10 +134,10 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
   async getNorthAmericaDestination() {
     const origins_airports = ['FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'];
     const continents = ['North+America', 'Europe', 'Asia'];
-    const sources = ['smiles', 'united', 'azul'];
+    const sources = ['smiles', 'american', 'azul', 'aeroplan'];
     console.log('SeatsAero rodando')
-    let take = 10; // Quantidade de resultados por página
-    let skip = 0; // Quantidade de resultados a pular inicialmente
+    let take = 10;
+    let skip = 0;
 
     let start_date = new Date();
     let end_date = new Date(start_date);
@@ -145,7 +145,6 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     start_date = randomDate(start_date, end_date);
     end_date = randomDate(start_date, end_date);
 
-    // Garantir que a data de saída não seja maior que a data de entrada
     if (end_date.getTime() > end_date.getTime()) {
       const tempDate = start_date;
       start_date = end_date;
@@ -155,12 +154,10 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     const source = sources[Math.floor(Math.random() * sources.length)];
     const destination = continents[Math.floor(Math.random() * continents.length)];
 
-
     try {
       const response = await engine_v1.get(`/availability?source=${source}&start_date=${formatDate(start_date)}&end_date=${formatDate(end_date)}&origin_region=South+America&destination_region=${destination}&take=${take}&skip=${skip}`);
 
       const availability = response.data;
-
 
       if (availability.data.length === 0) {
         console.log('No more data available. Restarting...');
@@ -170,33 +167,43 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       for (let i = 0; i < availability.data.length; i++) {
         const e = availability.data[i];
         if (origins_airports.includes(e.Route.OriginAirport)) {
-          const data_gpt = {
-            "model": "gpt-3.5-turbo",
-            "messages": [
-              {
-                "role": "system",
-                "content": "Você é um analista de passagens aereas, " +
-                  "vou lhe mandar um objeto você vai analisar e vai retornar pra mim um " +
-                  "JSON que contenha os dados que mandei pra você organizado. o json é" +
-                  "affiliates_program: voce vai identificar o programa de afiliados no json que enviar e colocar nesse campo em caixa alta " +
-                  "trip: aqui voce vai colocar de onde será a origem e de onde será o destino, coloque o nome das cidades por extenso no formato (origem para destino) " +
-                  "route: coloque a rota dos continentes Exemplo: América do Sul para América do Norte" +
-                  "miles: identifique o menor custo de milhas e coloque nesse campo pontuação de numero, e como um texto" +
-                  "type_trip: com base nas milhas identifique em qual classe está o voo se é economica/executiva/primeira classe e coloque nesse campo" +
-                  "airlines: identifique a companhia aerea e coloque nesse campo, remaining: data de embarque em formato brasil DD/MM/YYYY, sent: 'test' } "
-              },
-              {
-                "role": "user",
-                "content": JSON.stringify(e)
-              }
-            ]
-          };
 
-          const message = await gpt.post('chat/completions', data_gpt);
+          const getRoute = await engine_v1.get('trips/' + e.Route.ID);
 
-          let json = JSON.parse(message.data.choices[0].message.content) as Alert;
-          json.miles = json.miles?.toString() as any
-          const saved = new AlertService().createAlert(json)
+          console.log(getRoute)
+
+          //retirar economica, minimo 4 assentos disponiveis, 
+
+
+
+
+          // const data_gpt = {
+          //   "model": "gpt-3.5-turbo",
+          //   "messages": [
+          //     {
+          //       "role": "system",
+          //       "content": "Você é um analista de passagens aereas, " +
+          //         "vou lhe mandar um objeto você vai analisar e vai retornar pra mim um " +
+          //         "JSON que contenha os dados que mandei pra você organizado. o json é" +
+          //         "affiliates_program: voce vai identificar o programa de afiliados no json que enviar e colocar nesse campo em caixa alta " +
+          //         "trip: aqui voce vai colocar de onde será a origem e de onde será o destino, coloque o nome das cidades por extenso no formato (origem para destino) " +
+          //         "route: coloque a rota dos continentes Exemplo: América do Sul para América do Norte" +
+          //         "miles: identifique o menor custo de milhas e coloque nesse campo pontuação de numero, e como um texto" +
+          //         "type_trip: com base nas milhas identifique em qual classe está o voo se é economica/executiva/primeira classe e coloque nesse campo" +
+          //         "airlines: identifique a companhia aerea e coloque nesse campo, remaining: data de embarque em formato brasil DD/MM/YYYY, sent: 'test' } "
+          //     },
+          //     {
+          //       "role": "user",
+          //       "content": JSON.stringify(e)
+          //     }
+          //   ]
+          // };
+
+          // const message = await gpt.post('chat/completions', data_gpt);
+
+          // let json = JSON.parse(message.data.choices[0].message.content) as Alert;
+          // json.miles = json.miles?.toString() as any
+          // const saved = new AlertService().createAlert(json)
         }
       }
 
