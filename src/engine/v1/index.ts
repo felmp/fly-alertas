@@ -143,7 +143,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       this.is_running = true;
       this.interval = setInterval(() => this.processQueue(), 5000);
       setInterval(() => this.processQueueSeatsAero(), 900000);
-      setInterval(() => this.getSeatsAero(), 900000);
+      setInterval(() => this.getSeatsAero(), 420000);
       console.log('Fila de alertas iniciada.');
     }
   }
