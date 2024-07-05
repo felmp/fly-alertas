@@ -1,3 +1,4 @@
+import { exit } from 'process';
 import { engine_v1, gpt } from '../../axios';
 import { sendDefaultMessage } from '../../message-senders/sender-group-default';
 import { sendMoneyMessage } from '../../message-senders/sender-group-money';
@@ -16,10 +17,12 @@ const formatter = new Intl.NumberFormat('pt-BR', {
 class engineV1 {
   interval: any;
   is_running: boolean;
+  // alert: AlertService
 
   constructor() {
     this.is_running = false;
     this.interval = null;
+    // this.alert = new AlertService();
   }
 
   async processQueueSeatsAero() {
@@ -122,9 +125,9 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
   start() {
     if (!this.is_running) {
       this.is_running = true;
-      this.interval = setInterval(() => this.processQueue(), 5000);
-      setInterval(() => this.processQueueSeatsAero(), 900000);
-      // setInterval(() => this.getNorthAmericaDestination(), 3600000);
+      // this.interval = setInterval(() => this.processQueue(), 5000);
+      // setInterval(() => this.processQueueSeatsAero(), 900000);
+      setInterval(() => this.getSeatsAero(), 15000);
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -137,94 +140,99 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     }
   }
 
-  // async getNorthAmericaDestination() {
-  //   const origins_airports = ['FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'];
-  //   const continents = ['North+America', 'Europe', 'Asia'];
-  //   const sources = ['smiles', 'american', 'azul', 'aeroplan'];
-  //   console.log('SeatsAero rodando')
-  //   let take = 10;
-  //   let skip = 0;
+  async getSeatsAero() {
 
-  //   let start_date = new Date();
-  //   let end_date = new Date(start_date);
-  //   end_date.setFullYear(start_date.getFullYear() + 1);
-  //   start_date = randomDate(start_date, end_date);
-  //   end_date = randomDate(start_date, end_date);
+    const origins_airports = ['FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'];
+    const continents = ['North+America', 'Europe', 'Asia'];
+    const sources = ['smiles', 'american', 'azul', 'aeroplan'];
+    console.log('SeatsAero rodando')
+    let take = 10;
+    let skip = 0;
 
-  //   if (end_date.getTime() > end_date.getTime()) {
-  //     const tempDate = start_date;
-  //     start_date = end_date;
-  //     end_date = tempDate;
-  //   }
+    let start_date = new Date();
+    let end_date = new Date(start_date);
+    end_date.setFullYear(start_date.getFullYear() + 1);
+    start_date = randomDate(start_date, end_date);
+    end_date = randomDate(start_date, end_date);
 
-  //   const source = sources[Math.floor(Math.random() * sources.length)];
-  //   const destination = continents[Math.floor(Math.random() * continents.length)];
+    if (end_date.getTime() > end_date.getTime()) {
+      const tempDate = start_date;
+      start_date = end_date;
+      end_date = tempDate;
+    }
 
-  //   try {
-  //     const response = await engine_v1.get(`/availability?source=${source}&start_date=${formatDate(start_date)}&end_date=${formatDate(end_date)}&origin_region=South+America&destination_region=${destination}&take=${take}&skip=${skip}`);
+    const source = sources[Math.floor(Math.random() * sources.length)];
+    const destination = continents[Math.floor(Math.random() * continents.length)];
 
-  //     const availability = response.data;
+    try {
+      const response = await engine_v1.get(`/availability?source=${source}&start_date=${formatDate(start_date)}&end_date=${formatDate(end_date)}&origin_region=South+America&destination_region=${destination}&take=${take}&skip=${skip}`);
 
-  //     if (availability.data.length === 0) {
-  //       console.log('No more data available. Restarting...');
-  //       skip = 0;
-  //     }
+      const availability = response.data;
 
-  //     for (let i = 0; i < availability.data.length; i++) {
-  //       const e = availability.data[i];
-  //       if (origins_airports.includes(e.Route.OriginAirport)) {
+      if (availability.data.length === 0) {
+        console.log('No more data available. Restarting...');
+        skip = 0;
+      }
 
-  //         const getRoute = await engine_v1.get('trips/' + e.Route.ID);
+      availability.data = availability.data.filter((seat: any) =>
+        seat.WRemainingSeats > 4 ||
+        seat.JRemainingSeats > 4 ||
+        seat.FRemainingSeats > 4
+      );
 
-  //         console.log(getRoute)
+      for (let i = 0; i < availability.data.length; i++) {
+        const e = availability.data[i];
+        if (origins_airports.includes(e.Route.OriginAirport) && (e.WAvailable == true || e.JAvailable == true || e.FAvailable == true)) {
 
-  //         //retirar economica, minimo 4 assentos disponiveis, 
+          const data_gpt = {
+            "model": "gpt-3.5-turbo",
+            "messages": [
+              {
+                "role": "system",
+                "content": "Você é um analista de passagens aereas, " +
+                  "vou lhe mandar um objeto você vai analisar e vai retornar pra mim um " +
+                  "JSON que contenha os dados que mandei pra você organizado. o json é" +
+                  "affiliates_program: voce vai identificar o programa de afiliados no json que enviar e colocar nesse campo em caixa alta " +
+                  "trip: aqui voce vai colocar de onde será a origem e de onde será o destino, coloque o nome das cidades por extenso no formato (origem para destino) " +
+                  "route: coloque a rota dos continentes Exemplo: América do Sul para América do Norte" +
+                  "miles: identifique o menor custo de milhas e coloque nesse campo com pontuação de numero de 3 casas para milhar EX: 0.000.000, e como um texto" +
+                  "type_trip: com base nas milhas mais baratas identifique em qual classe está o voo se é economica/executiva/primeira classe e coloque nesse campo" +
+                  "airlines: identifique a companhia aerea e coloque nesse campo, remaining: data de embarque em formato brasil DD/MM/YYYY, sent: 'test' } "
+              },
+              {
+                "role": "user",
+                "content": JSON.stringify(e)
+              }
+            ]
+          };
 
+          const message = await gpt.post('chat/completions', data_gpt);
 
+          let json = JSON.parse(message.data.choices[0].message.content) as Alert;
+          json.miles = json.miles?.toString() as any
 
+          const verifyLast = new AlertService().verifyLast()
 
-  //         // const data_gpt = {
-  //         //   "model": "gpt-3.5-turbo",
-  //         //   "messages": [
-  //         //     {
-  //         //       "role": "system",
-  //         //       "content": "Você é um analista de passagens aereas, " +
-  //         //         "vou lhe mandar um objeto você vai analisar e vai retornar pra mim um " +
-  //         //         "JSON que contenha os dados que mandei pra você organizado. o json é" +
-  //         //         "affiliates_program: voce vai identificar o programa de afiliados no json que enviar e colocar nesse campo em caixa alta " +
-  //         //         "trip: aqui voce vai colocar de onde será a origem e de onde será o destino, coloque o nome das cidades por extenso no formato (origem para destino) " +
-  //         //         "route: coloque a rota dos continentes Exemplo: América do Sul para América do Norte" +
-  //         //         "miles: identifique o menor custo de milhas e coloque nesse campo pontuação de numero, e como um texto" +
-  //         //         "type_trip: com base nas milhas identifique em qual classe está o voo se é economica/executiva/primeira classe e coloque nesse campo" +
-  //         //         "airlines: identifique a companhia aerea e coloque nesse campo, remaining: data de embarque em formato brasil DD/MM/YYYY, sent: 'test' } "
-  //         //     },
-  //         //     {
-  //         //       "role": "user",
-  //         //       "content": JSON.stringify(e)
-  //         //     }
-  //         //   ]
-  //         // };
+          
 
-  //         // const message = await gpt.post('chat/completions', data_gpt);
+          console.log(await verifyLast)
 
-  //         // let json = JSON.parse(message.data.choices[0].message.content) as Alert;
-  //         // json.miles = json.miles?.toString() as any
-  //         // const saved = new AlertService().createAlert(json)
-  //       }
-  //     }
+          // const saved = new AlertService().createAlert(json)
+        }
+      }
 
-  //     if (availability.hasMore) {
-  //       skip += take; // Atualiza o offset para a próxima página
-  //     } else {
-  //       console.log('No more pages available for current selection. Restarting...');
-  //       skip = 0; // Reiniciar o skip para buscar desde o início na próxima iteração
-  //     }
+      if (availability.hasMore) {
+        skip += take; // Atualiza o offset para a próxima página
+      } else {
+        console.log('No more pages available for current selection. Restarting...');
+        skip = 0; // Reiniciar o skip para buscar desde o início na próxima iteração
+      }
 
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error);
-  //   }
-  // }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
 
+  }
 
 }
 
