@@ -25,10 +25,10 @@ class AlertService {
   }
 
   async verifyLast() {
-    const save = await prismaClient.alerts.findFirst({
+    const save = await prismaClient.alerts.findMany({
       orderBy: {
         created_at: "desc"
-      }
+      },
     })
 
     return save

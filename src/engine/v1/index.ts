@@ -59,6 +59,22 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_
 
       sendDefaultMessage(formattedText)
 
+      setTimeout(() => {
+        const formattedText = `
+⚠️ *OPORTUNIDADE @FLYALERTAS*
+
+🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
+✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
+💰 A partir de ${formatter.format(Number(alert.amount))} trecho + taxas
+🛫 Companhia Aérea: ${alert.airlines?.trim()}
+💺 Classe: ${alert.type_trip?.trim()}
+🗓️  Alerta de Data : ${alert.remaining}
+_Não tem milhas ? Nós te ajudamos com essa emissão !_`;
+
+        sendMoneyMessage(formattedText)
+
+      }, 4000);
+
       await prismaClient.alerts.update({
         where: { id: alert.id },
         data: {
@@ -125,9 +141,9 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
   start() {
     if (!this.is_running) {
       this.is_running = true;
-      // this.interval = setInterval(() => this.processQueue(), 5000);
-      // setInterval(() => this.processQueueSeatsAero(), 900000);
-      setInterval(() => this.getSeatsAero(), 15000);
+      this.interval = setInterval(() => this.processQueue(), 5000);
+      setInterval(() => this.processQueueSeatsAero(), 900000);
+      setInterval(() => this.getSeatsAero(), 900000);
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -146,7 +162,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     const continents = ['North+America', 'Europe', 'Asia'];
     const sources = ['smiles', 'american', 'azul', 'aeroplan'];
     console.log('SeatsAero rodando')
-    let take = 10;
+    let take = 500;
     let skip = 0;
 
     let start_date = new Date();
@@ -189,15 +205,34 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
             "messages": [
               {
                 "role": "system",
-                "content": "Você é um analista de passagens aereas, " +
+                "content": "Você é um analista de passagens aereas, você nao aceita passagens economicas, se vier economica. apenas não envie o JSON, envie a mensagem. PASSAGEM ECONOMICA " +
                   "vou lhe mandar um objeto você vai analisar e vai retornar pra mim um " +
                   "JSON que contenha os dados que mandei pra você organizado. o json é" +
                   "affiliates_program: voce vai identificar o programa de afiliados no json que enviar e colocar nesse campo em caixa alta " +
                   "trip: aqui voce vai colocar de onde será a origem e de onde será o destino, coloque o nome das cidades por extenso no formato (origem para destino) " +
                   "route: coloque a rota dos continentes Exemplo: América do Sul para América do Norte" +
-                  "miles: identifique o menor custo de milhas e coloque nesse campo com pontuação de numero de 3 casas para milhar EX: 0.000.000, e como um texto" +
-                  "type_trip: com base nas milhas mais baratas identifique em qual classe está o voo se é economica/executiva/primeira classe e coloque nesse campo" +
-                  "airlines: identifique a companhia aerea e coloque nesse campo, remaining: data de embarque em formato brasil DD/MM/YYYY, sent: 'test' } "
+                  "miles: identifique o menor custo de milhas e coloque nesse campo com pontuação duas casas decimais sem usar virgula e como texto " +
+                  "type_trip: com base nas milhas mais baratas identifique em qual classe está o voo se é premium/executiva/primeira classe e coloque nesse campo" +
+                  "airlines: identifique a companhia aerea e coloque nesse campo," +
+                  "remaining: data de embarque em formato brasil DD/MM/YYYY," +
+                  "sent: 'test'," +
+                  "amount: com base no valor em milhas converta usando a tabela a baixo para a cada 1000 milhas. coloque como texto em duas casas decimais sem usar virgula.," +
+                  " }" +
+                  "\n " +
+                  "Tabela para conversão em reais" +
+                  "SMILES -> valor da milha = 21.0" +
+                  "LATAM PASS -> valor da milha = 32.50" +
+                  "LATAMPASS -> valor da milha = 32.50" +
+                  "LATAM PASS - TABELA FIXA -> valor da milha = 32.50" +
+                  "TUDO AZUL -> valor da milha = 28.00" +
+                  "AADVANTAGE - AMERICAN AIRLINES -> valor da milha = 117.00" +
+                  "MILES&GO - TAP -> valor da milha = 39.00" +
+                  "MILES&amp;GO - TAP -> valor da milha = 39.00" +
+                  "AZUL FIDELIDADE - AZUL PELO MUNDO -> valor da milha = 21.00" +
+                  "AZUL FIDELIDADE -> valor da milha = 21.00" +
+                  "IBERIA PLUS - IBERIA -> valor da milha = 78.00" +
+                  "AEROPLAN -> valor da milha = 110.00" +
+                  "CONNECT MILES -> valor da milha = 85.00"
               },
               {
                 "role": "user",
@@ -211,13 +246,13 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
           let json = JSON.parse(message.data.choices[0].message.content) as Alert;
           json.miles = json.miles?.toString() as any
 
-          const verifyLast = new AlertService().verifyLast()
 
-          
+          if (json.miles != null && json.miles <= '250000') {
 
-          console.log(await verifyLast)
+            return new AlertService().createAlert(json)
 
-          // const saved = new AlertService().createAlert(json)
+          }
+
         }
       }
 
