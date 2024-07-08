@@ -1,7 +1,7 @@
 import { gpt, wpp } from '../axios';
 
 export async function sendDefaultMessage(message: string) {
-  const prompt = 'Retire completamente todo tipo de link e redirecionamento da mensagem. E qualquer toda OBSERVAÇÃO do texto.'
+  const prompt = 'Retire completamente todo tipo de link e redirecionamento da mensagem. Não altere nada da mensagem, somente retire o que for link e observação do texto, se não houver não mexa em nada, retorne do jeito que foi enviado.'
 
   const data_gpt = {
     "model": "gpt-3.5-turbo",
