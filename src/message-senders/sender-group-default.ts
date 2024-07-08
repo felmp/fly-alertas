@@ -1,10 +1,28 @@
-import { wpp } from '../axios';
+import { gpt, wpp } from '../axios';
 
-export function sendDefaultMessage(message: string) {
+export async function sendDefaultMessage(message: string) {
+  const prompt = 'Retire completamente todo tipo de link e redirecionamento da mensagem. E qualquer toda OBSERVAÇÃO do texto.'
+
+  const data_gpt = {
+    "model": "gpt-3.5-turbo",
+    "messages": [
+      {
+        "role": "system",
+        "content": prompt
+      },
+      {
+        "role": "user",
+        "content": JSON.stringify(message)
+      }
+    ]
+  };
+
+  const messageGPT = await gpt.post('chat/completions', data_gpt);
+
   var data = JSON.stringify({
-    "to_group_uuid": "WAGb20bcd1c-1bfd-447a-bc33-594a10952708", //certo
+    "to_group_uuid": "WAGb20bcd1c-1bfd-447a-bc33-594a10952708",
     "from_number": "+5579920012363",
-    "text": message
+    "text": messageGPT.data.choices[0].message.content
   });
 
   wpp.post('open/whatsapp/send-message', data)
