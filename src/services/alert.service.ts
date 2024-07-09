@@ -24,10 +24,20 @@ class AlertService {
     return save.id
   }
 
-  async verifyLast() {
+  async verifyLast(trip: string) {
+    const today = new Date();
+
+    const formattedToday = today.toISOString().split('T')[0];
+
     const save = await prismaClient.alerts.findMany({
       orderBy: {
-        created_at: "desc"
+        sent_date: "desc"
+      },
+      where: {
+        trip,
+        sent_date: {
+          gte: new Date(formattedToday)
+        }
       },
     })
 

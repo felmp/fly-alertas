@@ -1,5 +1,5 @@
 import { exit } from 'process';
-import { engine_v1, gpt } from '../../axios';
+import { engine_v1, gpt, wpp } from '../../axios';
 import { sendDefaultMessage } from '../../message-senders/sender-group-default';
 import { sendMoneyMessage } from '../../message-senders/sender-group-money';
 import { Alert } from '../../models/alert.model';
@@ -142,8 +142,8 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     if (!this.is_running) {
       this.is_running = true;
       this.interval = setInterval(() => this.processQueue(), 5000);
-      setInterval(() => this.processQueueSeatsAero(), 900000);
-      setInterval(() => this.getSeatsAero(), 42000);
+      // setInterval(() => this.processQueueSeatsAero(), 900000);
+      // setInterval(() => this.getSeatsAero(), 42000);
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -154,6 +154,29 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       this.is_running = false;
       console.log('Fila de alertas parada.');
     }
+  }
+
+  maintenance() {
+    var data = JSON.stringify({
+      "to_group_uuid": "WAGb20bcd1c-1bfd-447a-bc33-594a10952708",
+      "from_number": "+5579920012363",
+      "text": `
+⚠️ Manutenção Programada ⚠️
+
+Olá pessoal do grupo Fly Alertas! Estamos realizando uma pequena manutenção para trazer novidades fresquinhas nos nossos alertas. Fiquem ligados para novas oportunidades incríveis que estamos preparando para vocês!
+
+Em breve estaremos de volta com tudo! ✈️🌟
+
+Atenciosamente,
+Equipe Fly Alertas`
+    });
+
+    wpp.post('open/whatsapp/send-message', data)
+      .then(function (response) {
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
   }
 
   async getSeatsAero() {
@@ -246,29 +269,23 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
           let json = JSON.parse(message.data.choices[0].message.content) as Alert;
           json.miles = json.miles?.toString() as any
 
+          const lasts = await new AlertService().verifyLast(json.trip as string);
 
-          if (json.miles != null && json.miles <= '250000') {
-
+          if (json.miles != null && json.miles <= '250000' && lasts.length <= 2) {
             return new AlertService().createAlert(json)
-
           }
-
         }
       }
-
       if (availability.hasMore) {
-        skip += take; // Atualiza o offset para a próxima página
+        skip += take;
       } else {
         console.log('No more pages available for current selection. Restarting...');
-        skip = 0; // Reiniciar o skip para buscar desde o início na próxima iteração
+        skip = 0;
       }
-
     } catch (error) {
       console.error('Error fetching data:', error);
     }
-
   }
-
 }
 
 export default engineV1
