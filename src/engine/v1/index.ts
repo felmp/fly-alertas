@@ -97,7 +97,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       const arraySplitted = alert.original_message?.split("\n") as string[]
 
       let miles = '';
-      if (arraySplitted[2] == 'Internacional') {
+      if (arraySplitted[2].includes('Internacional')) {
         miles = arraySplitted[4].replace('💰', '').replace('💰', '')
       } else {
         miles = arraySplitted[3].replace('💰 ', '').replace('💰', '')
