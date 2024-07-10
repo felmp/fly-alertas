@@ -114,7 +114,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 🗓️  Alerta de Data : ${alert.remaining}
 _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
-console.log(formattedText)
+      console.log(formattedText)
 
       sendDefaultMessage(formattedText)
 
@@ -293,26 +293,27 @@ Equipe Fly Alertas`
     }
   }
 
-  // async crawlerTKMilhas() {
-  //   const browser = await puppeteer.launch({ headless: false });
-  //   const page = await browser.newPage();
+  async crawlerTKMilhas() {
+    const browser = await puppeteer.launch({ headless: false });
+    const page = await browser.newPage();
 
-  //   await page.goto('https://developer.chrome.com/');
+    await page.goto('https://www.tkmilhas.com/login');
 
-  //   await page.setViewport({ width: 1080, height: 1024 });
+    // await page.setViewport({ width: 1080, height: 1024 });
 
-  //   await page.locator('.devsite-search-field').fill('automate beyond recorder');
+    await page.locator('#mui-1').fill('potiguarpassagens@gmail.com');
+    await page.locator('#mui-2').fill('#Daniel55');
+    await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-fullWidth.MuiButtonBase-root.css-1g8e2pa').click();
 
-  //   await page.locator('.devsite-result-item-link').click();
-
-  //   const textSelector = await page
-  //     .locator('text/Customize and automate')
-  //     .waitHandle();
-  //   const fullTitle = await textSelector?.evaluate(el => el.textContent);
-
-  //   console.log('The title of this blog post is "%s".', fullTitle);
-
-  // }
+    await page.evaluate(() => {
+      document.onmousemove = function (e) {
+        let mouseX = e.offsetX;
+        let mouseY = e.offsetY;
+        console.log(mouseX, mouseY);
+      }
+    })
+    // await page.mouse.
+  }
 }
 
 export default engineV1
