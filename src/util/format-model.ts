@@ -40,7 +40,6 @@ export async function formatMessageText(text: string): Promise<string | undefine
     }
   }
 
-
   const regexCatchMiles = /\d+(\.\d+)?/g;
 
   const onlyMiles = miles.match(regexCatchMiles);
@@ -65,6 +64,8 @@ export async function formatMessageText(text: string): Promise<string | undefine
       amount: price.toString()
     })
 
+    console.log(save)
+    
     const saved = await save as unknown as string
 
     return saved;

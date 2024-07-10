@@ -10,6 +10,7 @@ export async function routes(fastify: FastifyInstance) {
   fastify.post('/webhook', async (request, res) => {
     const payload = request.body as GroupMessage;
 
+
     // if (payload.contact.friendly_name.includes('Flyalertas Diretoria') && payload.message.text.trim() === '/bot') {
     //   sessions[payload.participant.phone_number] = {
     //     active: true,

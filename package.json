@@ -22,7 +22,8 @@
     "axios": "^1.6.8",
     "dotenv": "^16.4.5",
     "fastify": "^4.26.2",
-    "googleapis": "^105.0.0"
+    "googleapis": "^105.0.0",
+    "puppeteer": "^22.12.1"
   },
   "devDependencies": {
     "@types/node": "^20.12.8",

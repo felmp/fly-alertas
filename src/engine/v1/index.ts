@@ -1,4 +1,4 @@
-import { exit } from 'process';
+import puppeteer from 'puppeteer';
 import { engine_v1, gpt, wpp } from '../../axios';
 import { sendDefaultMessage } from '../../message-senders/sender-group-default';
 import { sendMoneyMessage } from '../../message-senders/sender-group-money';
@@ -17,12 +17,10 @@ const formatter = new Intl.NumberFormat('pt-BR', {
 class engineV1 {
   interval: any;
   is_running: boolean;
-  // alert: AlertService
 
   constructor() {
     this.is_running = false;
     this.interval = null;
-    // this.alert = new AlertService();
   }
 
   async processQueueSeatsAero() {
@@ -96,17 +94,27 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     for (const alert of alerts) {
       console.log(`Enviando alert ID: ${alert.id}`);
 
+      const arraySplitted = alert.original_message?.split("\n") as string[]
+
+      let miles = '';
+      if (arraySplitted[2] == 'Internacional') {
+        miles = arraySplitted[4].replace('💰', '').replace('💰', '')
+      } else {
+        miles = arraySplitted[3].replace('💰 ', '').replace('💰', '')
+      }
+
       const formattedText = `
 ⚠️ *OPORTUNIDADE @FLYALERTAS*
 
 🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
 ✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
-💰 A partir de ${alert.miles?.trim()} ida e volta + taxas
+💰 ${miles} + taxas
 🛫 Companhia Aérea: ${alert.airlines?.trim()}
 💺 Classe: ${alert.type_trip?.trim()}
 🗓️  Alerta de Data : ${alert.remaining}
 _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
+console.log(formattedText)
 
       sendDefaultMessage(formattedText)
 
@@ -116,7 +124,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
 🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
 ✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
-💰 A partir de ${formatter.format(Number(alert.amount))} ida e volta + taxas
+💰 A partir de ${formatter.format(Number(alert.amount))} trecho + taxas
 🛫 Companhia Aérea: ${alert.airlines?.trim()}
 💺 Classe: ${alert.type_trip?.trim()}
 🗓️  Alerta de Data : ${alert.remaining}
@@ -125,8 +133,6 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
         sendMoneyMessage(formattedText)
 
       }, 4000);
-
-      console.log('cheguei aqui')
 
       await prismaClient.alerts.update({
         where: { id: alert.id },
@@ -142,8 +148,8 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     if (!this.is_running) {
       this.is_running = true;
       this.interval = setInterval(() => this.processQueue(), 5000);
-      // setInterval(() => this.processQueueSeatsAero(), 900000);
-      // setInterval(() => this.getSeatsAero(), 42000);
+      setInterval(() => this.processQueueSeatsAero(), 900000);
+      setInterval(() => this.getSeatsAero(), 500000);
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -185,7 +191,7 @@ Equipe Fly Alertas`
     const continents = ['North+America', 'Europe', 'Asia'];
     const sources = ['smiles', 'american', 'azul', 'aeroplan'];
     console.log('SeatsAero rodando')
-    let take = 500;
+    let take = 1000;
     let skip = 0;
 
     let start_date = new Date();
@@ -271,7 +277,7 @@ Equipe Fly Alertas`
 
           const lasts = await new AlertService().verifyLast(json.trip as string);
 
-          if (json.miles != null && json.miles <= '250000' && lasts.length <= 2) {
+          if (json.miles != null && json.miles <= '250000' && lasts.length < 2) {
             return new AlertService().createAlert(json)
           }
         }
@@ -286,6 +292,27 @@ Equipe Fly Alertas`
       console.error('Error fetching data:', error);
     }
   }
+
+  // async crawlerTKMilhas() {
+  //   const browser = await puppeteer.launch({ headless: false });
+  //   const page = await browser.newPage();
+
+  //   await page.goto('https://developer.chrome.com/');
+
+  //   await page.setViewport({ width: 1080, height: 1024 });
+
+  //   await page.locator('.devsite-search-field').fill('automate beyond recorder');
+
+  //   await page.locator('.devsite-result-item-link').click();
+
+  //   const textSelector = await page
+  //     .locator('text/Customize and automate')
+  //     .waitHandle();
+  //   const fullTitle = await textSelector?.evaluate(el => el.textContent);
+
+  //   console.log('The title of this blog post is "%s".', fullTitle);
+
+  // }
 }
 
 export default engineV1
