@@ -294,24 +294,39 @@ Equipe Fly Alertas`
   }
 
   async crawlerTKMilhas() {
+    function delay(time: number) {
+      return new Promise(function (resolve) {
+        setTimeout(resolve, time)
+      });
+    }
+
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
 
     await page.goto('https://www.tkmilhas.com/login');
 
-    // await page.setViewport({ width: 1080, height: 1024 });
+    await page.setViewport({ width: 1080, height: 1024 });
 
     await page.locator('#mui-1').fill('potiguarpassagens@gmail.com');
+    await delay(3000)
+
     await page.locator('#mui-2').fill('#Daniel55');
+    await delay(3000)
+
     await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-fullWidth.MuiButtonBase-root.css-1g8e2pa').click();
 
-    await page.evaluate(() => {
-      document.onmousemove = function (e) {
-        let mouseX = e.offsetX;
-        let mouseY = e.offsetY;
-        console.log(mouseX, mouseY);
-      }
-    })
+    await delay(3000)
+    await page.locator('.MuiAutocomplete-root.airport-input input').fill('NAT')
+    await page.keyboard.press('Enter')
+    await delay(3000)
+
+    // await page.evaluate(() => {
+    //   document.onmousemove = function (e) {
+    //     let mouseX = e.offsetX;
+    //     let mouseY = e.offsetY;
+    //     console.log(mouseX, mouseY);
+    //   }
+    // })
     // await page.mouse.
   }
 }
