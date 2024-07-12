@@ -7,6 +7,7 @@ import prismaClient from '../../prisma';
 import { AlertService } from '../../services/alert.service';
 import { formatDate } from '../../util/format-date';
 import { randomDate } from '../../util/random-date';
+import moment from 'moment';
 
 
 const formatter = new Intl.NumberFormat('pt-BR', {
@@ -300,12 +301,30 @@ Equipe Fly Alertas`
       });
     }
 
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({
+      headless: false, defaultViewport: null, args: ['--window-size=1920,1080'],
+    });
+
     const page = await browser.newPage();
 
     await page.goto('https://www.tkmilhas.com/login');
 
-    await page.setViewport({ width: 1080, height: 1024 });
+    await page.evaluate(async () => {
+      await new Promise<void>((resolve, reject) => {
+        var totalHeight = 0;
+        var distance = 100;
+        var timer = setInterval(() => {
+          var scrollHeight = document.body.scrollHeight;
+          window.scrollBy(0, distance);
+          totalHeight += distance;
+
+          if (totalHeight >= scrollHeight) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 100);
+      });
+    });
 
     await page.locator('#mui-1').fill('potiguarpassagens@gmail.com');
     await delay(3000)
@@ -316,9 +335,35 @@ Equipe Fly Alertas`
     await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-fullWidth.MuiButtonBase-root.css-1g8e2pa').click();
 
     await delay(3000)
+    //  
+    const buttonsToClick = ['azul', 'interline', 'multiplus', 'smiles', 'iberia', 'copa', 'aa'];
+
+    for (const value of buttonsToClick) {
+      const selector = `button[value="${value}"]`;
+      await page.locator(selector).click();
+      await delay(1000)
+    }
+
+    await page.locator('.MuiInput-root.MuiInput-underline.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.css-3dr76p input[value="5"]').click();
+    await page.keyboard.type('5')
+    await page.keyboard.press('Enter')
+    await delay(1000)
+
+
     await page.locator('.MuiAutocomplete-root.airport-input input').fill('NAT')
     await page.keyboard.press('Enter')
+    await page.keyboard.press('Tab')
     await delay(3000)
+    await page.keyboard.type('FOR', { delay: 800 })
+    await page.keyboard.press('Enter')
+    await delay(3000)
+
+    const today = moment().format('L')
+    await page.locator('#owDate').fill(today)
+    await delay(3000)
+    // await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeSmall.MuiButton-containedSizeSmall.MuiButtonBase-root.searchButton.css-1dpvzvp').click()
+
+
 
     // await page.evaluate(() => {
     //   document.onmousemove = function (e) {
