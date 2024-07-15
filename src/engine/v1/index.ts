@@ -241,7 +241,7 @@ Equipe Fly Alertas`
                   "affiliates_program: voce vai identificar o programa de afiliados no json que enviar e colocar nesse campo em caixa alta " +
                   "trip: aqui voce vai colocar de onde será a origem e de onde será o destino, coloque o nome das cidades por extenso no formato (origem para destino) " +
                   "route: coloque a rota dos continentes Exemplo: América do Sul para América do Norte" +
-                  "miles: identifique o menor custo de milhas e coloque nesse campo com pontuação duas casas decimais sem usar virgula e como texto " +
+                  "miles: identifique o menor custo de milhas e coloque nesse campo com pontuação duas casas decimais sem usar virgula e como texto. Não pegue a economica" +
                   "type_trip: com base nas milhas mais baratas identifique em qual classe está o voo se é premium/executiva/primeira classe e coloque nesse campo" +
                   "airlines: identifique a companhia aerea e coloque nesse campo," +
                   "remaining: data de embarque em formato brasil DD/MM/YYYY," +
@@ -309,23 +309,6 @@ Equipe Fly Alertas`
 
     await page.goto('https://www.tkmilhas.com/login');
 
-    await page.evaluate(async () => {
-      await new Promise<void>((resolve, reject) => {
-        var totalHeight = 0;
-        var distance = 100;
-        var timer = setInterval(() => {
-          var scrollHeight = document.body.scrollHeight;
-          window.scrollBy(0, distance);
-          totalHeight += distance;
-
-          if (totalHeight >= scrollHeight) {
-            clearInterval(timer);
-            resolve();
-          }
-        }, 100);
-      });
-    });
-
     await page.locator('#mui-1').fill('potiguarpassagens@gmail.com');
     await delay(3000)
 
@@ -335,8 +318,8 @@ Equipe Fly Alertas`
     await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-fullWidth.MuiButtonBase-root.css-1g8e2pa').click();
 
     await delay(3000)
-    //  
-    const buttonsToClick = ['azul', 'interline', 'multiplus', 'smiles', 'iberia', 'copa', 'aa'];
+    // 'azul', 'interline', 'multiplus',  , 'iberia', 'copa', 'aa'
+    const buttonsToClick = ['smiles'];
 
     for (const value of buttonsToClick) {
       const selector = `button[value="${value}"]`;
@@ -344,35 +327,65 @@ Equipe Fly Alertas`
       await delay(1000)
     }
 
+    await page.evaluate(async () => {
+      let scrollPosition = 0
+      let documentHeight = document.body.scrollHeight
+
+      while (documentHeight > scrollPosition) {
+        window.scrollBy(0, documentHeight)
+        await new Promise(resolve => {
+          setTimeout(resolve, 1000)
+        })
+        scrollPosition = documentHeight
+        documentHeight = document.body.scrollHeight
+      }
+    })
+
     await page.locator('.MuiInput-root.MuiInput-underline.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.css-3dr76p input[value="5"]').click();
     await page.keyboard.type('5')
     await page.keyboard.press('Enter')
     await delay(1000)
 
 
-    await page.locator('.MuiAutocomplete-root.airport-input input').fill('NAT')
+    await page.locator('.MuiAutocomplete-root.airport-input input').fill('LIS')
     await page.keyboard.press('Enter')
     await page.keyboard.press('Tab')
     await delay(3000)
-    await page.keyboard.type('FOR', { delay: 800 })
+    await page.keyboard.type('NAT', { delay: 1000 })
     await page.keyboard.press('Enter')
     await delay(3000)
 
     const today = moment().format('L')
     await page.locator('#owDate').fill(today)
     await delay(3000)
-    // await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeSmall.MuiButton-containedSizeSmall.MuiButtonBase-root.searchButton.css-1dpvzvp').click()
 
+    // await page.locator('button[value="join"]').click() // click mesclado
+    await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeSmall.MuiButton-containedSizeSmall.MuiButtonBase-root.searchButton.css-1dpvzvp').click()
 
+    await page.waitForFunction(() => !document.querySelector('.MuiSkeleton-root'));
 
-    // await page.evaluate(() => {
-    //   document.onmousemove = function (e) {
-    //     let mouseX = e.offsetX;
-    //     let mouseY = e.offsetY;
-    //     console.log(mouseX, mouseY);
-    //   }
-    // })
-    // await page.mouse.
+    await page.waitForSelector('.MuiBox-root.css-1yaucul');
+
+    const elementsData = await page.$$eval('.MuiBox-root.css-1yaucul', nodes => {
+      return nodes.map((node, index) => {
+        const h4s = node.querySelectorAll('h4');
+        if (h4s.length > 1 && h4s[1].textContent) {
+          return { index, value: parseFloat(h4s[1].textContent.replace(/,/g, '')) };
+        }
+        return { index, value: null };
+      }).filter((data): data is { index: number, value: number } => data.value !== null); // Type guard to filter out null values
+    });
+
+    // Encontrar o menor valor e seu índice correspondente
+    const minElementData = elementsData.reduce((min, element) => element.value < min.value ? element : min, elementsData[0]);
+
+    // Clicar no elemento com o menor valor
+    // await page.evaluate(index => {
+    //   const elements = document.querySelectorAll('.MuiBox-root.css-1yaucul');
+    //   elements[index].click
+    // }, minElementData.index);
+
+    console.log('O menor valor é:', minElementData);
   }
 }
 
