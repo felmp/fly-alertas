@@ -191,7 +191,7 @@ Equipe Fly Alertas`
 
     const origins_airports = ['FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'];
     const continents = ['North+America', 'Europe', 'Asia'];
-    const sources = ['smiles', 'american', 'azul', 'aeroplan'];
+    const sources = ['american', 'azul', 'aeroplan'];
     console.log('SeatsAero rodando')
     let take = 1000;
     let skip = 0;
