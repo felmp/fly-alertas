@@ -344,23 +344,33 @@ Equipe Fly Alertas`
       'GIG'
     ];
 
-    const airports_destination = [
+    const airports_to = [
       'LIS', 'WAS', 'PAR', 'SEL',
       'MAD', 'HND', 'CHI', 'LAX', 'ORL',
       'NYC', 'MIL', 'BUE', 'LON'
     ]
 
+
     for (let i = 0; i < airports_from.length; i++) {
-      for (let j = 0; j < airports_destination.length; j++) {
-        const from = airports_from[Math.floor(Math.random() * airports_from.length)];
-        const to = airports_destination[Math.floor(Math.random() * airports_from.length)];
+      const from = airports_from[i];
+      const to = airports_to[i % airports_to.length];
 
-        const today = moment().format('L');
-        const in30Days = moment().add(30, 'days').format('L');
+      for (let j = 0; j < 2; j++) {
+        const offset = j * 30;
 
+        console.log('Saido de : '+ from);
+        console.log('Para : '+ to);
+
+        await page.locator('#owDate').fill('')
+        await page.locator('.MuiAutocomplete-root.airport-input input').fill('')
+        await page.keyboard.press('Enter')
+        await page.keyboard.press('Tab')
+        await delay(3000)
+        await page.keyboard.type('', { delay: 1000 })
+        await page.keyboard.press('Enter')
 
         await page.locator('.MuiInput-root.MuiInput-underline.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.css-3dr76p input[value="5"]').click();
-        await page.keyboard.type('5')
+        await page.keyboard.type('30')
         await page.keyboard.press('Enter')
         await delay(1000)
 
@@ -372,12 +382,12 @@ Equipe Fly Alertas`
         await page.keyboard.press('Enter')
         await delay(3000)
 
+        const today = moment().add(offset, 'days').format('L');
         await page.locator('#owDate').fill(today)
         await delay(3000)
 
         await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeSmall.MuiButton-containedSizeSmall.MuiButtonBase-root.searchButton.css-1dpvzvp').click()
 
-        // await page.waitForSelector('.MuiBox-root.css-1yaucul');
         await page.waitForFunction(() => !document.querySelector('.MuiSkeleton-root'), { timeout: 0 });
 
         const mileElements = await page.$$eval('.MuiBox-root.css-1yaucul h4:nth-of-type(2)', elements =>
@@ -396,17 +406,21 @@ Equipe Fly Alertas`
           const classElement = document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(1) .MuiTypography-button') as any;
           const departureElement = document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(3) .MuiTypography-button') as any;
           const flightElement = document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(5) .MuiTypography-button') as any;
+          const milesElement = document.querySelector('.MuiBox-root.css-1yaucul h4:nth-of-type(2)') as any;
 
           return {
             program: programElement ? programElement.innerText : null,
             class: classElement ? classElement.innerText : null,
             departure: departureElement ? departureElement.innerText : null,
             flight: flightElement ? flightElement.innerText : null,
+            miles: milesElement ? milesElement.innerText : null,
           };
 
         });
 
         console.log(flightInfo);
+
+        await delay(10000)
       }
     }
   }
