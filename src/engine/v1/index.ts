@@ -393,7 +393,7 @@ Equipe Fly Alertas`
         await page.keyboard.press('Enter');
         await delay(3000);
 
-        const today = moment().add(offset, 'days').format('L');
+        const today = moment().add(15, 'days').add(offset, 'days').format('L');
         console.log(today);
         await page.locator('#owDate').fill('');
         await delay(3000);
@@ -402,44 +402,44 @@ Equipe Fly Alertas`
 
 
 
-        // await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeSmall.MuiButton-containedSizeSmall.MuiButtonBase-root.searchButton.css-1dpvzvp').click();
+        await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeSmall.MuiButton-containedSizeSmall.MuiButtonBase-root.searchButton.css-1dpvzvp').click();
 
-        // await page.waitForFunction(() => !document.querySelector('.MuiSkeleton-root'), { timeout: 60000 });
+        await page.waitForFunction(() => !document.querySelector('.MuiSkeleton-root'), { timeout: 60000 });
 
-        // const mileElements = await page.$$eval('.MuiBox-root.css-1yaucul h4:nth-of-type(2)', elements =>
-        //   elements.map(el => parseInt(el.innerText.replace(/\D/g, ''), 10))
-        // );
+        const mileElements = await page.$$eval('.MuiBox-root.css-1yaucul h4:nth-of-type(2)', elements =>
+          elements.map(el => parseInt(el.innerText.replace(/\D/g, ''), 10))
+        );
 
-        // const sortedIndices = mileElements.map((val, idx) => [val, idx])
-        //   .sort(([val1], [val2]) => val1 - val2)
-        //   .slice(0, 5)
-        //   .map(([, idx]) => idx);
+        const sortedIndices = mileElements.map((val, idx) => [val, idx])
+          .sort(([val1], [val2]) => val1 - val2)
+          .slice(0, 5)
+          .map(([, idx]) => idx);
 
-        // const buttons = await page.$$('.MuiBox-root.css-1yaucul');
+        const buttons = await page.$$('.MuiBox-root.css-1yaucul');
 
-        // for (const index of sortedIndices) {
-        //   await buttons[index].click();
-        //   await page.waitForSelector('.MuiAccordionDetails-root');
+        for (const index of sortedIndices) {
+          await buttons[index].click();
+          await page.waitForSelector('.MuiAccordionDetails-root');
 
-        //   const flightInfo = await page.evaluate((mile) => {
-        //     const programElement = document.querySelector('.MuiTableHead-root .flight-table-header td:nth-of-type(1)') as any;
-        //     const classElement = document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(1) .MuiTypography-button') as any;
-        //     const departureElement = document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(3) .MuiTypography-button') as any;
-        //     const flightElement = document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(5) .MuiTypography-button') as any;
+          const flightInfo = await page.evaluate((mile) => {
+            const programElement = document.querySelector('.MuiTableHead-root .flight-table-header td:nth-of-type(1)') as any;
+            const classElement = document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(1) .MuiTypography-button') as any;
+            const departureElement = document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(3) .MuiTypography-button') as any;
+            const flightElement = document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(5) .MuiTypography-button') as any;
 
-        //     return {
-        //       program: programElement ? programElement.innerText : null,
-        //       class: classElement ? classElement.innerText : null,
-        //       departure: departureElement ? departureElement.innerText : null,
-        //       flight: flightElement ? flightElement.innerText : null,
-        //       miles: mile
-        //     };
-        //   }, mileElements[index]);
+            return {
+              program: programElement ? programElement.innerText : null,
+              class: classElement ? classElement.innerText : null,
+              departure: departureElement ? departureElement.innerText : null,
+              flight: flightElement ? flightElement.innerText : null,
+              miles: mile
+            };
+          }, mileElements[index]);
 
-        //   console.log(flightInfo);
+          console.log(flightInfo);
 
-        //   await delay(10000);
-        // }
+          await delay(10000);
+        }
 
         await delay(5000);
       }
