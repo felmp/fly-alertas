@@ -146,12 +146,67 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     }
   }
 
+  async processQueueTK() {
+    const alerts = await prismaClient.alerts.findMany({
+      where: {
+        sent: 'tk'
+      },
+      orderBy: { created_at: 'asc' },
+      take: 1
+    });
+
+    for (const alert of alerts) {
+      console.log(`Enviando alert ID: ${alert.id} - TK milhas`);
+
+      const formattedText = `
+⚠️ *OPORTUNIDADE @FLYALERTAS*
+
+🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
+✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
+💰 ${alert.miles?.trim()}
+🛫 Companhia Aérea: ${alert.airlines?.trim()}
+💺 Classe: ${alert.type_trip?.trim()}
+🗓️  Alerta de Data : ${alert.remaining}
+
+_Não tem milhas ? Nós te ajudamos com essa emissão !_
+`;
+
+      sendMoneyMessage(formattedText)
+
+      //       setTimeout(() => {
+      //         const formattedText = `
+      // ⚠️ *OPORTUNIDADE @FLYALERTAS*
+
+      // 🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
+      // ✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
+      // 💰 A partir de ${formatter.format(Number(alert.amount))} trecho + taxas
+      // 🛫 Companhia Aérea: ${alert.airlines?.trim()}
+      // 💺 Classe: ${alert.type_trip?.trim()}
+      // 🗓️  Alerta de Data : ${alert.remaining}
+      // _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
+
+      //         sendMoneyMessage(formattedText)
+
+      //       }, 4000);
+
+      await prismaClient.alerts.update({
+        where: { id: alert.id },
+        data: {
+          sent: 'sent',
+          sent_date: new Date()
+        }
+      });
+    }
+  }
+
+
   start() {
     if (!this.is_running) {
       this.is_running = true;
-      this.interval = setInterval(() => this.processQueue(), 5000);
+      // this.interval = setInterval(() => this.processQueue(), 5000);
       setInterval(() => this.processQueueSeatsAero(), 900000);
-      setInterval(() => this.getSeatsAero(), 500000);
+      setInterval(() => this.processQueueTK(), 1000);
+      // setInterval(() => this.getSeatsAero(), 500000);
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -191,7 +246,7 @@ Equipe Fly Alertas`
 
     const origins_airports = ['FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'];
     const continents = ['North+America', 'Europe', 'Asia'];
-    const sources = ['american', 'azul', 'aeroplan'];
+    const sources = ['american', 'azul', 'aeroplan', 'smiles'];
     console.log('SeatsAero rodando')
     let take = 1000;
     let skip = 0;
@@ -295,6 +350,10 @@ Equipe Fly Alertas`
     }
   }
 
+  getRandomElement(arr: any) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
   async crawlerTKMilhas() {
 
     const browser = await puppeteer.launch({
@@ -318,13 +377,14 @@ Equipe Fly Alertas`
 
     await delay(3000)
     // 'azul', 'interline', 'copa', [em testes]
+    // [em testes]
     const buttonsToClick = ['multiplus', 'smiles', 'iberia', 'aa', 'tap'];
 
-    for (const value of buttonsToClick) {
-      const selector = `button[value="${value}"]`;
-      await page.locator(selector).click();
-      await delay(1000)
-    }
+    const program = this.getRandomElement(buttonsToClick);
+
+    const selector = `button[value="${program}"]`;
+    await page.locator(selector).click();
+    await delay(1000)
 
     await page.evaluate(async () => {
       let scrollPosition = 0
@@ -340,29 +400,25 @@ Equipe Fly Alertas`
       }
     })
 
-
     const airports_from = [
-      'FOR', 'NAT', 'SAO', 'REC', 'MCZ',
-      'RIO', 'CNF', 'BSB', 'AJU', 'GRU',
-      'GIG'
+      'NAT'
+      // 'FOR', 'NAT', 'SAO', 'REC', 'MCZ',
+      // 'RIO', 'CNF', 'BSB', 'AJU', 'GRU',
+      // 'GIG'
     ];
 
     const airports_to = [
-      'LIS', 'WAS', 'PAR', 'SEL',
-      'MAD', 'HND', 'CHI', 'LAX', 'ORL',
-      'NYC', 'MIL', 'BUE', 'LON'
+      'LIS'
+      // 'LIS', 'WAS', 'PAR', 'SEL',
+      // 'MAD', 'HND', 'CHI', 'LAX', 'ORL',
+      // 'NYC', 'MIL', 'BUE', 'LON'
     ]
-
-
-    function getRandomElement(arr: any) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
 
     const combinations = new Set();
 
     while (combinations.size < airports_from.length) {
-      const from = getRandomElement(airports_from);
-      const to = getRandomElement(airports_to);
+      const from = this.getRandomElement(airports_from);
+      const to = this.getRandomElement(airports_to);
 
       const combination = `${from}-${to}`;
       if (combinations.has(combination)) continue;
@@ -375,7 +431,7 @@ Equipe Fly Alertas`
         console.log('Para: ' + to);
 
         await page.locator('.MuiInput-root.MuiInput-underline.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.css-3dr76p input[value="5"]').click();
-        await page.keyboard.type('5');
+        await page.keyboard.type('30');
         await page.keyboard.press('Enter');
         await delay(1000);
 
@@ -393,18 +449,16 @@ Equipe Fly Alertas`
         await page.keyboard.press('Enter');
         await delay(3000);
 
-        const today = moment().add(15, 'days').add(offset, 'days').format('L');
+        const today = moment().add(offset, 'days').format('L');
         console.log(today);
         await page.locator('#owDate').fill('');
         await delay(3000);
         await page.locator('#owDate').fill(today);
         await delay(3000);
 
-
-
         await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeSmall.MuiButton-containedSizeSmall.MuiButtonBase-root.searchButton.css-1dpvzvp').click();
 
-        await page.waitForFunction(() => !document.querySelector('.MuiSkeleton-root'), { timeout: 60000 });
+        await page.waitForFunction(() => !document.querySelector('.MuiSkeleton-root'), { timeout: 0 });
 
         const mileElements = await page.$$eval('.MuiBox-root.css-1yaucul h4:nth-of-type(2)', elements =>
           elements.map(el => parseInt(el.innerText.replace(/\D/g, ''), 10))
@@ -419,7 +473,7 @@ Equipe Fly Alertas`
 
         for (const index of sortedIndices) {
           await buttons[index].click();
-          await page.waitForSelector('.MuiAccordionDetails-root');
+          await page.waitForSelector('.MuiAccordionDetails-root', { timeout: 0 });
 
           const flightInfo = await page.evaluate((mile) => {
             const programElement = document.querySelector('.MuiTableHead-root .flight-table-header td:nth-of-type(1)') as any;
@@ -433,8 +487,20 @@ Equipe Fly Alertas`
               departure: departureElement ? departureElement.innerText : null,
               flight: flightElement ? flightElement.innerText : null,
               miles: mile
+
             };
           }, mileElements[index]);
+
+          new AlertService().createAlert({
+            affiliates_program: flightInfo.program,
+            trip: 'Internacional',
+            route: from + ' para ' + to,
+            miles: `A partir de ${flightInfo.miles} milhas trecho + taxas`,
+            airlines: '-',
+            sent: 'tk',
+            type_trip: 'Econômica',
+            remaining: flightInfo.departure
+          })
 
           console.log(flightInfo);
 
