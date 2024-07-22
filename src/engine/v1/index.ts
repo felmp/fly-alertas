@@ -9,6 +9,7 @@ import { formatDate } from '../../util/format-date';
 import { randomDate } from '../../util/random-date';
 import moment from 'moment';
 import delay from '../../util/delay';
+import console from 'console';
 
 
 const formatter = new Intl.NumberFormat('pt-BR', {
@@ -203,12 +204,11 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_
   start() {
     if (!this.is_running) {
       this.is_running = true;
-      // this.interval = setInterval(() => this.processQueue(), 5000);
+      this.interval = setInterval(() => this.processQueue(), 5000);
       setInterval(() => this.processQueueSeatsAero(), 900000);
-      setInterval(() => this.processQueueTK(), 1000);
       // setInterval(() => this.processQueueTK(), 1000);
-      this.crawlerTKMilhas()
-      // setInterval(() => this.getSeatsAero(), 500000);
+      // this.crawlerTKMilhas()
+      setInterval(() => this.getSeatsAero(), 500000);
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -294,12 +294,13 @@ Equipe Fly Alertas`
               {
                 "role": "system",
                 "content": "Você é um analista de passagens aereas, você nao aceita passagens economicas, se vier economica. apenas não envie o JSON, envie a mensagem. PASSAGEM ECONOMICA " +
+                  "Mostre apenas numeros referentes a viagens EXECUTIVAS" +
                   "vou lhe mandar um objeto você vai analisar e vai retornar pra mim um " +
                   "JSON que contenha os dados que mandei pra você organizado. o json é" +
                   "affiliates_program: voce vai identificar o programa de afiliados no json que enviar e colocar nesse campo em caixa alta " +
                   "trip: aqui voce vai colocar de onde será a origem e de onde será o destino, coloque o nome das cidades por extenso no formato (origem para destino) " +
                   "route: coloque a rota dos continentes Exemplo: América do Sul para América do Norte" +
-                  "miles: identifique o menor custo de milhas que não seja economica e coloque nesse campo com pontuação duas casas decimais sem usar virgula e como texto." +
+                  "miles: identifique o menor custo de milhas e coloque nesse campo com pontuação duas casas decimais sem usar virgula e como texto." +
                   "type_trip: com base nas milhas mais baratas identifique em qual classe está o voo dessas milhas e coloque nesse campo" +
                   "airlines: identifique a companhia aerea e coloque nesse campo," +
                   "remaining: data de embarque em formato brasil DD/MM/YYYY," +
@@ -332,6 +333,7 @@ Equipe Fly Alertas`
           const message = await gpt.post('chat/completions', data_gpt);
 
           let json = JSON.parse(message.data.choices[0].message.content) as Alert;
+          console.log(json);
           json.miles = json.miles?.toString() as any
 
           const lasts = await new AlertService().verifyLast(json.trip as string);
@@ -365,9 +367,15 @@ Equipe Fly Alertas`
       protocolTimeout: 0
     });
 
-    const page = await browser.newPage();
 
-    await page.goto('https://www.tkmilhas.com/login');
+    const page = await browser.newPage();
+    const client = await page.createCDPSession();
+    await client.send('Browser.grantPermissions', {
+      origin: "https://www.tkmilhas.com/login",
+      permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
+    });
+
+    await page.goto('https://www.tkmilhas.com/login'); // Altere para a URL real da sua aplicação
 
     await page.locator('#mui-1').fill('potiguarpassagens@gmail.com');
     await delay(3000)
@@ -427,7 +435,7 @@ Equipe Fly Alertas`
     console.log('Para: ' + to);
 
     await page.locator('.MuiInput-root.MuiInput-underline.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.css-3dr76p input[value="5"]').click();
-    await page.keyboard.type('15');
+    await page.keyboard.type('5');
     await page.keyboard.press('Enter');
     await delay(1000);
 
@@ -449,12 +457,19 @@ Equipe Fly Alertas`
     let end_date = new Date(start_date);
     end_date.setMonth(start_date.getMonth() + 3)
 
+    console.log(start_date, end_date)
+
     start_date = randomDate(start_date, end_date);
-    
 
-    const date = moment(start_date).format('L');
+    let date = moment(start_date).format('L');
 
-    console.log('Data preenchida: '+date);
+    while (date < moment().format('L')) {
+      start_date = randomDate(start_date, end_date);
+      date = moment(start_date).format('L');
+
+    }
+
+    console.log('Data preenchida: ' + date);
     await page.locator('#owDate').fill('');
     await delay(3000);
     await page.locator('#owDate').fill(date);
@@ -462,12 +477,14 @@ Equipe Fly Alertas`
 
 
     await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeSmall.MuiButton-containedSizeSmall.MuiButtonBase-root.searchButton.css-1dpvzvp').click();
-    
+
     await page.waitForFunction(() => !document.querySelector('.MuiSkeleton-root'), { timeout: 0 });
-    
+
     const mileElements = await page.$$eval('.MuiBox-root.css-1yaucul h4:nth-of-type(2)', elements =>
       elements.filter(f => f.innerText !== 'Erro').map(el => parseInt(el.innerText.replace(/\D/g, ''), 10))
     );
+
+    console.log(mileElements)
 
     const sortedIndices = mileElements
       .map((val, idx) => [val, idx])
@@ -482,7 +499,6 @@ Equipe Fly Alertas`
       await page.waitForSelector('.MuiAccordionDetails-root', { timeout: 0 });
       console.log('Botao clicado voo clicado')
 
-      // Clique na div "Clique para adicionar no orçamento e emissão."
       await page.evaluate(() => {
         const budgetButton = Array.from(document.querySelectorAll('div')).find(div => div.innerText.includes('Clique para adicionar no orçamento e emissão.'));
         if (budgetButton) {
@@ -490,9 +506,8 @@ Equipe Fly Alertas`
         }
       });
 
-      await delay(2000); // Delay to allow for any transitions/animations
+      await delay(2000);
 
-      // Clique no botão "Copiar dados Voo"
       await page.evaluate(() => {
         const copyButton = Array.from(document.querySelectorAll('button')).find(button => button.innerText.includes('Copiar dados Voo'));
         if (copyButton) {
@@ -508,7 +523,7 @@ Equipe Fly Alertas`
         return text;
       });
 
-      console.log('Dados copiados: '+ copiedData)
+      console.log('Dados copiados: ' + copiedData)
 
       // Extraia os nomes das cidades e as companhias aéreas dos dados copiados
       const flightDetails = copiedData.split('\n').map(line => line.trim()).filter(line => line);
@@ -557,7 +572,7 @@ Equipe Fly Alertas`
         remaining: flightInfo.departure
       })
 
-      console.log(flightInfo);
+      // await browser.close();
 
       await delay(10000);
     }
