@@ -349,9 +349,9 @@ Equipe Fly Alertas`
 
           const lasts = await new AlertService().verifyLast(json.trip as string);
 
-          // if (json.miles != null && json.miles <= '250000' && lasts.length < 2) {
-          //   return new AlertService().createAlert(json)
-          // }
+          if (json.miles != null && json.miles <= '250000' && lasts.length < 2) {
+            return new AlertService().createAlert(json)
+          }
         }
       }
       if (availability.hasMore) {
