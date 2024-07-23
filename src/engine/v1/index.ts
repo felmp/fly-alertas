@@ -256,8 +256,8 @@ Equipe Fly Alertas`
     let start_date = new Date();
     let end_date = new Date(start_date);
     end_date.setFullYear(start_date.getFullYear() + 1);
-    start_date = randomDate(start_date, end_date);
-    end_date = randomDate(start_date, end_date);
+    start_date = randomDate(start_date, end_date, 0, 24);
+    end_date = randomDate(start_date, end_date, 0, 24);
 
     if (end_date.getTime() > end_date.getTime()) {
       const tempDate = start_date;
@@ -358,10 +358,10 @@ Equipe Fly Alertas`
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
-  async crawlerTKMilhas() {
+  async getTKmilhas() {
 
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       defaultViewport: null,
       args: ['--window-size=1920,1080'],
       protocolTimeout: 0
@@ -386,9 +386,8 @@ Equipe Fly Alertas`
     await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-fullWidth.MuiButtonBase-root.css-1g8e2pa').click();
 
     await delay(3000)
-    // 'azul', 'interline', 'copa', [em testes]
-    // [em testes]
-    const buttonsToClick = ['multiplus', 'smiles', 'iberia', 'aa', 'tap'];
+
+    const buttonsToClick = ['azul', 'interline', 'copa', 'multiplus', 'smiles', 'iberia', 'aa', 'tap'];
 
     const program = this.getRandomElement(buttonsToClick);
 
@@ -422,14 +421,10 @@ Equipe Fly Alertas`
       'NYC', 'MIL', 'BUE', 'LON'
     ]
 
-    // const combinations = new Set();
+    const cabin = ['Executive', 'Basic']
 
     const from = this.getRandomElement(airports_from);
     const to = this.getRandomElement(airports_to);
-
-    // const combination = `${from}-${to}`;
-    // if (combinations.has(combination)) continue;
-    // combinations.add(combination);
 
     console.log('Saindo de: ' + from);
     console.log('Para: ' + to);
@@ -453,20 +448,27 @@ Equipe Fly Alertas`
     await page.keyboard.press('Enter');
     await delay(3000);
 
+
+    const cabinSelected = this.getRandomElement(cabin);
+
+    await page.locator('#mui-7').click();
+    await page.waitForSelector('ul.MuiMenu-list li');
+    await page.click(`ul.MuiMenu-list li[data-value="${cabinSelected}"]`);
+
+
     let start_date = new Date();
     let end_date = new Date(start_date);
     end_date.setMonth(start_date.getMonth() + 3)
 
     console.log(start_date, end_date)
 
-    start_date = randomDate(start_date, end_date);
+    start_date = randomDate(start_date, end_date, 0, 24);
 
     let date = moment(start_date).format('L');
 
-    while (date < moment().format('L')) {
-      start_date = randomDate(start_date, end_date);
+    while (start_date < new Date()) {
+      start_date = randomDate(start_date, end_date, 0, 24);
       date = moment(start_date).format('L');
-
     }
 
     console.log('Data preenchida: ' + date);
@@ -484,7 +486,13 @@ Equipe Fly Alertas`
       elements.filter(f => f.innerText !== 'Erro').map(el => parseInt(el.innerText.replace(/\D/g, ''), 10))
     );
 
-    console.log(mileElements)
+    if (mileElements.length == 0) {
+      await browser.close();
+
+      await delay(5000);
+
+      await this.getTKmilhas();
+    }
 
     const sortedIndices = mileElements
       .map((val, idx) => [val, idx])
@@ -500,7 +508,7 @@ Equipe Fly Alertas`
       console.log('Botao clicado voo clicado')
 
       await page.evaluate(() => {
-        const budgetButton = Array.from(document.querySelectorAll('div')).find(div => div.innerText.includes('Clique para adicionar no orçamento e emissão.'));
+        const budgetButton = Array.from(document.querySelectorAll('div')).find(div => div.ariaLabel?.includes('Clique para adicionar no orçamento e emissão.'));
         if (budgetButton) {
           budgetButton.click();
         }
@@ -508,12 +516,24 @@ Equipe Fly Alertas`
 
       await delay(2000);
 
-      await page.evaluate(() => {
-        const copyButton = Array.from(document.querySelectorAll('button')).find(button => button.innerText.includes('Copiar dados Voo'));
-        if (copyButton) {
-          copyButton.click();
+      // await page.locator('.MuiButton-root.MuiButton-outlined.MuiButton-outlinedPrimary.MuiButton-sizeMedium.MuiButton-outlinedSizeMedium.MuiButtonBase-root.css-qoovj6').click();
+
+      const buttonClicked = await page.evaluate(() => {
+        const buttonsOptions = Array.from(document.querySelectorAll('button'));
+        for (let button of buttonsOptions) {
+          if (button.textContent?.includes('Copiar dados Voo')) {
+            button.click();
+            return true; // Indica que o botão foi encontrado e clicado
+          }
         }
+        return false; // Indica que o botão não foi encontrado
       });
+
+      if (buttonClicked) {
+        console.log('Botão "Copiar dados Voo" clicado.');
+      } else {
+        console.log('Botão "Copiar dados Voo" não encontrado.');
+      }
 
       await delay(2000); // Delay to allow for any transitions/animations
 
@@ -523,9 +543,8 @@ Equipe Fly Alertas`
         return text;
       });
 
-      console.log('Dados copiados: ' + copiedData)
+      console.log(copiedData)
 
-      // Extraia os nomes das cidades e as companhias aéreas dos dados copiados
       const flightDetails = copiedData.split('\n').map(line => line.trim()).filter(line => line);
       const flightSegments = [];
 
@@ -556,23 +575,25 @@ Equipe Fly Alertas`
           departure: departureElement ? departureElement.innerText : null,
           flight: flightElement ? flightElement.innerText : null,
           miles: mile,
-          flightSegments: flightSegments
+          flightSegments
 
         };
       }, mileElements[index], flightSegments);
 
-      new AlertService().createAlert({
-        affiliates_program: flightInfo.program,
-        trip: 'Internacional',
-        route: from + ' para ' + to,
-        miles: `A partir de ${flightInfo.miles} milhas trecho + taxas`,
-        airlines: '-',
-        sent: 'tk',
-        type_trip: 'Econômica',
-        remaining: flightInfo.departure
-      })
+      if (flightInfo.miles < 200000) {
+        new AlertService().createAlert({
+          affiliates_program: flightInfo.program,
+          trip: 'Internacional',
+          route: flightSegments[0].origin.split('/')[1] + ' para ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
+          miles: `A partir de ${flightInfo.miles} milhas trecho + taxas`,
+          airlines: flightSegments[0].airline,
+          sent: 'tk',
+          type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
+          remaining: flightInfo.departure
+        })
+      }
 
-      // await browser.close();
+      await browser.close();
 
       await delay(10000);
     }

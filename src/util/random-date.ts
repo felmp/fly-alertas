@@ -1,15 +1,6 @@
-export function randomDate(start: Date, end: Date) {
-  // const startDate = new Date(start);
-  // const endDate = new Date(end);
-
-  // Verifica se as datas são válidas
-  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-    throw new Error('Datas inválidas fornecidas.');
-  }
-
-  // Gera um timestamp aleatório entre as duas datas
-  const randomTimestamp = start.getTime() + Math.random() * (end.getTime() - start.getTime());
-
-  // Retorna a data aleatória
-  return new Date(randomTimestamp)
+export function randomDate(start: any, end: any, startHour: any, endHour: any) {
+  var date = new Date(+start + Math.random() * (end - start));
+  var hour = startHour + Math.random() * (endHour - startHour) | 0;
+  date.setHours(hour);
+  return date;
 }
