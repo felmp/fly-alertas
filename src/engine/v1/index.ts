@@ -294,8 +294,6 @@ Equipe Fly Alertas`
             }
           }
 
-          console.log(e)
-
           const data_gpt = {
             "model": "gpt-3.5-turbo",
             "messages": [
@@ -344,12 +342,13 @@ Equipe Fly Alertas`
           const message = await gpt.post('chat/completions', data_gpt);
 
           let json = JSON.parse(message.data.choices[0].message.content) as Alert;
-          console.log(json);
           json.miles = json.miles?.toString() as any
 
           const lasts = await new AlertService().verifyLast(json.trip as string);
 
           if (json.miles != null && json.miles <= '250000' && lasts.length < 2) {
+            console.log('SAVED SeatsAero')
+            console.log(json)
             return new AlertService().createAlert(json)
           }
         }
