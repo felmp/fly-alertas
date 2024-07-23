@@ -205,10 +205,10 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_
     if (!this.is_running) {
       this.is_running = true;
       this.interval = setInterval(() => this.processQueue(), 5000);
-      // setInterval(() => this.processQueueSeatsAero(), 900000);
+      setInterval(() => this.processQueueSeatsAero(), 900000);
       // setInterval(() => this.processQueueTK(), 1000);
       // this.crawlerTKMilhas()
-      // setInterval(() => this.getSeatsAero(), 500000);
+      setInterval(() => this.getSeatsAero(), 500000);
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -288,40 +288,51 @@ Equipe Fly Alertas`
         const e = availability.data[i];
         if (origins_airports.includes(e.Route.OriginAirport) && (e.WAvailable == true || e.JAvailable == true || e.FAvailable == true)) {
 
+          for (let key in e) {
+            if (key.startsWith('Y')) {
+              delete e[key];
+            }
+          }
+
+          console.log(e)
+
           const data_gpt = {
             "model": "gpt-3.5-turbo",
             "messages": [
               {
                 "role": "system",
-                "content": "Você é um analista de passagens aereas, você nao aceita passagens economicas, se vier economica. apenas não envie o JSON, envie a mensagem. PASSAGEM ECONOMICA " +
-                  "Mostre apenas numeros referentes a viagens EXECUTIVAS" +
-                  "vou lhe mandar um objeto você vai analisar e vai retornar pra mim um " +
-                  "JSON que contenha os dados que mandei pra você organizado. o json é" +
-                  "affiliates_program: voce vai identificar o programa de afiliados no json que enviar e colocar nesse campo em caixa alta " +
-                  "trip: aqui voce vai colocar de onde será a origem e de onde será o destino, coloque o nome das cidades por extenso no formato (origem para destino) " +
-                  "route: coloque a rota dos continentes Exemplo: América do Sul para América do Norte" +
-                  "miles: identifique o menor custo de milhas e coloque nesse campo com pontuação duas casas decimais sem usar virgula e como texto." +
-                  "type_trip: com base nas milhas mais baratas identifique em qual classe está o voo dessas milhas e coloque nesse campo" +
-                  "airlines: identifique a companhia aerea e coloque nesse campo," +
-                  "remaining: data de embarque em formato brasil DD/MM/YYYY," +
-                  "sent: 'test'," +
-                  "amount: com base no valor em milhas converta usando a tabela a baixo para a cada 1000 milhas. coloque como texto em duas casas decimais sem usar virgula.," +
-                  " }" +
-                  "\n " +
-                  "Tabela para conversão em reais" +
-                  "SMILES -> valor da milha = 21.0" +
-                  "LATAM PASS -> valor da milha = 32.50" +
-                  "LATAMPASS -> valor da milha = 32.50" +
-                  "LATAM PASS - TABELA FIXA -> valor da milha = 32.50" +
-                  "TUDO AZUL -> valor da milha = 28.00" +
-                  "AADVANTAGE - AMERICAN AIRLINES -> valor da milha = 117.00" +
-                  "MILES&GO - TAP -> valor da milha = 39.00" +
-                  "MILES&amp;GO - TAP -> valor da milha = 39.00" +
-                  "AZUL FIDELIDADE - AZUL PELO MUNDO -> valor da milha = 21.00" +
-                  "AZUL FIDELIDADE -> valor da milha = 21.00" +
-                  "IBERIA PLUS - IBERIA -> valor da milha = 78.00" +
-                  "AEROPLAN -> valor da milha = 110.00" +
-                  "CONNECT MILES -> valor da milha = 85.00"
+                "content": `Você é um analista de passagens aéreas. 
+                Seu objetivo é analisar e filtrar apenas passagens de classe Executiva, Primeira Classe e Premium Economy. 
+                Vou lhe mandar um objeto para análise, e você deve retornar um JSON organizado com os dados fornecidos, contendo os seguintes campos:
+
+                - affiliates_program: Identifique o programa de afiliados no JSON que enviar e coloque nesse campo em caixa alta.
+                - trip: Coloque a origem e o destino com os nomes das cidades por extenso no formato (origem para destino).
+                - route: Coloque a rota dos continentes no formato 'América do Sul para América do Norte'.
+                - miles: Identifique o menor custo de milhas entre as classes Executiva, Primeira Classe e Premium Economy e coloque nesse campo com a pontuação adequada (ex: 151000 -> 151.000). Ignore passagens com milhas igual a 0. Coloque como um texto
+                - type_trip: Baseado nas milhas mais baratas das classes permitidas, identifique a classe do voo (Executiva, Primeira Classe ou Premium Economy) e coloque nesse campo. Ignore passagens econômicas.
+                - airlines: Identifique a companhia aérea e coloque nesse campo.
+                - remaining: Data de embarque no formato DD/MM/YYYY.
+                - sent: 'test'.
+                - amount: Com base no valor em milhas, converta usando a tabela abaixo para a cada 1000 milhas. Coloque como texto em duas casas decimais sem vírgula.
+                
+                Tabela para conversão em reais:
+                - SMILES: valor da milha = 21.00
+                - LATAM PASS: valor da milha = 32.50
+                - LATAMPASS: valor da milha = 32.50
+                - LATAM PASS - TABELA FIXA: valor da milha = 32.50
+                - TUDO AZUL: valor da milha = 28.00
+                - AADVANTAGE - AMERICAN AIRLINES: valor da milha = 117.00
+                - MILES&GO - TAP: valor da milha = 39.00
+                - MILES&amp;GO - TAP: valor da milha = 39.00
+                - AZUL FIDELIDADE - AZUL PELO MUNDO: valor da milha = 21.00
+                - AZUL FIDELIDADE: valor da milha = 21.00
+                - IBERIA PLUS - IBERIA: valor da milha = 78.00
+                - AEROPLAN: valor da milha = 110.00
+                - CONNECT MILES: valor da milha = 85.00`
+              },
+              {
+                "role": "user",
+                "content": "Por favor, analise o seguinte objeto JSON e retorne os dados organizados conforme as instruções fornecidas, excluindo passagens econômicas e selecionando a milha mais barata entre Executiva, Primeira Classe e Premium Economy. Formate as milhas no formato de mil com a pontuação adequada (ex: 151000 -> 151.000). Ignore milhas igual a 0."
               },
               {
                 "role": "user",
@@ -338,9 +349,9 @@ Equipe Fly Alertas`
 
           const lasts = await new AlertService().verifyLast(json.trip as string);
 
-          if (json.miles != null && json.miles <= '250000' && lasts.length < 2) {
-            return new AlertService().createAlert(json)
-          }
+          // if (json.miles != null && json.miles <= '250000' && lasts.length < 2) {
+          //   return new AlertService().createAlert(json)
+          // }
         }
       }
       if (availability.hasMore) {
