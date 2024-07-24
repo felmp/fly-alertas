@@ -9,7 +9,7 @@ import { formatDate } from '../../util/format-date';
 import { randomDate } from '../../util/random-date';
 import moment from 'moment';
 import delay from '../../util/delay';
-import console from 'console';
+require('dotenv').config();
 
 
 const formatter = new Intl.NumberFormat('pt-BR', {
@@ -374,8 +374,9 @@ Equipe Fly Alertas`
 
       const browser = await puppeteer.launch({
         headless: true,
+        executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
         defaultViewport: null,
-        args: ['--window-size=1920,1080'],
+        args: ['--window-size=1920,1080', '--no-sandbox', '--disable-setuid-sandbox', '--single-process', '--no-zygote'],
         protocolTimeout: 0
       });
 
