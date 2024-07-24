@@ -295,6 +295,11 @@ Equipe Fly Alertas`
             }
           }
 
+          console.log('BUSCA SEATSAERO - RETORNO')
+          console.log('------------------------------------------')
+          console.log(e)
+          console.log('------------------------------------------')
+
           const data_gpt = {
             "model": "gpt-3.5-turbo",
             "messages": [
@@ -439,8 +444,8 @@ Equipe Fly Alertas`
       const from = this.getRandomElement(airports_from);
       const to = this.getRandomElement(airports_to);
 
-      console.log('Saindo de: ' + from);
-      console.log('Para: ' + to);
+      // console.log('Saindo de: ' + from);
+      // console.log('Para: ' + to);
 
       await page.locator('.MuiInput-root.MuiInput-underline.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.css-3dr76p input[value="5"]').click();
       await page.keyboard.type('5');
@@ -484,7 +489,6 @@ Equipe Fly Alertas`
         date = moment(start_date).format('L');
       }
 
-      console.log('Data preenchida: ' + date);
       await page.locator('#owDate').fill('');
       await delay(3000);
       await page.locator('#owDate').fill(date);
@@ -518,7 +522,7 @@ Equipe Fly Alertas`
       for (const index of sortedIndices) {
         await buttons[index].click();
         await page.waitForSelector('.MuiAccordionDetails-root', { timeout: 0 });
-        console.log('Botao clicado voo clicado')
+        // console.log('Botao clicado voo clicado')
 
         await page.evaluate(() => {
           const budgetButton = Array.from(document.querySelectorAll('div')).find(div => div.ariaLabel?.includes('Clique para adicionar no orçamento e emissão.'));
@@ -542,11 +546,11 @@ Equipe Fly Alertas`
           return false; // Indica que o botão não foi encontrado
         });
 
-        if (buttonClicked) {
-          console.log('Botão "Copiar dados Voo" clicado.');
-        } else {
-          console.log('Botão "Copiar dados Voo" não encontrado.');
-        }
+        // if (buttonClicked) {
+        //   console.log('Botão "Copiar dados Voo" clicado.');
+        // } else {
+        //   console.log('Botão "Copiar dados Voo" não encontrado.');
+        // }
 
         await delay(2000); // Delay to allow for any transitions/animations
 
@@ -556,7 +560,7 @@ Equipe Fly Alertas`
           return text;
         });
 
-        console.log(copiedData)
+        // console.log(copiedData)
 
         const flightDetails = copiedData.split('\n').map(line => line.trim()).filter(line => line);
         const flightSegments = [];
