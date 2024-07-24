@@ -205,11 +205,12 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
   start() {
     if (!this.is_running) {
       this.is_running = true;
-      this.interval = setInterval(() => this.processQueue(), 5000);
-      setInterval(() => this.processQueueTK(), 5000);
-      setInterval(() => this.processQueueSeatsAero(), 900000);
-      setInterval(() => this.getSeatsAero(), 500000);
-      setInterval(() => this.getTKmilhas(), 500000);
+      // this.interval = setInterval(() => this.processQueue(), 5000);
+      // setInterval(() => this.processQueueTK(), 5000);
+      // setInterval(() => this.processQueueSeatsAero(), 900000);
+      setInterval(() => this.getSeatsAero(), 10000);
+      // setInterval(() => this.getSeatsAero(), 500000);
+      // setInterval(() => this.getTKmilhas(), 500000);
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -287,11 +288,39 @@ Equipe Fly Alertas`
 
       for (let i = 0; i < availability.data.length; i++) {
         const e = availability.data[i];
-        if (origins_airports.includes(e.Route.OriginAirport) && (e.WAvailable == true || e.JAvailable == true || e.FAvailable == true)) {
+        if (origins_airports.includes(e.Route.OriginAirport) && (e.WAvailable === true || e.JAvailable === true || e.FAvailable === true)) {
 
+          // Remover todas as chaves que começam com 'Y'
           for (let key in e) {
             if (key.startsWith('Y')) {
               delete e[key];
+            }
+          }
+
+          // Extrair os valores de milhas
+          let mileageCosts = {
+            W: parseInt(e.WMileageCost),
+            J: parseInt(e.JMileageCost),
+            F: parseInt(e.FMileageCost)
+          };
+
+          // Filtrar valores diferentes de 0 e encontrar o menor valor
+          let filteredCosts = Object.entries(mileageCosts).filter(([key, value]) => value !== 0);
+          let minCostEntry = filteredCosts.reduce((minEntry, currentEntry) => currentEntry[1] < minEntry[1] ? currentEntry : minEntry);
+
+          // Função para deletar chaves relacionadas a um tipo específico
+          function deleteRelatedKeys(type: any) {
+            for (let key in e) {
+              if (key.startsWith(type)) {
+                delete e[key];
+              }
+            }
+          }
+
+          // Deletar chaves relacionadas aos tipos de milhagem que não possuem o menor valor
+          for (let key in mileageCosts) {
+            if (key !== minCostEntry[0]) {
+              deleteRelatedKeys(key);
             }
           }
 
@@ -313,7 +342,7 @@ Equipe Fly Alertas`
                 - trip: Coloque a origem e o destino com os nomes das cidades por extenso no formato (origem para destino).
                 - route: Coloque a rota dos continentes no formato 'América do Sul para América do Norte'.
                 - miles: Identifique o menor custo de milhas entre as classes Executiva, Primeira Classe e Premium Economy e coloque nesse campo com a pontuação adequada (ex: 151000 -> 151.000). Ignore passagens com milhas igual a 0. Coloque como um texto
-                - type_trip: Baseado nas milhas mais baratas das classes permitidas, identifique a classe do voo (Executiva, Primeira Classe ou Premium Economy) e coloque nesse campo. Ignore passagens econômicas.
+                - type_trip: Baseado nas milhas mais baratas das classes permitidas, identifique a classe do voo (Executiva = JMileageCost), (Primeira Classe = FMileageCost) ou (Premium Economy = WMileageCost) e coloque nesse campo. Ignore passagens econômicas.
                 - airlines: Identifique a companhia aérea e coloque nesse campo.
                 - remaining: Data de embarque no formato DD/MM/YYYY.
                 - sent: 'test'.
@@ -355,7 +384,9 @@ Equipe Fly Alertas`
           if (json.miles != null && json.miles <= '250000' && lasts.length < 2) {
             console.log('SAVED SeatsAero')
             console.log(json)
-            return new AlertService().createAlert(json)
+
+            return
+            // return new AlertService().createAlert(json)
           }
         }
       }
