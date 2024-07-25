@@ -205,11 +205,12 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
   start() {
     if (!this.is_running) {
       this.is_running = true;
-      // this.interval = setInterval(() => this.processQueue(), 5000);
+      this.interval = setInterval(() => this.processQueue(), 5000);
       setInterval(() => this.processQueueTK(), 5000);
-      // setInterval(() => this.processQueueSeatsAero(), 900000);
-      // setInterval(() => this.getSeatsAero(), 500000);
-      setInterval(() => this.getTKmilhas(), 180000);
+      setInterval(() => this.processQueueSeatsAero(), 900000);
+      setInterval(() => this.getSeatsAero(), 500000);
+      // setInterval(() => this.getTKmilhas(), 180000);
+      this.getTKmilhas()
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -380,7 +381,7 @@ Equipe Fly Alertas`
 
           const lasts = await new AlertService().verifyLast(json.trip as string);
 
-          if (json.miles != null && json.miles <= '80000' && lasts.length < 2) {
+          if (json.miles != null && json.miles <= '150000' && lasts.length < 2) {
             console.log('SAVED SeatsAero')
             console.log(json)
 
@@ -408,10 +409,10 @@ Equipe Fly Alertas`
     try {
 
       const browser = await puppeteer.launch({
-        headless: true,
+        headless: false,
         executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
         defaultViewport: null,
-        args: ['--window-size=1920,1080', '--no-sandbox', '--disable-setuid-sandbox', '--single-process', '--no-zygote'],
+        args: ['--window-size=1920,1080', '--no-sandbox', '--disable-setuid-sandbox', '--single-process', '--no-zygote', '--disable-features=site-per-process'],
         protocolTimeout: 0
       });
 
@@ -423,7 +424,7 @@ Equipe Fly Alertas`
         permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
       });
 
-      await page.goto('https://www.tkmilhas.com/login'); // Altere para a URL real da sua aplicação
+      await page.goto('https://www.tkmilhas.com/login', { timeout: 0 }); // Altere para a URL real da sua aplicação
 
       await page.locator('#mui-1').fill('potiguarpassagens@gmail.com');
       await delay(3000)
@@ -434,8 +435,8 @@ Equipe Fly Alertas`
       await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-fullWidth.MuiButtonBase-root.css-1g8e2pa').click();
 
       await delay(3000)
-
-      const buttonsToClick = ['azul', 'interline', 'copa', 'multiplus', 'smiles', 'iberia', 'aa', 'tap'];
+      // 'azul', 'interline',  'aa', 'tap'
+      const buttonsToClick = ['copa', 'multiplus', 'smiles', 'iberia'];
 
       const program = this.getRandomElement(buttonsToClick);
 
@@ -478,7 +479,7 @@ Equipe Fly Alertas`
       // console.log('Para: ' + to);
 
       await page.locator('.MuiInput-root.MuiInput-underline.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.css-3dr76p input[value="5"]').click();
-      await page.keyboard.type('5');
+      await page.keyboard.type('30');
       await page.keyboard.press('Enter');
       await delay(1000);
 
@@ -500,7 +501,7 @@ Equipe Fly Alertas`
       const cabinSelected = this.getRandomElement(cabin);
 
       await page.locator('#mui-7').click();
-      await page.waitForSelector('ul.MuiMenu-list li');
+      await page.waitForSelector('ul.MuiMenu-list li', { timeout: 0 });
       await page.click(`ul.MuiMenu-list li[data-value="${cabinSelected}"]`);
 
 
@@ -627,6 +628,10 @@ Equipe Fly Alertas`
           };
         }, mileElements[index], flightSegments);
 
+
+        console.log('ALERTAS CAPTURADOS')
+        console.log(flightInfo)
+
         if (flightInfo.miles < 54000) {
           new AlertService().createAlert({
             affiliates_program: flightInfo.program,
@@ -643,11 +648,11 @@ Equipe Fly Alertas`
         await browser.close();
 
         await delay(10000);
+
+        await this.getTKmilhas();
+
       }
 
-      await delay(5000);
-
-      await delay(5000);
     } catch (error) {
       console.log('Erro na execução crawler' + error);
       await delay(5000);
