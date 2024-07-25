@@ -412,7 +412,7 @@ Equipe Fly Alertas`
         headless: false,
         executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
         defaultViewport: null,
-        args: ['--window-size=1920,1080', '--no-sandbox', '--disable-setuid-sandbox', '--single-process', '--no-zygote', '--disable-features=site-per-process'],
+        args: ['--window-size=1920,1080', '--no-sandbox', '--disable-setuid-sandbox', '--single-process', '--no-zygote'],
         protocolTimeout: 0
       });
 
