@@ -252,7 +252,7 @@ Equipe Fly Alertas`
     const continents = ['North+America', 'Europe', 'Asia'];
     const sources = ['american', 'azul', 'aeroplan', 'smiles'];
     console.log('SeatsAero rodando')
-    let take = 1000;
+    let take = 3000;
     let skip = 0;
 
     let start_date = new Date();
