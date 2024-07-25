@@ -385,6 +385,14 @@ Equipe Fly Alertas`
             console.log('SAVED SeatsAero')
             console.log(json)
 
+            if(json.type_trip = 'JMileageCost') {
+              json.type_trip = 'Executiva';
+            } else if(json.type_trip = 'FMileageCost') {
+              json.type_trip = 'Primeira Classe';
+            } else if(json.type_trip = 'WMileageCost') {
+              json.type_trip = 'Premium Economy';
+            }
+
             // return
             return new AlertService().createAlert(json)
           }
