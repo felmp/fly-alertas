@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer-core';
+import puppeteer from 'puppeteer';
 import { engine_v1, gpt, wpp } from '../../axios';
 import { sendDefaultMessage } from '../../message-senders/sender-group-default';
 import { sendMoneyMessage } from '../../message-senders/sender-group-money';
