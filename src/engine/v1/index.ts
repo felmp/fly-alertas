@@ -210,7 +210,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       setInterval(() => this.processQueueSeatsAero(), 900000);
       setInterval(() => this.getSeatsAero(), 320000);
       // setInterval(() => this.getTKmilhas(), 180000);
-      this.getTKmilhas()
+      // this.getTKmilhas()
       console.log('Fila de alertas iniciada.');
     }
   }
