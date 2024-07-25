@@ -381,18 +381,31 @@ Equipe Fly Alertas`
 
           const lasts = await new AlertService().verifyLast(json.trip as string);
 
-          if (json.miles != null && json.miles <= '150000' && lasts.length < 2) {
+          if(json.type_trip = 'JMileageCost') {
+            json.type_trip = 'Executiva';
+          } else if(json.type_trip = 'FMileageCost') {
+            json.type_trip = 'Primeira Classe';
+          } else if(json.type_trip = 'WMileageCost') {
+            json.type_trip = 'Premium Economy';
+          }
+
+          if (json.miles != null && json.miles <= '40000' && lasts.length < 2 && source == 'aeroplan') {
             console.log('SAVED SeatsAero')
             console.log(json)
+            // return
+            return new AlertService().createAlert(json)
+          }
 
-            if(json.type_trip = 'JMileageCost') {
-              json.type_trip = 'Executiva';
-            } else if(json.type_trip = 'FMileageCost') {
-              json.type_trip = 'Primeira Classe';
-            } else if(json.type_trip = 'WMileageCost') {
-              json.type_trip = 'Premium Economy';
-            }
-
+          if (json.miles != null && json.miles <= '150000' && lasts.length < 2 && source == 'smiles') {
+            console.log('SAVED SeatsAero')
+            console.log(json)
+            // return
+            return new AlertService().createAlert(json)
+          }
+          
+          if (json.miles != null && json.miles <= '90000' && lasts.length < 2 && source == 'american') {
+            console.log('SAVED SeatsAero')
+            console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
