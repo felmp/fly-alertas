@@ -205,9 +205,9 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
   start() {
     if (!this.is_running) {
       this.is_running = true;
-      // this.interval = setInterval(() => this.processQueue(), 5000);
-      // setInterval(() => this.processQueueTK(), 5000);
-      // setInterval(() => this.processQueueSeatsAero(), 900000);
+      this.interval = setInterval(() => this.processQueue(), 5000);
+      setInterval(() => this.processQueueTK(), 5000);
+      setInterval(() => this.processQueueSeatsAero(), 900000);
       setInterval(() => this.getSeatsAero(), 320000);
       // setInterval(() => this.getTKmilhas(), 180000);
       // this.getTKmilhas()
@@ -393,21 +393,21 @@ Equipe Fly Alertas`
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
-            return new AlertService().createAlert(json)
+            // return new AlertService().createAlert(json)
           }
 
           if (json.miles != null && Number(json.miles) <= 150.000 && lasts.length < 2 && source == 'smiles') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
-            return new AlertService().createAlert(json)
+            // return new AlertService().createAlert(json)
           }
           
           if (json.miles != null && Number(json.miles) <= 90.000 && lasts.length < 2 && source == 'american') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
-            return new AlertService().createAlert(json)
+            // return new AlertService().createAlert(json)
           }
         }
       }
