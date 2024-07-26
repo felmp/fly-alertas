@@ -389,21 +389,21 @@ Equipe Fly Alertas`
             json.type_trip = 'Premium Economy';
           }
 
-          if (json.miles != null && json.miles <= '40000' && lasts.length < 2 && source == 'aeroplan') {
+          if (json.miles != null && json.miles <= '40.000' && lasts.length < 2 && source == 'aeroplan') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && json.miles <= '150000' && lasts.length < 2 && source == 'smiles') {
+          if (json.miles != null && json.miles <= '150.000' && lasts.length < 2 && source == 'smiles') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
           
-          if (json.miles != null && json.miles <= '90000' && lasts.length < 2 && source == 'american') {
+          if (json.miles != null && json.miles <= '90.000' && lasts.length < 2 && source == 'american') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
