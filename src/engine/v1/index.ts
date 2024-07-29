@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer-core';
+import puppeteer from 'puppeteer';
 import { engine_v1, gpt, wpp } from '../../axios';
 import { sendDefaultMessage } from '../../message-senders/sender-group-default';
 import { sendMoneyMessage } from '../../message-senders/sender-group-money';
@@ -205,12 +205,12 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
   start() {
     if (!this.is_running) {
       this.is_running = true;
-      this.interval = setInterval(() => this.processQueue(), 5000);
+      // this.interval = setInterval(() => this.processQueue(), 5000);
       setInterval(() => this.processQueueTK(), 5000);
-      setInterval(() => this.processQueueSeatsAero(), 900000);
-      setInterval(() => this.getSeatsAero(), 320000);
+      // setInterval(() => this.processQueueSeatsAero(), 900000);
+      // setInterval(() => this.getSeatsAero(), 320000);
       // setInterval(() => this.getTKmilhas(), 180000);
-      // this.getTKmilhas()
+      this.getTKmilhas()
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -381,11 +381,11 @@ Equipe Fly Alertas`
 
           const lasts = await new AlertService().verifyLast(json.trip as string);
 
-          if(json.type_trip = 'JMileageCost') {
+          if (json.type_trip = 'JMileageCost') {
             json.type_trip = 'Executiva';
-          } else if(json.type_trip = 'FMileageCost') {
+          } else if (json.type_trip = 'FMileageCost') {
             json.type_trip = 'Primeira Classe';
-          } else if(json.type_trip = 'WMileageCost') {
+          } else if (json.type_trip = 'WMileageCost') {
             json.type_trip = 'Premium Economy';
           }
 
@@ -402,7 +402,7 @@ Equipe Fly Alertas`
             // return
             // return new AlertService().createAlert(json)
           }
-          
+
           if (json.miles != null && Number(json.miles) <= 90.000 && lasts.length < 2 && source == 'american') {
             console.log('SAVED SeatsAero')
             console.log(json)
@@ -430,18 +430,19 @@ Equipe Fly Alertas`
     try {
 
       const browser = await puppeteer.launch({
-        headless: false,
-        executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
+        headless: true,
+        // executablePath: puppeteer.executablePath(),
+        //  process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : 
         defaultViewport: null,
         args: [
           '--window-size=1920,1080',
-          '--disable-gpu',
-          '--disable-dev-shm-usage',
-          '--disable-setuid-sandbox',
-          '--no-first-run',
-          '--no-sandbox',
-          '--no-zygote',
-          '--single-process',
+          // '--disable-gpu',
+          // '--disable-dev-shm-usage',
+          // '--disable-setuid-sandbox',
+          // '--no-first-run',
+          // '--no-sandbox',
+          // '--no-zygote',
+          // '--single-process',
         ],
         protocolTimeout: 0
       });
@@ -466,7 +467,8 @@ Equipe Fly Alertas`
 
       await delay(3000)
       // 'azul', 'interline',  'aa', 'tap'
-      const buttonsToClick = ['copa', 'multiplus', 'smiles', 'iberia'];
+      // const buttonsToClick = ['copa', 'multiplus', 'smiles', 'iberia'];
+      const buttonsToClick = ['multiplus'];
 
       const program = this.getRandomElement(buttonsToClick);
 
@@ -488,17 +490,21 @@ Equipe Fly Alertas`
         }
       })
 
-      const airports_from = [
-        'FOR', 'NAT', 'SAO', 'REC', 'MCZ',
-        'RIO', 'CNF', 'BSB', 'AJU', 'GRU',
-        'GIG'
-      ];
+      // const airports_from = [
+      //   'FOR', 'NAT', 'SAO', 'REC', 'MCZ',
+      //   'RIO', 'CNF', 'BSB', 'AJU', 'GRU',
+      //   'GIG'
+      // ];
 
-      const airports_to = [
-        'LIS', 'WAS', 'PAR', 'SEL',
-        'MAD', 'HND', 'CHI', 'LAX', 'ORL',
-        'NYC', 'MIL', 'BUE', 'LON'
-      ]
+      // const airports_to = [
+      //   'LIS', 'WAS', 'PAR', 'SEL',
+      //   'MAD', 'HND', 'CHI', 'LAX', 'ORL',
+      //   'NYC', 'MIL', 'BUE', 'LON'
+      // ]
+
+      const airports_from = ['SAO'];
+
+      const airports_to = ['LIS'];
 
       const cabin = ['Executive', 'Basic']
 
@@ -662,7 +668,7 @@ Equipe Fly Alertas`
         console.log('ALERTAS CAPTURADOS')
         console.log(flightInfo)
 
-        if (flightInfo.miles < 54000) {
+        if (flightInfo.miles < 60000) {
           new AlertService().createAlert({
             affiliates_program: flightInfo.program,
             trip: 'Internacional',
