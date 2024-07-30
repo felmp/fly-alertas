@@ -467,8 +467,8 @@ Equipe Fly Alertas`
 
       await delay(3000)
       // 'azul', 'interline',  'aa', 'tap'
-      // const buttonsToClick = ['copa', 'multiplus', 'smiles', 'iberia'];
-      const buttonsToClick = ['multiplus'];
+      const buttonsToClick = ['copa', 'multiplus', 'smiles', 'iberia'];
+      // const buttonsToClick = ['multiplus'];
 
       const program = this.getRandomElement(buttonsToClick);
 
@@ -490,21 +490,21 @@ Equipe Fly Alertas`
         }
       })
 
-      // const airports_from = [
-      //   'FOR', 'NAT', 'SAO', 'REC', 'MCZ',
-      //   'RIO', 'CNF', 'BSB', 'AJU', 'GRU',
-      //   'GIG'
-      // ];
+      const airports_from = [
+        'FOR', 'NAT', 'SAO', 'REC', 'MCZ',
+        'RIO', 'CNF', 'BSB', 'AJU', 'GRU',
+        'GIG'
+      ];
 
-      // const airports_to = [
-      //   'LIS', 'WAS', 'PAR', 'SEL',
-      //   'MAD', 'HND', 'CHI', 'LAX', 'ORL',
-      //   'NYC', 'MIL', 'BUE', 'LON'
-      // ]
+      const airports_to = [
+        'LIS', 'WAS', 'PAR', 'SEL',
+        'MAD', 'HND', 'CHI', 'LAX', 'ORL',
+        'NYC', 'MIL', 'BUE', 'LON'
+      ]
 
-      const airports_from = ['SAO'];
+      // const airports_from = ['SAO'];
 
-      const airports_to = ['LIS'];
+      // const airports_to = ['LIS'];
 
       const cabin = ['Executive', 'Basic']
 
@@ -668,7 +668,7 @@ Equipe Fly Alertas`
         console.log('ALERTAS CAPTURADOS')
         console.log(flightInfo)
 
-        if (flightInfo.miles < 60000) {
+        if (flightInfo.miles < 90000) {
           new AlertService().createAlert({
             affiliates_program: flightInfo.program,
             trip: 'Internacional',
