@@ -1,7 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { formatMessageText } from "./util/format-model";
 import { GroupMessage } from "./models/group-message.model";
-import { wpp } from "./axios";
 import { AlertService } from "./services/alert.service";
 
 export async function routes(fastify: FastifyInstance) {
@@ -21,6 +20,13 @@ export async function routes(fastify: FastifyInstance) {
     const payload = request.body;
 
     console.log(payload)
+  })
 
+  fastify.get('/alerts', async (req, res) => {
+    const alerts = await new AlertService().getAlerts();
+
+    // console.log(alerts);
+
+    res.send(alerts);
   })
 }

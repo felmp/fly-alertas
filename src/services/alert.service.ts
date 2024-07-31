@@ -2,6 +2,16 @@ import { Alert } from "../models/alert.model";
 import prismaClient from "../prisma";
 
 class AlertService {
+  async getAlerts() {
+    const alerts = await prismaClient.alerts.findMany({
+      orderBy: {
+        sent_date: "desc"
+      },
+      take: 10,
+    })
+
+    return alerts
+  }
 
   async createAlert(data: Partial<Alert>) {
     const { original_message, affiliates_program, amount, sent, trip, route, miles, type_trip, airlines, remaining } = data;
