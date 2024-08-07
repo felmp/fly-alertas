@@ -13,6 +13,12 @@ class AlertService {
     return alerts
   }
 
+  async getTotalAlerts() {
+    const total_alerts = await prismaClient.alerts.count()
+
+    return total_alerts
+  }
+
   async createAlert(data: Partial<Alert>) {
     const { original_message, affiliates_program, amount, sent, trip, route, miles, type_trip, airlines, remaining } = data;
 
