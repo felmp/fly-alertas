@@ -253,9 +253,9 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       setInterval(() => this.processQueueSeatsAero(), 5000);
       setInterval(() => this.processQueueSeatsAeroChile(), 5000);
 
-      setInterval(() => this.getSeatsAero(), 90000);
-      setInterval(() => this.getSeatsAeroChile(), 90000);
-      this.getTKmilhas()
+      setInterval(() => this.getSeatsAero(), 180000);
+      setInterval(() => this.getSeatsAeroChile(), 180000);
+      // this.getTKmilhas()
 
       console.log('Fila de alertas iniciada.');
     }
@@ -435,28 +435,28 @@ Equipe Fly Alertas`
             json.type_trip = 'Premium Economy';
           }
 
-          if (json.miles != null && (Number(json.miles) <= 40.000 || json.miles <= '40000') && lasts.length <= 1 && source == 'aeroplan') {
+          if (json.miles != null && (Number(json.miles) <= 40.000 || json.miles <= '40000') && lasts.length < 1 && source == 'aeroplan') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length <= 1 && source == 'smiles') {
+          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length < 1 && source == 'smiles') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length <= 1 && source == 'tudoazul') {
+          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length < 1 && source == 'tudoazul') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && (Number(json.miles) <= 90.000 || json.miles <= '90000') && lasts.length <= 1 && source == 'american') {
+          if (json.miles != null && (Number(json.miles) <= 90.000 || json.miles <= '90000') && lasts.length < 1 && source == 'american') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
@@ -618,28 +618,28 @@ Equipe Fly Alertas`
             json.type_trip = 'Premium Economy';
           }
 
-          if (json.miles != null && (Number(json.miles) <= 40.000 || json.miles <= '40000') && lasts.length <= 1 && source == 'aeroplan') {
+          if (json.miles != null && (Number(json.miles) <= 40.000 || json.miles <= '40000') && lasts.length < 1 && source == 'aeroplan') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length <= 1 && source == 'smiles') {
+          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length < 1 && source == 'smiles') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length <= 1 && source == 'tudoazul') {
+          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length < 1 && source == 'tudoazul') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && (Number(json.miles) <= 90.000 || json.miles <= '90000') && lasts.length <= 1 && source == 'american') {
+          if (json.miles != null && (Number(json.miles) <= 90.000 || json.miles <= '90000') && lasts.length < 1 && source == 'american') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
