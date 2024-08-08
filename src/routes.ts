@@ -2,7 +2,6 @@ import { FastifyInstance } from "fastify";
 import { formatMessageText } from "./util/format-model";
 import { GroupMessage } from "./models/group-message.model";
 import { AlertService } from "./services/alert.service";
-import axios from "axios";
 import { wpp } from "./axios";
 
 export async function routes(fastify: FastifyInstance) {
@@ -16,12 +15,6 @@ export async function routes(fastify: FastifyInstance) {
     if (verifica_padrao && payload.contact.friendly_name == 'Espelho Emissões Y1') {
       await formatMessageText(payload.message.text)
     }
-  })
-
-  fastify.post('/webhook-teste', async (request, res) => {
-    const payload = request.body;
-
-    console.log(payload)
   })
 
   fastify.get('/alerts', async (req, res) => {
@@ -41,4 +34,6 @@ export async function routes(fastify: FastifyInstance) {
       res.send(response.data)
     })
   })
+
+  // fastify.get
 }

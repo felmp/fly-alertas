@@ -245,19 +245,18 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     }
   }
 
-
   start() {
     if (!this.is_running) {
       this.is_running = true;
-      // this.interval = setInterval(() => this.processQueue(), 5000);
-      // setInterval(() => this.processQueueTK(), 5000);
-      // setInterval(() => this.processQueueSeatsAero(), 5000);
-      setInterval(() => this.getSeatsAero(), 90000);
-
+      this.interval = setInterval(() => this.processQueue(), 5000);
+      setInterval(() => this.processQueueTK(), 5000);
+      setInterval(() => this.processQueueSeatsAero(), 5000);
       setInterval(() => this.processQueueSeatsAeroChile(), 5000);
+
+      setInterval(() => this.getSeatsAero(), 90000);
       setInterval(() => this.getSeatsAeroChile(), 90000);
-      // setInterval(() => this.getTKmilhas(), 180000);
-      // this.getTKmilhas()
+      this.getTKmilhas()
+
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -296,7 +295,7 @@ Equipe Fly Alertas`
   async getSeatsAeroChile() {
 
     const origins_airports = ['SCL'];
-    const continents = ['North+America'];
+    const continents = ['North+America', 'South+America'];
     const sources = ['american', 'tudoazul', 'aeroplan', 'smiles'];
     console.log('SeatsAero (CHILE) rodando')
     let take = 3000;
@@ -436,21 +435,28 @@ Equipe Fly Alertas`
             json.type_trip = 'Premium Economy';
           }
 
-          if (json.miles != null && (Number(json.miles) <= 40.000 || json.miles <= '40000') && lasts.length < 1 && source == 'aeroplan') {
+          if (json.miles != null && (Number(json.miles) <= 40.000 || json.miles <= '40000') && lasts.length <= 1 && source == 'aeroplan') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length < 1 && source == 'smiles') {
+          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length <= 1 && source == 'smiles') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && (Number(json.miles) <= 90.000 || json.miles <= '90000') && lasts.length < 1 && source == 'american') {
+          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length <= 1 && source == 'tudoazul') {
+            console.log('SAVED SeatsAero')
+            console.log(json)
+            // return
+            return new AlertService().createAlert(json)
+          }
+
+          if (json.miles != null && (Number(json.miles) <= 90.000 || json.miles <= '90000') && lasts.length <= 1 && source == 'american') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
@@ -472,8 +478,8 @@ Equipe Fly Alertas`
   async getSeatsAero() {
 
     const origins_airports = ['FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'];
-    const continents = ['North+America', 'Europe', 'Asia'];
-    const sources = ['american', 'azul', 'aeroplan', 'smiles'];
+    const continents = ['North+America', 'Europe', 'Asia', 'Africa', 'South+America', 'Oceania'];
+    const sources = ['american', 'tudoazul', 'aeroplan', 'smiles'];
     console.log('SeatsAero rodando')
     let take = 3000;
     let skip = 0;
@@ -612,21 +618,28 @@ Equipe Fly Alertas`
             json.type_trip = 'Premium Economy';
           }
 
-          if (json.miles != null && (Number(json.miles) <= 40.000 || json.miles <= '40000') && lasts.length < 2 && source == 'aeroplan') {
+          if (json.miles != null && (Number(json.miles) <= 40.000 || json.miles <= '40000') && lasts.length <= 1 && source == 'aeroplan') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length < 2 && source == 'smiles') {
+          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length <= 1 && source == 'smiles') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && (Number(json.miles) <= 90.000 || json.miles <= '90000') && lasts.length < 2 && source == 'american') {
+          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length <= 1 && source == 'tudoazul') {
+            console.log('SAVED SeatsAero')
+            console.log(json)
+            // return
+            return new AlertService().createAlert(json)
+          }
+
+          if (json.miles != null && (Number(json.miles) <= 90.000 || json.miles <= '90000') && lasts.length <= 1 && source == 'american') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
@@ -650,11 +663,22 @@ Equipe Fly Alertas`
   }
 
   async getTKmilhas() {
+    let browser
     try {
-      const browser = await puppeteer.launch({
+      browser = await puppeteer.launch({
         headless: false,
         defaultViewport: null,
-        args: ['--window-size=1920,1080'],
+        args: [
+          '--window-size=1920,1080',
+          '--disable-gpu',
+          '--disable-dev-shm-usage',
+          '--disable-setuid-sandbox',
+          '--no-first-run',
+          '--no-sandbox',
+          '--no-zygote',
+          '--single-process',
+        ],
+        executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
         protocolTimeout: 0
       });
 
@@ -667,16 +691,16 @@ Equipe Fly Alertas`
 
       await page.goto('https://www.tkmilhas.com/login', { timeout: 0 });
 
-      await page.locator('#mui-1').fill('potiguarpassagens@gmail.com');
+      await page.locator('#mui-1').fill('ruan_jtl@hotmail.com');
       await delay(3000);
 
-      await page.locator('#mui-2').fill('#Daniel55');
+      await page.locator('#mui-2').fill('Isabel%2936');
       await delay(3000);
 
       await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-fullWidth.MuiButtonBase-root.css-1g8e2pa').click();
       await delay(3000);
 
-      const buttonsToClick = ['copa', 'multiplus', 'smiles', 'iberia'];
+      const buttonsToClick = ['multiplus', 'smiles', 'iberia'];
       const program = this.getRandomElement(buttonsToClick);
       const selector = `button[value="${program}"]`;
       await page.locator(selector).click();
@@ -717,13 +741,13 @@ Equipe Fly Alertas`
       console.log('Para: ' + to);
       console.log('\nSource: ' + program);
 
-      // await page.locator('.MuiInput-root.MuiInput-underline.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.css-3dr76p input[value="5"]').click();
-      // await page.keyboard.type('2');
-      // await page.keyboard.press('Enter');
-      // await delay(1000);
+      await page.locator('.MuiInput-root.MuiInput-underline.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.css-3dr76p input[value="5"]').click();
+      await page.keyboard.type('30');
+      await page.keyboard.press('Enter');
+      await delay(1000);
 
-      // await page.locator('.MuiAutocomplete-root.airport-input input').fill('');
-      // await delay(1000);
+      await page.locator('.MuiAutocomplete-root.airport-input input').fill('');
+      await delay(1000);
 
       await page.locator('#fromAirport').fill(from);
       await page.keyboard.press('Enter');
@@ -885,6 +909,7 @@ Equipe Fly Alertas`
     } catch (error) {
       console.log('Erro na execução crawler' + error);
       await delay(5000);
+      await browser?.close();
       await this.getTKmilhas();
     }
   }
