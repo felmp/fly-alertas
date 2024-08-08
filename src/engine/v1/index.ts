@@ -296,7 +296,7 @@ Equipe Fly Alertas`
 
     const origins_airports = ['SCL'];
     const continents = ['North+America', 'South+America'];
-    const sources = ['american', 'tudoazul', 'aeroplan', 'smiles'];
+    const sources = ['american', 'tudoazul', 'smiles'];
     console.log('SeatsAero (CHILE) rodando')
     let take = 3000;
     let skip = 0;
@@ -479,7 +479,7 @@ Equipe Fly Alertas`
 
     const origins_airports = ['FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'];
     const continents = ['North+America', 'Europe', 'Asia', 'Africa', 'South+America', 'Oceania'];
-    const sources = ['american', 'tudoazul', 'aeroplan', 'smiles'];
+    const sources = ['american', 'tudoazul', 'smiles'];
     console.log('SeatsAero rodando')
     let take = 3000;
     let skip = 0;
