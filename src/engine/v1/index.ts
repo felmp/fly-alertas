@@ -9,8 +9,6 @@ import { formatDate } from '../../util/format-date';
 import { randomDate } from '../../util/random-date';
 import moment from 'moment';
 import delay from '../../util/delay';
-import { json } from 'stream/consumers';
-require('dotenv').config();
 
 
 const formatter = new Intl.NumberFormat('pt-BR', {
@@ -30,21 +28,14 @@ class engineV1 {
   async processQueueSeatsAero() {
     const alerts = await prismaClient.alerts.findMany({
       where: {
-        AND: [
-          { sent: 'test' },
-          {
-            NOT: {
-              affiliates_program: 'UNITED'
-            }
-          }
-        ]
+        sent: 'brasil_group'
       },
       orderBy: { created_at: 'asc' },
       take: 1
     });
 
     for (const alert of alerts) {
-      console.log(`Enviando alert ID: ${alert.id} - seatsAero`);
+      console.log(`Enviando alert ID: ${alert.id} - seatsAero (GRUPO BRASIL)`);
 
       const formattedText = `
 ⚠️ *OPORTUNIDADE @FLYALERTAS*
@@ -80,7 +71,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       await prismaClient.alerts.update({
         where: { id: alert.id },
         data: {
-          sent: 'sent',
+          sent: 'brasil_group_sent',
           sent_date: new Date()
         }
       });
@@ -92,11 +83,6 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       where: {
         AND: [
           { sent: 'chile_group' },
-          {
-            NOT: {
-              affiliates_program: 'UNITED'
-            }
-          }
         ]
       },
       orderBy: { created_at: 'asc' },
@@ -128,6 +114,115 @@ _¿No tienes millas? ¡Te ayudamos con esa emisión!_
           sent_date: new Date()
         }
       });
+    }
+  }
+
+  async processQueueSeatsAeroChileFreeGroup() {
+    console.log('RODANDO FILA GRUPO');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const countExecutiva = await prismaClient.alerts.count({
+      where: {
+        sent: 'chile_group_sent_free',
+        type_trip: 'Executiva',
+        sent_date: {
+          gte: today
+        }
+      }
+    });
+
+    const countEconomica = await prismaClient.alerts.count({
+      where: {
+        sent: 'chile_group_sent_free',
+        type_trip: 'Economica',
+        sent_date: {
+          gte: today
+        }
+      }
+    });
+
+    let limitExecutiva = 15 - countExecutiva;
+    let limitEconomica = 15 - countEconomica;
+
+    if (limitExecutiva <= 0 && limitEconomica <= 0) {
+      console.log('Limite diário de envios atingido para ambas as classes.');
+      return;
+    }
+
+    let alerts = await prismaClient.alerts.findMany({
+      where: {
+        AND: [
+          { sent: 'chile_group' },
+          {
+            OR: [
+              { type_trip: 'Executiva' },
+              { type_trip: 'Economica' }
+            ]
+          }
+        ]
+      },
+      orderBy: { created_at: 'asc' },
+      take: 10
+    });
+
+    // Remover alertas duplicados por rota
+    const uniqueAlerts = [];
+    const seenRoutes = new Set();
+
+    for (const alert of alerts) {
+      const routeKey = `${alert.route}_${alert.type_trip}`;
+      if (!seenRoutes.has(routeKey)) {
+        seenRoutes.add(routeKey);
+        uniqueAlerts.push(alert);
+      } else {
+        // Remove o alerta duplicado do banco de dados
+        await prismaClient.alerts.delete({
+          where: { id: alert.id }
+        });
+      }
+    }
+
+    // Enviar um alerta com base nos limites
+    for (const alert of uniqueAlerts) {
+      const tipoClasse = alert.type_trip;
+
+      if ((tipoClasse === 'Executiva' && limitExecutiva > 0) ||
+        (tipoClasse === 'Economica' && limitEconomica > 0)) {
+
+        console.log(`Enviando alert ID: ${alert.id} - seatsAero (CHILE)`);
+
+        const formattedText = `
+⚠️ *OPORTUNIDAD @FLYALERTAS*
+
+🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
+✈️  Ruta: ${alert.trip?.trim()} / ${alert.route?.trim()}
+💰 Desde ${alert.amount?.trim()} + tasas
+🛫 Aerolínea: ${alert.airlines?.trim()}
+💺 Clase: ${alert.type_trip?.trim()}
+🗓️  Alerta de Fecha: ${alert.remaining}
+
+_¿QUIERES CONSEGUIR ESTA OFERTA AHORA ANTES DE QUE TERMINE? LLAMA A NUESTRO SOPORTE EN PRIVADO TE AYUDAMOS CON LA EMISIÓN._
+`;
+
+        sendDefaultMessage(formattedText, 'WAG21643897-66e9-45a7-8886-7040c803db73');
+
+        await prismaClient.alerts.update({
+          where: { id: alert.id },
+          data: {
+            sent: 'chile_group_sent_free',
+            sent_date: new Date()
+          }
+        });
+
+        if (tipoClasse === 'Executiva') {
+          limitExecutiva--;
+        } else if (tipoClasse === 'Economica') {
+          limitEconomica--;
+        }
+
+        break;  // Enviar apenas 1 alerta
+      }
     }
   }
 
@@ -249,12 +344,13 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     if (!this.is_running) {
       this.is_running = true;
       this.interval = setInterval(() => this.processQueue(), 5000);
-      setInterval(() => this.processQueueTK(), 5000);
-      setInterval(() => this.processQueueSeatsAero(), 5000);
-      setInterval(() => this.processQueueSeatsAeroChile(), 5000);
+      // setInterval(() => this.processQueueTK(), 5000);
+      setInterval(() => this.processQueueSeatsAero(), 1800000);
+      setInterval(() => this.processQueueSeatsAeroChile(), 1800000);
+      setInterval(() => this.processQueueSeatsAeroChileFreeGroup(), 3600000);
 
-      setInterval(() => this.getSeatsAero(), 180000);
-      setInterval(() => this.getSeatsAeroChile(), 180000);
+      setInterval(() => this.getSeatsAero(), 60000);
+      setInterval(() => this.getSeatsAeroChile(), 60000);
       // this.getTKmilhas()
 
       console.log('Fila de alertas iniciada.');
@@ -271,17 +367,9 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
   maintenance() {
     var data = JSON.stringify({
-      "to_group_uuid": "WAGb20bcd1c-1bfd-447a-bc33-594a10952708",
+      "to_group_uuid": "WAG21643897-66e9-45a7-8886-7040c803db73",
       "from_number": "+5579920012363",
-      "text": `
-⚠️ Manutenção Programada ⚠️
-
-Olá pessoal do grupo Fly Alertas! Estamos realizando uma pequena manutenção para trazer novidades fresquinhas nos nossos alertas. Fiquem ligados para novas oportunidades incríveis que estamos preparando para vocês!
-
-Em breve estaremos de volta com tudo! ✈️🌟
-
-Atenciosamente,
-Equipe Fly Alertas`
+      "text": `NO TE PIERDAS NADA SIGUE TODAS LAS OFERTAS QUE SUELTAREMOS AQUÍ ES EXCLUSIVO Y TEMPORAL, COMPÁRTELO CON TU AMIGO QUE VIAJA, ¡LAS VACANTES AQUÍ GRATIS SON LIMITADAS!`
     });
 
     wpp.post('open/whatsapp/send-message', data)
@@ -295,8 +383,8 @@ Equipe Fly Alertas`
   async getSeatsAeroChile() {
 
     const origins_airports = ['SCL'];
-    const continents = ['North+America', 'South+America'];
-    const sources = ['american', 'tudoazul', 'smiles'];
+    const continents = ['North+America', 'South+America', 'Europe'];
+    const sources = ['azul', 'smiles'];
     console.log('SeatsAero (CHILE) rodando')
     let take = 3000;
     let skip = 0;
@@ -334,17 +422,20 @@ Equipe Fly Alertas`
 
       for (let i = 0; i < availability.data.length; i++) {
         const e = availability.data[i];
-        if (origins_airports.includes(e.Route.OriginAirport) && (e.WAvailable === true || e.JAvailable === true || e.FAvailable === true)) {
 
-          // Remover todas as chaves que começam com 'Y'
-          for (let key in e) {
-            if (key.startsWith('Y')) {
-              delete e[key];
-            }
-          }
+        // const prioritize = (e.Route.DestinationAirport === 'MIA' || e.Route.DestinationAirport === 'IAH' || e.Route.DestinationAirport === 'LIM' || e.Route.DestinationAirport === 'JFK' || e.Route.DestinationAirport === 'GIG')
+        if (origins_airports.includes(e.Route.OriginAirport) && e.Route.DestinationAirport !== 'PTY') {
+
+          //RETIRAR ECONOMICA
+          // for (let key in e) {
+          //   if (key.startsWith('Y')) {
+          //     delete e[key];
+          //   }
+          // }
 
           // Extrair os valores de milhas
           let mileageCosts = {
+            Y: parseInt(e.YMileageCost),
             W: parseInt(e.WMileageCost),
             J: parseInt(e.JMileageCost),
             F: parseInt(e.FMileageCost)
@@ -387,27 +478,17 @@ Equipe Fly Alertas`
                 - affiliates_program: Identifique o programa de afiliados no JSON que enviar e coloque nesse campo em caixa alta.
                 - trip: Coloque a origem e o destino com os nomes das cidades por extenso no formato (origem para destino).
                 - route: Coloque a rota dos continentes no formato 'América do Sul para América do Norte'.
-                - miles: Identifique o menor custo de milhas entre as classes Executiva, Primeira Classe e Premium Economy e coloque nesse campo com a pontuação adequada (ex: 151000 -> 151.000). Ignore passagens com milhas igual a 0. Coloque como um texto
-                - type_trip: Baseado nas milhas mais baratas das classes permitidas, identifique a classe do voo JMileageCost = Executiva, FMileageCost = Primeira Classe ou WMileageCost = Premium Economy e coloque nesse campo. Ignore passagens econômicas.
+                - miles: Coloque o valor da milhagem.
+                - type_trip: Coloque aqui a classe do voo.
                 - airlines: Identifique a companhia aérea e coloque nesse campo.
                 - remaining: Data de embarque no formato DD/MM/YYYY.
                 - sent: 'chile_group'.
-                - amount: Com base no valor em milhas, converta usando a tabela abaixo para a cada 1000 milhas. Coloque como texto em duas casas decimais sem vírgula.
-                
-                Tabela para conversão em reais:
-                - SMILES: valor da milha = 21.00
-                - LATAM PASS: valor da milha = 32.50
-                - LATAMPASS: valor da milha = 32.50
-                - LATAM PASS - TABELA FIXA: valor da milha = 32.50
-                - TUDO AZUL: valor da milha = 28.00
-                - AADVANTAGE - AMERICAN AIRLINES: valor da milha = 117.00
-                - MILES&GO - TAP: valor da milha = 39.00
-                - MILES&amp;GO - TAP: valor da milha = 39.00
-                - AZUL FIDELIDADE - AZUL PELO MUNDO: valor da milha = 21.00
-                - AZUL FIDELIDADE: valor da milha = 21.00
-                - IBERIA PLUS - IBERIA: valor da milha = 78.00
-                - AEROPLAN: valor da milha = 110.00
-                - CONNECT MILES: valor da milha = 85.00`
+                - amount: Com base no valor da milhagem, converta usando a tabela abaixo para a cada 1000 milhas. Coloque como texto e no formato dinheiro.
+
+                Tabela para conversão em pesos chilenos:
+                - 1000 milhas SMILES = 3340 CLP
+                - 1000 milhas tudo azul = 3700 CLP
+                - 1000 milhas latam pass br = 4600CLP`
               },
               {
                 "role": "user",
@@ -425,8 +506,6 @@ Equipe Fly Alertas`
           let json = JSON.parse(message.data.choices[0].message.content) as Alert;
           json.miles = json.miles?.toString() as any
 
-          const lasts = await new AlertService().verifyLast(json.trip as string);
-
           if (json.type_trip = 'JMileageCost') {
             json.type_trip = 'Executiva';
           } else if (json.type_trip = 'FMileageCost') {
@@ -435,33 +514,22 @@ Equipe Fly Alertas`
             json.type_trip = 'Premium Economy';
           }
 
-          if (json.miles != null && (Number(json.miles) <= 40.000 || json.miles <= '40000') && lasts.length < 1 && source == 'aeroplan') {
+          // const lasts = await new AlertService().verifyLast(json.trip as string);
+
+          if (json.miles != null && (Number(json.miles) <= 103.000 || json.miles <= '103000') && source == 'smiles') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length < 1 && source == 'smiles') {
+          if (json.miles != null && (Number(json.miles) <= 90.000 || json.miles <= '90000') && source == 'azul') {
             console.log('SAVED SeatsAero')
             console.log(json)
             // return
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length < 1 && source == 'tudoazul') {
-            console.log('SAVED SeatsAero')
-            console.log(json)
-            // return
-            return new AlertService().createAlert(json)
-          }
-
-          if (json.miles != null && (Number(json.miles) <= 90.000 || json.miles <= '90000') && lasts.length < 1 && source == 'american') {
-            console.log('SAVED SeatsAero')
-            console.log(json)
-            // return
-            return new AlertService().createAlert(json)
-          }
         }
       }
       if (availability.hasMore) {
@@ -479,7 +547,7 @@ Equipe Fly Alertas`
 
     const origins_airports = ['FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'];
     const continents = ['North+America', 'Europe', 'Asia', 'Africa', 'South+America', 'Oceania'];
-    const sources = ['american', 'tudoazul', 'smiles'];
+    const sources = ['american', 'azul', 'smiles'];
     console.log('SeatsAero rodando')
     let take = 3000;
     let skip = 0;
@@ -574,7 +642,7 @@ Equipe Fly Alertas`
                 - type_trip: Baseado nas milhas mais baratas das classes permitidas, identifique a classe do voo JMileageCost = Executiva, FMileageCost = Primeira Classe ou WMileageCost = Premium Economy e coloque nesse campo. Ignore passagens econômicas.
                 - airlines: Identifique a companhia aérea e coloque nesse campo.
                 - remaining: Data de embarque no formato DD/MM/YYYY.
-                - sent: 'test'.
+                - sent: 'brasil_group'.
                 - amount: Com base no valor em milhas, converta usando a tabela abaixo para a cada 1000 milhas. Coloque como texto em duas casas decimais sem vírgula.
                 
                 Tabela para conversão em reais:
@@ -618,12 +686,6 @@ Equipe Fly Alertas`
             json.type_trip = 'Premium Economy';
           }
 
-          if (json.miles != null && (Number(json.miles) <= 40.000 || json.miles <= '40000') && lasts.length < 1 && source == 'aeroplan') {
-            console.log('SAVED SeatsAero')
-            console.log(json)
-            // return
-            return new AlertService().createAlert(json)
-          }
 
           if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length < 1 && source == 'smiles') {
             console.log('SAVED SeatsAero')

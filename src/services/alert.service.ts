@@ -52,7 +52,7 @@ class AlertService {
 
     const save = await prismaClient.alerts.findMany({
       orderBy: {
-        sent_date: "desc"
+        created_at: "desc"
       },
       where: {
         trip,
