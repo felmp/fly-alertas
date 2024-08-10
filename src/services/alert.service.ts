@@ -42,18 +42,14 @@ class AlertService {
 
   async verifyLast(trip: string) {
     const today = new Date();
-    const formattedToday = today.toISOString().split('T')[0];
 
-    // Data do início do dia (00:00:00)
-    const startOfDay = new Date(`${formattedToday}T00:00:00Z`);
+    // Pega a data atual, mas ajusta para o início do dia (meia-noite)
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
 
-    // Data do fim do dia (23:59:59)
-    const endOfDay = new Date(`${formattedToday}T23:59:59Z`);
+    // Ajusta a data para o final do dia (23:59:59)
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-    const save = await prismaClient.alerts.findMany({
-      orderBy: {
-        created_at: "desc"
-      },
+    const save = await prismaClient.alerts.count({
       where: {
         trip,
         created_at: {
