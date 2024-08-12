@@ -348,7 +348,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       this.is_running = true;
       this.interval = setInterval(() => this.processQueue(), 5000);
       setInterval(() => this.processQueueSeatsAero(), 1800000);
-      setInterval(() => this.processQueueSeatsAeroChile(), 5000);
+      // setInterval(() => this.processQueueSeatsAeroChile(), 5000);
       setInterval(() => this.processQueueSeatsAeroChileFreeGroup(), 1800000);
 
       // setInterval(() => this.getSeatsAero(), 60000);
