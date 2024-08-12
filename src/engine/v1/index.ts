@@ -347,17 +347,13 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     if (!this.is_running) {
       this.is_running = true;
       this.interval = setInterval(() => this.processQueue(), 5000);
-      // setInterval(() => this.processQueueTK(), 5000);
-      // setInterval(() => this.processQueueSeatsAero(), 1800000);
-      // setInterval(() => this.processQueueSeatsAeroChile(), 5000);
+      setInterval(() => this.processQueueSeatsAero(), 1800000);
+      setInterval(() => this.processQueueSeatsAeroChile(), 5000);
       setInterval(() => this.processQueueSeatsAeroChileFreeGroup(), 1800000);
-      this.processQueueSeatsAeroChileFreeGroup()
-      // this.processQueueSeatsAeroChileFreeGroup()
-      // setInterval(() => this.processQueueSeatsAeroChileFreeGroup(), 5000);
 
       // setInterval(() => this.getSeatsAero(), 60000);
       setInterval(() => this.getSeatsAeroChile(), 60000);
-      this.getSeatsAeroChile()
+      // this.getSeatsAeroChile()
       // this.getTKmilhas();
 
       console.log('Fila de alertas iniciada.');
@@ -389,11 +385,11 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
   async getSeatsAeroChile() {
     moment.locale('pt-br')
-    this.count_execution = this.count_execution + 1; 
+    this.count_execution = this.count_execution + 1;
 
     console.log(this.count_execution)
     const origins_airports = ['SCL'];
-    const continents = ['Europe', 'South+America','North+America'];
+    const continents = ['Europe', 'South+America', 'North+America'];
     const sources = ['smiles', 'azul'];
     console.log('SeatsAero (CHILE) rodando')
     let take = 5000;
@@ -414,7 +410,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     const airports_to = [
       'LIS', 'WAS', 'PAR', 'SEL',
       'MAD', 'HND', 'CHI', 'LAX', 'ORL',
-      'NYC', 'MIL', 'BUE', 'LON', 'MIA',
+      'NYC', 'MIL', 'BUE', 'LON',
       'IAH', 'LIM', 'JFK', 'GIG'
     ];
 
@@ -853,7 +849,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-fullWidth.MuiButtonBase-root.css-1g8e2pa').click();
       await delay(3000);
 
-      const buttonsToClick = ['multiplus'];
+      const buttonsToClick = ['multiplus', 'smiles'];
       const program = this.getRandomElement(buttonsToClick);
       const selector = `button[value="${program}"]`;
       await page.locator(selector).click();
@@ -877,12 +873,17 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
         'SCL'
       ];
 
+      // const airports_to = ['MAD']
+      // const airports_to = [
+      //   'LIS', 'WAS', 'PAR', 'SEL',
+      //   'MAD', 'HND', 'CHI', 'LAX', 'ORL',
+      //   'NYC', 'MIL', 'BUE', 'LON',
+      //   'IAH', 'LIM', 'JFK', 'GIG'
+      // ];
+
       const airports_to = [
-        'LIS', 'WAS', 'PAR', 'SEL',
-        'MAD', 'HND', 'CHI', 'LAX', 'ORL',
-        'NYC', 'MIL', 'BUE', 'LON',
-        'MIA', 'IAH', 'LIM', 'JFK', 'GIG'
-      ];
+        'MAD', 'LIM', 'BUE', 'IAH', 'MIA', 'BCN'
+      ]
 
       const cabin = ['Executive', 'Basic'];
 
@@ -981,7 +982,13 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
       for (const index of sortedIndices) {
         await buttons[index].click();
-        await page.waitForSelector('.MuiAccordionDetails-root', { timeout: 0 });
+        // await page.waitForSelector('.MuiAccordionDetails-root');
+
+        await page.waitForSelector('div[aria-label="Clique para adicionar no orçamento e emissão."]', { timeout: 0 });
+
+        // Clica na div usando o atributo aria-label
+        await page.click('div[aria-label="Clique para adicionar no orçamento e emissão."]');
+
 
         const buttonClicked = await page.evaluate(() => {
           const buttonsOptions = Array.from(document.querySelectorAll('button'));
@@ -1035,27 +1042,68 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
           };
         }, mileElements[index], flightSegments);
 
+        console.log(flightInfo.miles)
+
+        if (Number(flightInfo.miles) <= 85000 && cabinSelected == 'Basic' && program == 'smiles') {
+          console.log('ALERTA CAPTURADOS');
+          console.log(flightInfo);
+
+          new AlertService().createAlert({
+            affiliates_program: flightInfo.program,
+            trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
+            route: 'Internacional',
+            miles: Math.round(flightInfo.miles).toString(),
+            amount: Math.round(Number(calculateMilesToCLP('latam', Number(flightInfo.miles)))).toString(),
+            airlines: flightSegments[0].airline,
+            sent: 'chile_group',
+            type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
+            remaining: flightInfo.departure
+          });
+        }
+
+        if (Number(flightInfo.miles) <= 140000 && cabinSelected != 'Basic' && program == 'smiles') {
+          console.log('ALERTA CAPTURADOS');
+          console.log(flightInfo);
+
+          new AlertService().createAlert({
+            affiliates_program: flightInfo.program,
+            trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
+            route: 'Internacional',
+            miles: Math.round(flightInfo.miles).toString(),
+            amount: Math.round(Number(calculateMilesToCLP('latam', Number(flightInfo.miles)))).toString(),
+            airlines: flightSegments[0].airline,
+            sent: 'chile_group',
+            type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
+            remaining: flightInfo.departure
+          });
+        }
+
         if (flightInfo.miles <= 120000) {
           console.log('ALERTA CAPTURADOS');
           console.log(flightInfo);
 
           new AlertService().createAlert({
             affiliates_program: flightInfo.program,
-            trip: 'Internacional',
-            route: flightSegments[0].origin.split('/')[1] + ' para ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
-            miles: `A partir de ${flightInfo.miles} milhas trecho + taxas`,
+            trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
+            route: 'Internacional',
+            miles: Math.round(flightInfo.miles).toString(),
+            amount: Math.round(Number(calculateMilesToCLP('latam', Number(flightInfo.miles)))).toString(),
             airlines: flightSegments[0].airline,
-            sent: 'tk',
+            sent: 'chile_group',
             type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
             remaining: flightInfo.departure
           });
-        }
+        } else {
 
-        console.log('Nada bom encontrado.\n\n');
+          console.log('Nada bom encontrado.\n\n');
+
+
+        }
 
         await browser.close();
         await delay(5000);
         await this.getTKmilhas();
+
       }
 
     } catch (error) {
