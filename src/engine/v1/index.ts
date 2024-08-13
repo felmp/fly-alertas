@@ -9,8 +9,8 @@ import { formatDate } from '../../util/format-date';
 import { randomDate } from '../../util/random-date';
 import moment from 'moment';
 import delay from '../../util/delay';
-import calculateMilesToCLP from '../../util/conversor';
 import 'moment/locale/pt-br'
+import calculateMilesToCurrency from '../../util/conversor';
 
 const formatter = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
@@ -21,11 +21,14 @@ class engineV1 {
   interval: any;
   is_running: boolean;
   count_execution: number;
+  change_search: 'BR' | 'CH';
 
   constructor() {
     this.is_running = false;
     this.count_execution = 0;
     this.interval = null;
+
+    this.change_search = 'BR';
   }
 
   async processQueueSeatsAero() {
@@ -145,8 +148,8 @@ _¿No tienes millas? ¡Te ayudamos con esa emisión!_
       }
     });
 
-    let limitExecutiva = 15 - countExecutiva;
-    let limitEconomica = 15 - countEconomica;
+    let limitExecutiva = 30 - countExecutiva;
+    let limitEconomica = 30 - countEconomica;
 
     if (limitExecutiva <= 0 && limitEconomica <= 0) {
       console.log('Limite diário de envios atingido para ambas as classes.');
@@ -347,15 +350,14 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     if (!this.is_running) {
       this.is_running = true;
       this.interval = setInterval(() => this.processQueue(), 5000);
-      setInterval(() => this.processQueueSeatsAero(), 1800000);
-      // setInterval(() => this.processQueueSeatsAeroChile(), 5000);
-      setInterval(() => this.processQueueSeatsAeroChileFreeGroup(), 1800000);
+      // setInterval(() => this.processQueueSeatsAero(), 1800000);
+      // setInterval(() => this.processQueueSeatsAeroChile(), 1800000);
+      // setInterval(() => this.processQueueSeatsAeroChileFreeGroup(), 1800000);
 
-      // setInterval(() => this.getSeatsAero(), 60000);
-      setInterval(() => this.getSeatsAeroChile(), 60000);
+      // setInterval(() => this.getSeatsAeroBrasil(), 60000);
+      // setInterval(() => this.getSeatsAeroChile(), 60000);
       // this.getSeatsAeroChile()
       // this.getTKmilhas();
-
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -407,11 +409,56 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       end_date = tempDate;
     }
 
-    const airports_to = [
-      'LIS', 'WAS', 'PAR', 'SEL',
-      'MAD', 'HND', 'CHI', 'LAX', 'ORL',
-      'NYC', 'MIL', 'BUE', 'LON',
-      'IAH', 'LIM', 'JFK', 'GIG'
+    const airports_to: string[] = [
+      'ATL', // Hartsfield-Jackson Atlanta International Airport, Atlanta, USA
+      'PEK', // Beijing Capital International Airport, Beijing, China
+      'LAX', // Los Angeles International Airport, Los Angeles, USA
+      'DXB', // Dubai International Airport, Dubai, UAE
+      'HND', // Tokyo Haneda Airport, Tokyo, Japan
+      'ORD', // O'Hare International Airport, Chicago, USA
+      'LHR', // London Heathrow Airport, London, UK
+      'PVG', // Shanghai Pudong International Airport, Shanghai, China
+      'CDG', // Charles de Gaulle Airport, Paris, France
+      'DFW', // Dallas/Fort Worth International Airport, Dallas, USA
+      'GRU', // São Paulo/Guarulhos International Airport, São Paulo, Brazil
+      'GIG', // Rio de Janeiro/Galeão International Airport, Rio de Janeiro, Brazil
+      'BSB', // Brasília International Airport, Brasília, Brazil
+      'CGH', // São Paulo/Congonhas Airport, São Paulo, Brazil
+      'SDU', // Rio de Janeiro/Santos Dumont Airport, Rio de Janeiro, Brazil
+      'POA', // Salgado Filho International Airport, Porto Alegre, Brazil
+      'SSA', // Deputado Luís Eduardo Magalhães International Airport, Salvador, Brazil
+      'REC', // Recife/Guararapes-Gilberto Freyre International Airport, Recife, Brazil
+      'CWB', // Afonso Pena International Airport, Curitiba, Brazil
+      'FOR', // Pinto Martins – Fortaleza International Airport, Fortaleza, Brazil
+      'BEL', // Val de Cans/Júlio Cezar Ribeiro International Airport, Belém, Brazil
+      'MAO', // Eduardo Gomes International Airport, Manaus, Brazil
+      'CNF', // Tancredo Neves/Confins International Airport, Belo Horizonte, Brazil
+      'VIX', // Eurico de Aguiar Salles Airport, Vitória, Brazil
+      'NAT', // São Gonçalo do Amarante–Governador Aluízio Alves International Airport, Natal, Brazil
+      'MCZ', // Zumbi dos Palmares International Airport, Maceió, Brazil
+      'AJU', // Santa Maria Airport, Aracaju, Brazil
+      'AMS', // Amsterdam Schiphol Airport, Amsterdam, Netherlands
+      'FRA', // Frankfurt Airport, Frankfurt, Germany
+      'IST', // Istanbul Airport, Istanbul, Turkey
+      'SIN', // Singapore Changi Airport, Singapore, Singapore
+      'ICN', // Incheon International Airport, Seoul, South Korea
+      'BKK', // Suvarnabhumi Airport, Bangkok, Thailand
+      'JFK', // John F. Kennedy International Airport, New York City, USA
+      'MIA', // Miami International Airport, Miami, USA
+      'HKG', // Hong Kong International Airport, Hong Kong, China
+      'LIS', // Humberto Delgado Airport, Lisbon, Portugal
+      'WAS', // Washington D.C. (various airports), USA
+      'PAR', // Paris (various airports), France
+      'SEL', // Seoul (various airports), South Korea
+      'MAD', // Adolfo Suárez Madrid–Barajas Airport, Madrid, Spain
+      'CHI', // Chicago (various airports), USA
+      'ORL', // Orlando International Airport, Orlando, USA
+      'NYC', // New York City (various airports), USA
+      'MIL', // Milan (various airports), Italy
+      'BUE', // Buenos Aires (various airports), Argentina
+      'LON', // London (various airports), UK
+      'IAH', // George Bush Intercontinental Airport, Houston, USA
+      'LIM', // Jorge Chávez International Airport, Lima, Peru
     ];
 
 
@@ -573,6 +620,39 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
             'LIM': 'Lima',
             'JFK': 'Nova York',
             'GIG': 'Rio de Janeiro',
+            'FOR': 'Fortaleza',
+            'NAT': 'Natal',
+            'SAO': 'São Paulo',
+            'REC': 'Recife',
+            'MCZ': 'Maceió',
+            'RIO': 'Rio de Janeiro',
+            'CNF': 'Belo Horizonte',
+            'BSB': 'Brasília',
+            'AJU': 'Aracaju',
+            'GRU': 'São Paulo',
+            'ATL': 'Atlanta',
+            'PEK': 'Pequim',
+            'DXB': 'Dubai',
+            'ORD': 'Chicago',
+            'LHR': 'Londres',
+            'PVG': 'Xangai',
+            'CDG': 'Paris',
+            'DFW': 'Dallas',
+            'CGH': 'São Paulo',
+            'SDU': 'Rio de Janeiro',
+            'POA': 'Porto Alegre',
+            'SSA': 'Salvador',
+            'CWB': 'Curitiba',
+            'BEL': 'Belém',
+            'MAO': 'Manaus',
+            'VIX': 'Vitória',
+            'AMS': 'Amsterdã',
+            'FRA': 'Frankfurt',
+            'IST': 'Istambul',
+            'SIN': 'Singapura',
+            'ICN': 'Incheon',
+            'BKK': 'Bangkok',
+            'HKG': 'Hong Kong'
           };
 
           const continentsTranslate: { [key: string]: string } = {
@@ -591,7 +671,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
             affiliates_program: e.Route.Source.toLocaleUpperCase(),
             trip: 'Santiago a ' + airportsCity[e.Route.DestinationAirport],
             route: continentsTranslate[e.Route.OriginRegion] + ' a ' + continentsTranslate[e.Route.DestinationRegion],
-            amount: calculateMilesToCLP(e.Source, Number(miles)),
+            amount: calculateMilesToCurrency(e.Source, Number(miles), 'CLP'),
             type_trip,
             airlines,
             remaining: moment(e.Date).format('L'),
@@ -630,182 +710,284 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     }
   }
 
-  // async getSeatsAero() {
+  async getSeatsAeroBrasil() {
+    moment.locale('pt-br')
+    // this.count_execution = this.count_execution + 1;
 
-  //   const origins_airports = ['FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'];
-  //   const continents = ['North+America', 'Europe', 'Asia', 'Africa', 'South+America', 'Oceania'];
-  //   const sources = ['american', 'azul', 'smiles'];
-  //   console.log('SeatsAero rodando')
-  //   let take = 3000;
-  //   let skip = 0;
+    // console.log(this.count_execution)
+    const origins_airports = ['FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'];
+    const continents = ['North+America', 'Europe', 'Asia', 'Africa', 'South+America', 'Oceania'];
+    const sources = ['smiles', 'azul'];
+    console.log('SeatsAero (CHILE) rodando')
+    let take = 5000;
+    let skip = 0;
 
-  //   let start_date = new Date();
-  //   let end_date = new Date(start_date);
-  //   end_date.setFullYear(start_date.getFullYear() + 1);
-  //   start_date = randomDate(start_date, end_date, 0, 24);
-  //   end_date = randomDate(start_date, end_date, 0, 24);
+    let start_date = new Date();
+    let end_date = new Date(start_date);
+    end_date.setFullYear(start_date.getFullYear() + 1);
+    start_date = randomDate(start_date, end_date, 0, 24);
+    end_date = randomDate(start_date, end_date, 0, 24);
 
-  //   if (end_date.getTime() > end_date.getTime()) {
-  //     const tempDate = start_date;
-  //     start_date = end_date;
-  //     end_date = tempDate;
-  //   }
+    if (end_date.getTime() > end_date.getTime()) {
+      const tempDate = start_date;
+      start_date = end_date;
+      end_date = tempDate;
+    }
 
-  //   const source = sources[Math.floor(Math.random() * sources.length)];
-  //   const destination = continents[Math.floor(Math.random() * continents.length)];
+    const airports_to: string[] = [
+      'ATL', 'PEK', 'LAX', 'DXB', 'HND', 'ORD',
+      'LHR', 'PVG', 'CDG', 'DFW', 'GRU', 'GIG',
+      'BSB', 'CGH', 'SDU', 'POA', 'SSA', 'REC',
+      'CWB', 'FOR', 'BEL', 'MAO', 'CNF', 'VIX',
+      'MCZ', 'AJU', 'AMS', 'FRA', 'IST', 'SIN',
+      'ICN', 'BKK', 'JFK', 'MIA', 'HKG', 'NAT'];
 
-  //   try {
-  //     const response = await engine_v1.get(`/availability?source=${source}&start_date=${formatDate(start_date)}&end_date=${formatDate(end_date)}&origin_region=South+America&destination_region=${destination}&take=${take}&skip=${skip}`);
+    const source = sources[Math.floor(Math.random() * sources.length)];
+    const destination = continents[Math.floor(Math.random() * continents.length)];
 
-  //     const availability = response.data;
+    try {
+      const response = await engine_v1.get(`/availability?source=${source}&start_date=${formatDate(start_date)}&end_date=${formatDate(end_date)}&origin_region=South+America&destination_region=${destination}&take=${take}&skip=${skip}`);
 
-  //     if (availability.data.length === 0) {
-  //       console.log('No more data available. Restarting...');
-  //       skip = 0;
-  //     }
+      // const response = await engine_v1.post('live', {
+      //   disable_filters: true,
+      //   origin_airport: "SCL",
+      //   departure_date: "2024-09-18",
+      //   source: "azul",
+      //   destination_airport: "MIA"
+      // });
 
-  //     availability.data = availability.data.filter((seat: any) =>
-  //       seat.WRemainingSeats > 4 ||
-  //       seat.JRemainingSeats > 4 ||
-  //       seat.FRemainingSeats > 4
-  //     );
+      type Route = {
+        ID: string;
+        OriginAirport: string;
+        OriginRegion: string;
+        DestinationAirport: string;
+        DestinationRegion: string;
+        NumDaysOut: number;
+        Distance: number;
+        Source: string;
+      };
 
-  //     for (let i = 0; i < availability.data.length; i++) {
-  //       const e = availability.data[i];
-  //       if (origins_airports.includes(e.Route.OriginAirport) && (e.WAvailable === true || e.JAvailable === true || e.FAvailable === true)) {
+      type AvailabilityData = {
+        ID: string;
+        RouteID: string;
+        Route: Route;
+        Date: string;
+        ParsedDate: string;
+        YAvailable: boolean;
+        WAvailable: boolean;
+        JAvailable: boolean;
+        FAvailable: boolean;
+        YMileageCost: string;
+        WMileageCost: string;
+        JMileageCost: string;
+        FMileageCost: string;
+        YDirectMileageCost: number;
+        WDirectMileageCost: number;
+        JDirectMileageCost: number;
+        FDirectMileageCost: number;
+        YRemainingSeats: number;
+        WRemainingSeats: number;
+        JRemainingSeats: number;
+        FRemainingSeats: number;
+        YDirectRemainingSeats: number;
+        WDirectRemainingSeats: number;
+        JDirectRemainingSeats: number;
+        FDirectRemainingSeats: number;
+        YAirlines: string;
+        WAirlines: string;
+        JAirlines: string;
+        FAirlines: string;
+        YDirectAirlines: string;
+        WDirectAirlines: string;
+        JDirectAirlines: string;
+        FDirectAirlines: string;
+        YDirect: boolean;
+        WDirect: boolean;
+        JDirect: boolean;
+        FDirect: boolean;
+        Source: string;
+        CreatedAt: string;
+        UpdatedAt: string;
+        AvailabilityTrips: null;
+      };
 
-  //         // Remover todas as chaves que começam com 'Y'
-  //         for (let key in e) {
-  //           if (key.startsWith('Y')) {
-  //             delete e[key];
-  //           }
-  //         }
+      let availability;
 
-  //         // Extrair os valores de milhas
-  //         let mileageCosts = {
-  //           W: parseInt(e.WMileageCost),
-  //           J: parseInt(e.JMileageCost),
-  //           F: parseInt(e.FMileageCost)
-  //         };
+      availability = response.data
 
-  //         // Filtrar valores diferentes de 0 e encontrar o menor valor
-  //         let filteredCosts = Object.entries(mileageCosts).filter(([key, value]) => value !== 0);
-  //         let minCostEntry = filteredCosts.reduce((minEntry, currentEntry) => currentEntry[1] < minEntry[1] ? currentEntry : minEntry);
-
-  //         // Função para deletar chaves relacionadas a um tipo específico
-  //         function deleteRelatedKeys(type: any) {
-  //           for (let key in e) {
-  //             if (key.startsWith(type)) {
-  //               delete e[key];
-  //             }
-  //           }
-  //         }
-
-  //         // Deletar chaves relacionadas aos tipos de milhagem que não possuem o menor valor
-  //         for (let key in mileageCosts) {
-  //           if (key !== minCostEntry[0]) {
-  //             deleteRelatedKeys(key);
-  //           }
-  //         }
-
-  //         // console.log('BUSCA SEATSAERO - RETORNO')
-  //         // console.log('------------------------------------------')
-  //         // console.log(e)
-  //         // console.log('------------------------------------------')
-
-  //         const data_gpt = {
-  //           "model": "gpt-3.5-turbo",
-  //           "messages": [
-  //             {
-  //               "role": "system",
-  //               "content": `Você é um analista de passagens aéreas. 
-  //               Seu objetivo é analisar e filtrar apenas passagens de classe Executiva, Primeira Classe e Premium Economy. 
-  //               Vou lhe mandar um objeto para análise, e você deve retornar um JSON organizado com os dados fornecidos, contendo os seguintes campos:
-
-  //               - affiliates_program: Identifique o programa de afiliados no JSON que enviar e coloque nesse campo em caixa alta.
-  //               - trip: Coloque a origem e o destino com os nomes das cidades por extenso no formato (origem para destino).
-  //               - route: Coloque a rota dos continentes no formato 'América do Sul para América do Norte'.
-  //               - miles: Identifique o menor custo de milhas entre as classes Executiva, Primeira Classe e Premium Economy e coloque nesse campo com a pontuação adequada (ex: 151000 -> 151.000). Ignore passagens com milhas igual a 0. Coloque como um texto
-  //               - type_trip: Baseado nas milhas mais baratas das classes permitidas, identifique a classe do voo JMileageCost = Executiva, FMileageCost = Primeira Classe ou WMileageCost = Premium Economy e coloque nesse campo. Ignore passagens econômicas.
-  //               - airlines: Identifique a companhia aérea e coloque nesse campo.
-  //               - remaining: Data de embarque no formato DD/MM/YYYY.
-  //               - sent: 'brasil_group'.
-  //               - amount: Com base no valor em milhas, converta usando a tabela abaixo para a cada 1000 milhas. Coloque como texto em duas casas decimais sem vírgula.
-
-  //               Tabela para conversão em reais:
-  //               - SMILES: valor da milha = 21.00
-  //               - LATAM PASS: valor da milha = 32.50
-  //               - LATAMPASS: valor da milha = 32.50
-  //               - LATAM PASS - TABELA FIXA: valor da milha = 32.50
-  //               - TUDO AZUL: valor da milha = 28.00
-  //               - AADVANTAGE - AMERICAN AIRLINES: valor da milha = 117.00
-  //               - MILES&GO - TAP: valor da milha = 39.00
-  //               - MILES&amp;GO - TAP: valor da milha = 39.00
-  //               - AZUL FIDELIDADE - AZUL PELO MUNDO: valor da milha = 21.00
-  //               - AZUL FIDELIDADE: valor da milha = 21.00
-  //               - IBERIA PLUS - IBERIA: valor da milha = 78.00
-  //               - AEROPLAN: valor da milha = 110.00
-  //               - CONNECT MILES: valor da milha = 85.00`
-  //             },
-  //             {
-  //               "role": "user",
-  //               "content": "Por favor, analise o seguinte objeto JSON e retorne os dados organizados conforme as instruções fornecidas, excluindo passagens econômicas e selecionando a milha mais barata entre Executiva, Primeira Classe e Premium Economy. Formate as milhas no formato de mil com a pontuação adequada (ex: 151000 -> 151.000). Ignore milhas igual a 0."
-  //             },
-  //             {
-  //               "role": "user",
-  //               "content": JSON.stringify(e)
-  //             }
-  //           ]
-  //         };
-
-  //         const message = await gpt.post('chat/completions', data_gpt);
-
-  //         let json = JSON.parse(message.data.choices[0].message.content) as Alert;
-  //         json.miles = json.miles?.toString() as any
-
-  //         const lasts = await new AlertService().verifyLast(json.trip as string);
-
-  //         if (json.type_trip = 'JMileageCost') {
-  //           json.type_trip = 'Executiva';
-  //         } else if (json.type_trip = 'FMileageCost') {
-  //           json.type_trip = 'Primeira Classe';
-  //         } else if (json.type_trip = 'WMileageCost') {
-  //           json.type_trip = 'Premium Economy';
-  //         }
+      // console.log('---------------------------')
 
 
-  //         if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length < 1 && source == 'smiles') {
-  //           console.log('SAVED SeatsAero')
-  //           console.log(json)
-  //           // return
-  //           return new AlertService().createAlert(json)
-  //         }
+      if (availability.data.length === 0) {
+        console.log('No more data available. Restarting...');
+        skip = 0;
+      }
 
-  //         if (json.miles != null && (Number(json.miles) <= 150.000 || json.miles <= '150000') && lasts.length < 1 && source == 'tudoazul') {
-  //           console.log('SAVED SeatsAero')
-  //           console.log(json)
-  //           // return
-  //           return new AlertService().createAlert(json)
-  //         }
+      availability.data = availability.data.filter((seat: any) =>
+        seat.WRemainingSeats > 4 ||
+        seat.JRemainingSeats > 4 ||
+        seat.FRemainingSeats > 4 ||
+        seat.YRemainingSeats > 4
+      );
 
-  //         if (json.miles != null && (Number(json.miles) <= 90.000 || json.miles <= '90000') && lasts.length < 1 && source == 'american') {
-  //           console.log('SAVED SeatsAero')
-  //           console.log(json)
-  //           // return
-  //           return new AlertService().createAlert(json)
-  //         }
-  //       }
-  //     }
-  //     if (availability.hasMore) {
-  //       skip += take;
-  //     } else {
-  //       console.log('No more pages available for current selection. Restarting...');
-  //       skip = 0;
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error);
-  //   }
-  // }
+      for (let i = 0; i < availability.data.length; i++) {
+        const e = availability.data[i];
+
+        if (origins_airports.includes(e.Route.OriginAirport) && e.Route.DestinationAirport !== 'PTY' && airports_to.includes(e.Route.DestinationAirport)) {
+
+          let mileageCosts = {
+            Y: parseInt(e.YMileageCost),
+            W: parseInt(e.WMileageCost),
+            J: parseInt(e.JMileageCost),
+            F: parseInt(e.FMileageCost)
+          };
+
+          let filteredCosts = Object.entries(mileageCosts).filter(([key, value]) => value !== 0);
+          let minCostEntry = filteredCosts.reduce((minEntry, currentEntry) => currentEntry[1] < minEntry[1] ? currentEntry : minEntry);
+
+          function deleteRelatedKeys(type: any) {
+            for (let key in e) {
+              if (key.startsWith(type)) {
+                delete e[key as keyof AvailabilityData];
+              }
+            }
+          }
+
+          for (let key in mileageCosts) {
+            if (key !== minCostEntry[0]) {
+              deleteRelatedKeys(key);
+            }
+          }
+
+          let miles
+          let type_trip;
+          let airlines;
+
+          if (e.YMileageCost !== undefined) {
+            miles = e.YMileageCost
+            type_trip = 'Econômica'
+            airlines = e.YAirlines;
+          } else if (e.WMileageCost !== undefined) {
+            miles = e.WMileageCost
+            type_trip = 'Premium Economy'
+            airlines = e.WAirlines;
+          } else if (e.JMileageCost !== undefined) {
+            miles = e.JMileageCost
+            type_trip = 'Executiva'
+            airlines = e.JAirlines;
+          } else {
+            miles = e.FMileageCost
+            type_trip = 'Primeira Classe'
+            airlines = e.FAirlines;
+          }
+          const airportsCity: { [key: string]: string } = {
+            'LIS': 'Lisboa',
+            'WAS': 'Washington, D.C.',
+            'PAR': 'Paris',
+            'SEL': 'Seul',
+            'MAD': 'Madri',
+            'HND': 'Tóquio',
+            'CHI': 'Chicago',
+            'LAX': 'Los Angeles',
+            'ORL': 'Orlando',
+            'NYC': 'Nova York',
+            'MIL': 'Milão',
+            'BUE': 'Buenos Aires',
+            'LON': 'Londres',
+            'MIA': 'Miami',
+            'IAH': 'Houston',
+            'LIM': 'Lima',
+            'JFK': 'Nova York',
+            'GIG': 'Rio de Janeiro',
+            'FOR': 'Fortaleza',
+            'NAT': 'Natal',
+            'SAO': 'São Paulo',
+            'REC': 'Recife',
+            'MCZ': 'Maceió',
+            'RIO': 'Rio de Janeiro',
+            'CNF': 'Belo Horizonte',
+            'BSB': 'Brasília',
+            'AJU': 'Aracaju',
+            'GRU': 'São Paulo',
+            'ATL': 'Atlanta',
+            'PEK': 'Pequim',
+            'DXB': 'Dubai',
+            'ORD': 'Chicago',
+            'LHR': 'Londres',
+            'PVG': 'Xangai',
+            'CDG': 'Paris',
+            'DFW': 'Dallas',
+            'CGH': 'São Paulo',
+            'SDU': 'Rio de Janeiro',
+            'POA': 'Porto Alegre',
+            'SSA': 'Salvador',
+            'CWB': 'Curitiba',
+            'BEL': 'Belém',
+            'MAO': 'Manaus',
+            'VIX': 'Vitória',
+            'AMS': 'Amsterdã',
+            'FRA': 'Frankfurt',
+            'IST': 'Istambul',
+            'SIN': 'Singapura',
+            'ICN': 'Incheon',
+            'BKK': 'Bangkok',
+            'HKG': 'Hong Kong'
+          };
+
+          const continentsTranslate: { [key: string]: string } = {
+            'South America': 'América do Sul',
+            'North America': 'América do Norte',
+            'Europe': 'Europa',
+            'Asia': 'Asia',
+            'Africa': 'África',
+            'Oceania': 'Oceanía'
+          };
+
+          let json: Alert = {
+            miles,
+            id: '',
+            original_message: null,
+            affiliates_program: e.Route.Source.toLocaleUpperCase(),
+            trip: airportsCity[e.Route.OriginAirport] + ' para ' + airportsCity[e.Route.DestinationAirport],
+            route: continentsTranslate[e.Route.OriginRegion] + ' a ' + continentsTranslate[e.Route.DestinationRegion],
+            amount: calculateMilesToCurrency(e.Source, Number(miles), 'BRL'),
+            type_trip,
+            airlines,
+            remaining: moment(e.Date).format('L'),
+            sent: 'brasil_group',
+            sent_date: null,
+            created_at: null
+          };
+
+          if (type_trip == 'Econômica' && Number(json.miles) <= 70000) {
+            console.log('SAVED SeatsAero')
+            console.log(json)
+            return new AlertService().createAlert(json)
+          }
+
+          if (type_trip == 'Executiva' && Number(json.miles) <= 120000) {
+            console.log('SAVED SeatsAero')
+            console.log(json)
+            return new AlertService().createAlert(json)
+          }
+
+          if (json.miles != null && source == 'azul') {
+            console.log('SAVED SeatsAero')
+            console.log(json)
+            return new AlertService().createAlert(json)
+          }
+        }
+      }
+      if (availability.hasMore) {
+        skip += take;
+      } else {
+        console.log('No more pages available for current selection. Restarting...');
+        skip = 0;
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
 
   getRandomElement(arr: any) {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -869,26 +1051,33 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
         }
       });
 
-      const airports_from = [
-        'SCL'
-      ];
+      let airports_from: string[] = []
 
-      // const airports_to = ['MAD']
-      // const airports_to = [
-      //   'LIS', 'WAS', 'PAR', 'SEL',
-      //   'MAD', 'HND', 'CHI', 'LAX', 'ORL',
-      //   'NYC', 'MIL', 'BUE', 'LON',
-      //   'IAH', 'LIM', 'JFK', 'GIG'
-      // ];
+      if (this.change_search == 'BR') {
+        airports_from = [
+          'FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'
+        ];
+
+        this.change_search = 'CH'
+      } else if (this.change_search == 'CH') {
+        airports_from = [
+          'SCL'
+        ];
+
+        this.change_search = 'BR'
+      }
 
       const airports_to = [
-        'MAD', 'LIM', 'BUE', 'IAH', 'MIA', 'BCN'
-      ]
+        'LIS', 'WAS', 'PAR', 'SEL',
+        'MAD', 'HND', 'CHI', 'LAX', 'ORL',
+        'NYC', 'MIL', 'BUE', 'LON',
+        'IAH', 'LIM', 'JFK', 'GIG'
+      ];
 
       const cabin = ['Executive', 'Basic'];
 
-      const from = this.getRandomElement(airports_from);
-      const to = this.getRandomElement(airports_to);
+      const from: string = this.getRandomElement(airports_from);
+      const to: string = this.getRandomElement(airports_to);
 
       console.log('\n\nSaindo de: ' + from);
       console.log('Para: ' + to);
@@ -1043,61 +1232,42 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
         }, mileElements[index], flightSegments);
 
         console.log(flightInfo.miles)
+        flightInfo.miles = Number(flightInfo.miles)
 
-        if (Number(flightInfo.miles) <= 85000 && cabinSelected == 'Basic' && program == 'smiles') {
-          console.log('ALERTA CAPTURADOS');
-          console.log(flightInfo);
+        switch (program) {
+          case 'smiles':
+            if ((Number(flightInfo.miles) <= 70000 && cabinSelected == 'Basic') || (Number(flightInfo.miles) <= 120000 && cabinSelected == 'Executive')) {
+              new AlertService().createAlert({
+                affiliates_program: flightInfo.program,
+                trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
+                route: 'Internacional',
+                miles: Math.round(flightInfo.miles).toString(),
+                amount: Math.round(Number(calculateMilesToCurrency('smiles', Number(flightInfo.miles), from === 'SCL' ? 'CLP' : 'BRL'))).toString(),
+                airlines: flightSegments[0].airline,
+                sent: from === 'SCL' ? 'chile_group' : 'brasil_group',
+                type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
+                remaining: flightInfo.departure
+              });
+            }
+            break;
+          case 'multiplus':
+            if ((Number(flightInfo.miles) <= 85000 && cabinSelected == 'Basic') || Number(flightInfo.miles) <= 120000 && cabinSelected == 'Executive') {
+              new AlertService().createAlert({
+                affiliates_program: flightInfo.program,
+                trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
+                route: 'Internacional',
+                miles: Math.round(flightInfo.miles).toString(),
+                amount: Math.round(Number(calculateMilesToCurrency('latam', Number(flightInfo.miles), from === 'SCL' ? 'CLP' : 'BRL'))).toString(),
+                airlines: flightSegments[0].airline,
+                sent: from === 'SCL' ? 'chile_group' : 'brasil_group',
+                type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
+                remaining: flightInfo.departure
+              });
+            }
+            break;
 
-          new AlertService().createAlert({
-            affiliates_program: flightInfo.program,
-            trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
-            route: 'Internacional',
-            miles: Math.round(flightInfo.miles).toString(),
-            amount: Math.round(Number(calculateMilesToCLP('latam', Number(flightInfo.miles)))).toString(),
-            airlines: flightSegments[0].airline,
-            sent: 'chile_group',
-            type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
-            remaining: flightInfo.departure
-          });
-        }
-
-        if (Number(flightInfo.miles) <= 140000 && cabinSelected != 'Basic' && program == 'smiles') {
-          console.log('ALERTA CAPTURADOS');
-          console.log(flightInfo);
-
-          new AlertService().createAlert({
-            affiliates_program: flightInfo.program,
-            trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
-            route: 'Internacional',
-            miles: Math.round(flightInfo.miles).toString(),
-            amount: Math.round(Number(calculateMilesToCLP('latam', Number(flightInfo.miles)))).toString(),
-            airlines: flightSegments[0].airline,
-            sent: 'chile_group',
-            type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
-            remaining: flightInfo.departure
-          });
-        }
-
-        if (flightInfo.miles <= 120000) {
-          console.log('ALERTA CAPTURADOS');
-          console.log(flightInfo);
-
-          new AlertService().createAlert({
-            affiliates_program: flightInfo.program,
-            trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
-            route: 'Internacional',
-            miles: Math.round(flightInfo.miles).toString(),
-            amount: Math.round(Number(calculateMilesToCLP('latam', Number(flightInfo.miles)))).toString(),
-            airlines: flightSegments[0].airline,
-            sent: 'chile_group',
-            type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
-            remaining: flightInfo.departure
-          });
-        } else {
-
-          console.log('Nada bom encontrado.\n\n');
-
-
+          default:
+            break;
         }
 
         await browser.close();
