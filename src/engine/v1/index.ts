@@ -350,14 +350,13 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     if (!this.is_running) {
       this.is_running = true;
       this.interval = setInterval(() => this.processQueue(), 5000);
-      // setInterval(() => this.processQueueSeatsAero(), 1800000);
-      // setInterval(() => this.processQueueSeatsAeroChile(), 1800000);
+      setInterval(() => this.processQueueSeatsAero(), 1800000);
+      setInterval(() => this.processQueueSeatsAeroChile(), 1800000);
       // setInterval(() => this.processQueueSeatsAeroChileFreeGroup(), 1800000);
 
-      // setInterval(() => this.getSeatsAeroBrasil(), 60000);
-      // setInterval(() => this.getSeatsAeroChile(), 60000);
-      // this.getSeatsAeroChile()
-      // this.getTKmilhas();
+      setInterval(() => this.getSeatsAeroBrasil(), 300000);
+      setInterval(() => this.getSeatsAeroChile(), 300000);
+      this.getTKmilhas();
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -444,7 +443,6 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       'ICN', // Incheon International Airport, Seoul, South Korea
       'BKK', // Suvarnabhumi Airport, Bangkok, Thailand
       'JFK', // John F. Kennedy International Airport, New York City, USA
-      'MIA', // Miami International Airport, Miami, USA
       'HKG', // Hong Kong International Airport, Hong Kong, China
       'LIS', // Humberto Delgado Airport, Lisbon, Portugal
       'WAS', // Washington D.C. (various airports), USA
@@ -740,7 +738,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       'BSB', 'CGH', 'SDU', 'POA', 'SSA', 'REC',
       'CWB', 'FOR', 'BEL', 'MAO', 'CNF', 'VIX',
       'MCZ', 'AJU', 'AMS', 'FRA', 'IST', 'SIN',
-      'ICN', 'BKK', 'JFK', 'MIA', 'HKG', 'NAT'];
+      'ICN', 'BKK', 'JFK', 'HKG', 'NAT'];
 
     const source = sources[Math.floor(Math.random() * sources.length)];
     const destination = continents[Math.floor(Math.random() * continents.length)];
