@@ -2,6 +2,7 @@ import fastify from 'fastify';
 import cors from '@fastify/cors'
 import { routes } from './routes';
 import engineV1 from './engine/v1';
+import calculateMilesToCurrency from './util/conversor';
 require('dotenv').config();
 
 const app = fastify();
@@ -26,3 +27,5 @@ app.listen({
 const engine_v1 = new engineV1();
 
 engine_v1.start();
+
+// console.log(Math.round(Number(calculateMilesToCurrency('smiles', 100000, 'CLP'))))

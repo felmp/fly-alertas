@@ -27,6 +27,7 @@ model Alerts {
   sent               String
   sent_date          DateTime?
   created_at         DateTime? @default(now())
+  link               String?
 
   @@map("alerts")
 }

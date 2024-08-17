@@ -108,6 +108,8 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 💺 Clase: ${alert.type_trip?.trim()}
 🗓️  Alerta de Fecha: ${alert.remaining}
 
+Link: 
+
 _¿No tienes millas? ¡Te ayudamos con esa emisión!_
 `;
 
@@ -211,7 +213,7 @@ _¿No tienes millas? ¡Te ayudamos con esa emisión!_
 _¿QUIERES CONSEGUIR ESTA OFERTA AHORA ANTES DE QUE TERMINE? LLAMA A NUESTRO SOPORTE EN PRIVADO TE AYUDAMOS CON LA EMISIÓN._
 `;
 
-        sendDefaultMessage(formattedText, 'WAG21643897-66e9-45a7-8886-7040c803db73');
+        sendDefaultMessage(formattedText, 'WAG631c5f1e-b6c2-418a-814e-96d4310a092c');
 
         await prismaClient.alerts.update({
           where: { id: alert.id },
@@ -351,8 +353,11 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       this.is_running = true;
       this.interval = setInterval(() => this.processQueue(), 5000);
       setInterval(() => this.processQueueSeatsAero(), 1800000);
-      setInterval(() => this.processQueueSeatsAeroChile(), 1800000);
-      // setInterval(() => this.processQueueSeatsAeroChileFreeGroup(), 1800000);
+      setInterval(() => this.processQueueSeatsAeroChile(), 1800000);;
+      // setInterval(() => this.processQueueSeatsAeroChileFreeGroup(), 5000);
+      // this.processQueueSeatsAero()
+
+      // setTimeout(() => this.processQueueSeatsAeroChile(), 5000)
 
       setInterval(() => this.getSeatsAeroBrasil(), 300000);
       setInterval(() => this.getSeatsAeroChile(), 300000);
@@ -678,19 +683,19 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
             created_at: null
           };
 
-          if (type_trip == 'Econômica' && Number(json.miles) <= 85000) {
+            if (type_trip == 'Econômica' && Number(json.miles) <= 85000 && !json.airlines?.includes('Sky Airline Chile') ) {
             console.log('SAVED SeatsAero')
             console.log(json)
             return new AlertService().createAlert(json)
           }
 
-          if (type_trip == 'Executiva' && Number(json.miles) <= 140000) {
+          if (type_trip == 'Executiva' && Number(json.miles) <= 140000 && !json.airlines?.includes('Sky Airline Chile')) {
             console.log('SAVED SeatsAero')
             console.log(json)
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && source == 'azul') {
+          if (json.miles != null && source == 'azul' && !json.airlines?.includes('Sky Airline Chile')) {
             console.log('SAVED SeatsAero')
             console.log(json)
             return new AlertService().createAlert(json)
@@ -957,19 +962,19 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
             created_at: null
           };
 
-          if (type_trip == 'Econômica' && Number(json.miles) <= 70000) {
+          if (type_trip == 'Econômica' && Number(json.miles) <= 70000 && !json.airlines?.includes('Sky Airline Chile')) {
             console.log('SAVED SeatsAero')
             console.log(json)
             return new AlertService().createAlert(json)
           }
 
-          if (type_trip == 'Executiva' && Number(json.miles) <= 120000) {
+          if (type_trip == 'Executiva' && Number(json.miles) <= 120000 && !json.airlines?.includes('Sky Airline Chile')) {
             console.log('SAVED SeatsAero')
             console.log(json)
             return new AlertService().createAlert(json)
           }
 
-          if (json.miles != null && source == 'azul') {
+          if (json.miles != null && source == 'azul' && !json.airlines?.includes('Sky Airline Chile')) {
             console.log('SAVED SeatsAero')
             console.log(json)
             return new AlertService().createAlert(json)

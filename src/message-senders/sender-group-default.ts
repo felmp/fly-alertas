@@ -1,6 +1,9 @@
 import { gpt, wpp } from '../axios';
 
 export async function sendDefaultMessage(message: string, group_id: string = 'WAGb20bcd1c-1bfd-447a-bc33-594a10952708') {
+  // GROUP : fly alertas milhas (original) = WAGb20bcd1c-1bfd-447a-bc33-594a10952708
+  // GROUP : fly alertas chile free = WAG21643897-66e9-45a7-8886-7040c803db73
+  
   const prompt = 'Retire completamente todo tipo de link e redirecionamento da mensagem.' +
     'Não altere nada da mensagem, somente retire o que for link e observação do texto, se não houver não mexa em nada, retorne do jeito que foi enviado.' +
     'Não tire nenhum emoji'
