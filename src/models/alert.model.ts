@@ -12,4 +12,5 @@ export type Alert = {
   sent: string,
   sent_date: string | null,
   created_at: string | null,
+  link: string | null
 }

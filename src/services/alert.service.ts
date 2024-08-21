@@ -20,7 +20,7 @@ class AlertService {
   }
 
   async createAlert(data: Partial<Alert>) {
-    const { original_message, affiliates_program, amount, sent, trip, route, miles, type_trip, airlines, remaining } = data;
+    const { original_message, affiliates_program, amount, sent, trip, route, miles, type_trip, airlines, remaining, link } = data;
 
     const save = await prismaClient.alerts.create({
       data: {
@@ -33,7 +33,8 @@ class AlertService {
         type_trip,
         airlines,
         remaining,
-        amount
+        amount, 
+        link
       }
     })
 

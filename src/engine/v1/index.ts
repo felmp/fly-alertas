@@ -74,6 +74,58 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
       }, 4000);
 
+
+      /// PRIVADO DO CARA TESTE BR
+      setTimeout(async () => {
+        if ((alert.type_trip?.includes('EXECUTIVA') || alert.type_trip?.includes('Executiva')) && this.count_execution !== 10) {
+          this.count_execution++;
+          const formattedText = `
+⚠️ *OPORTUNIDADE @FLYALERTAS*
+
+🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
+✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
+💰 A partir de ${alert.miles?.trim()} trecho + taxas
+🛫 Companhia Aérea: ${alert.airlines?.trim()}
+💺 Classe: ${alert.type_trip?.trim()}
+🗓️  Alerta de Data : ${alert.remaining}
+_Não tem milhas ? Nós te ajudamos com essa emissão !_`;
+
+
+          const prompt = 'Retire completamente todo tipo de link e redirecionamento da mensagem.' +
+            'Não altere nada da mensagem, somente retire o que for link e observação do texto, se não houver não mexa em nada, retorne do jeito que foi enviado.' +
+            'Não tire nenhum emoji'
+
+          const data_gpt = {
+            "model": "gpt-3.5-turbo",
+            "messages": [
+              {
+                "role": "system",
+                "content": prompt
+              },
+              {
+                "role": "user",
+                "content": formattedText
+              }
+            ]
+          };
+
+          const messageGPT = await gpt.post('chat/completions', data_gpt);
+
+          var data = JSON.stringify({
+            "to_number": "+19713406030",
+            "from_number": "+5579920012363",
+            "text": messageGPT.data.choices[0].message.content
+          });
+
+          wpp.post('open/whatsapp/send-message', data)
+            .then(function (response) {
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+        }
+      }, 4000);
+
       await prismaClient.alerts.update({
         where: { id: alert.id },
         data: {
@@ -284,6 +336,59 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
       }, 4000);
 
+      /// PRIVADO DO CARA TESTE BR
+      setTimeout(async () => {
+        if ((alert.type_trip?.includes('EXECUTIVA') || alert.type_trip?.includes('Executiva')) && this.count_execution !== 10) {
+          this.count_execution++;
+          const formattedText = `
+⚠️ *OPORTUNIDADE @FLYALERTAS*
+
+🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
+✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
+💰 ${miles} + taxas
+🛫 Companhia Aérea: ${alert.airlines?.trim()}
+💺 Classe: ${alert.type_trip?.trim()}
+🗓️  Alerta de Data : ${alert.remaining}
+_Não tem milhas ? Nós te ajudamos com essa emissão !_`;
+
+
+          const prompt = 'Retire completamente todo tipo de link e redirecionamento da mensagem.' +
+            'Não altere nada da mensagem, somente retire o que for link e observação do texto, se não houver não mexa em nada, retorne do jeito que foi enviado.' +
+            'Não tire nenhum emoji'
+
+          const data_gpt = {
+            "model": "gpt-3.5-turbo",
+            "messages": [
+              {
+                "role": "system",
+                "content": prompt
+              },
+              {
+                "role": "user",
+                "content": formattedText
+              }
+            ]
+          };
+
+          const messageGPT = await gpt.post('chat/completions', data_gpt);
+
+          var data = JSON.stringify({
+            // "to_group_uuid": group_id,
+            "to_number": "+19713406030",
+            "from_number": "+5579920012363",
+            "text": messageGPT.data.choices[0].message.content
+          });
+
+          wpp.post('open/whatsapp/send-message', data)
+            .then(function (response) {
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+        }
+      }, 4000);
+
+
       await prismaClient.alerts.update({
         where: { id: alert.id },
         data: {
@@ -353,15 +458,10 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       this.is_running = true;
       this.interval = setInterval(() => this.processQueue(), 5000);
       setInterval(() => this.processQueueSeatsAero(), 1800000);
-      setInterval(() => this.processQueueSeatsAeroChile(), 1800000);;
-      // setInterval(() => this.processQueueSeatsAeroChileFreeGroup(), 5000);
-      // this.processQueueSeatsAero()
-
-      // setTimeout(() => this.processQueueSeatsAeroChile(), 5000)
-
-      setInterval(() => this.getSeatsAeroBrasil(), 300000);
+      setInterval(() => this.processQueueSeatsAeroChile(), 1805000);
+      setInterval(() => this.getSeatsAeroBrasil(), 10000);
       setInterval(() => this.getSeatsAeroChile(), 300000);
-      this.getTKmilhas();
+      // this.getTKmilhas();
       console.log('Fila de alertas iniciada.');
     }
   }
@@ -680,10 +780,11 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
             remaining: moment(e.Date).format('L'),
             sent: 'chile_group',
             sent_date: null,
-            created_at: null
+            created_at: null,
+            link: null
           };
 
-            if (type_trip == 'Econômica' && Number(json.miles) <= 85000 && !json.airlines?.includes('Sky Airline Chile') ) {
+          if (type_trip == 'Econômica' && Number(json.miles) <= 85000 && !json.airlines?.includes('Sky Airline Chile')) {
             console.log('SAVED SeatsAero')
             console.log(json)
             return new AlertService().createAlert(json)
@@ -715,9 +816,9 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
   async getSeatsAeroBrasil() {
     moment.locale('pt-br')
-    // this.count_execution = this.count_execution + 1;
+    this.count_execution = this.count_execution + 1;
 
-    // console.log(this.count_execution)
+    console.log(this.count_execution)
     const origins_airports = ['FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'];
     const continents = ['North+America', 'Europe', 'Asia', 'Africa', 'South+America', 'Oceania'];
     const sources = ['smiles', 'azul'];
@@ -818,7 +919,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
       availability = response.data
 
-      // console.log('---------------------------')
+      console.log('---------------------------')
 
 
       if (availability.data.length === 0) {
@@ -959,25 +1060,50 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
             remaining: moment(e.Date).format('L'),
             sent: 'brasil_group',
             sent_date: null,
-            created_at: null
+            created_at: null,
+            link: null
           };
 
           if (type_trip == 'Econômica' && Number(json.miles) <= 70000 && !json.airlines?.includes('Sky Airline Chile')) {
-            console.log('SAVED SeatsAero')
-            console.log(json)
-            return new AlertService().createAlert(json)
+            const response = await engine_v1.get(`/trips/${e.ID}`);
+
+            const link = response.data
+
+            json.link = link.booking_links[0].link;
+
+            if (json.link != null) {
+              console.log('SAVED SeatsAero')
+              console.log(json)
+              return new AlertService().createAlert(json)
+            }
           }
 
           if (type_trip == 'Executiva' && Number(json.miles) <= 120000 && !json.airlines?.includes('Sky Airline Chile')) {
-            console.log('SAVED SeatsAero')
-            console.log(json)
-            return new AlertService().createAlert(json)
+            const response = await engine_v1.get(`/trips/${e.ID}`);
+
+            const link = response.data
+
+            json.link = link.booking_links[0].link;
+
+            if (json.link != null) {
+              console.log('SAVED SeatsAero')
+              console.log(json)
+              return new AlertService().createAlert(json)
+            }
           }
 
           if (json.miles != null && source == 'azul' && !json.airlines?.includes('Sky Airline Chile')) {
-            console.log('SAVED SeatsAero')
-            console.log(json)
-            return new AlertService().createAlert(json)
+            const response = await engine_v1.get(`/trips/${e.ID}`);
+
+            const link = response.data
+
+            json.link = link.booking_links[0].link;
+
+            if (json.link != null) {
+              console.log('SAVED SeatsAero')
+              console.log(json)
+              return new AlertService().createAlert(json)
+            }
           }
         }
       }
@@ -1034,7 +1160,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-fullWidth.MuiButtonBase-root.css-1g8e2pa').click();
       await delay(3000);
 
-      const buttonsToClick = ['multiplus', 'smiles'];
+      const buttonsToClick = ['smiles'];
       const program = this.getRandomElement(buttonsToClick);
       const selector = `button[value="${program}"]`;
       await page.locator(selector).click();
@@ -1077,7 +1203,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
         'IAH', 'LIM', 'JFK', 'GIG'
       ];
 
-      const cabin = ['Executive', 'Basic'];
+      const cabin = ['Executive'];
 
       const from: string = this.getRandomElement(airports_from);
       const to: string = this.getRandomElement(airports_to);
@@ -1240,6 +1366,15 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
         switch (program) {
           case 'smiles':
             if ((Number(flightInfo.miles) <= 70000 && cabinSelected == 'Basic') || (Number(flightInfo.miles) <= 120000 && cabinSelected == 'Executive')) {
+
+              const [day, month, year, hour, minute] = flightInfo.departure.match(/\d+/g).map(Number);
+              const date = new Date(year, month - 1, day, hour, minute);
+              const millisecondsData = date.getTime();
+
+
+              const link = `https://www.smiles.com.br/mfe/emissao-passagem/?adults=1&cabin=${cabinSelected == 'Basic' ? 'ECONOMIC' : 'BUSINESS'}&children=0&infants=0&isElegible=false&isFlexibleDateChecked=false&searchType=g3&segments=1&originAirportIsAny=true&destinAirportIsAny=true&novo-resultado-voos=true&departureDate=${millisecondsData}&tripType=2&originAirport=${from}&destinationAirport=${to}`;
+
+
               new AlertService().createAlert({
                 affiliates_program: flightInfo.program,
                 trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
@@ -1249,7 +1384,8 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
                 airlines: flightSegments[0].airline,
                 sent: from === 'SCL' ? 'chile_group' : 'brasil_group',
                 type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
-                remaining: flightInfo.departure
+                remaining: flightInfo.departure,
+                link
               });
             }
             break;
