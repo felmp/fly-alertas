@@ -1,8 +1,9 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance, FastifyRequest } from "fastify";
 import { formatMessageText } from "./util/format-model";
 import { GroupMessage } from "./models/group-message.model";
 import { AlertService } from "./services/alert.service";
 import { wpp } from "./axios";
+import engineV1 from "./engine/v1";
 
 export async function routes(fastify: FastifyInstance) {
   fastify.post('/webhook', async (request, res) => {
@@ -24,9 +25,9 @@ export async function routes(fastify: FastifyInstance) {
   })
 
   fastify.get('/alerts/total', async (req, res) => {
-     const total_alerts = await new AlertService().getTotalAlerts();
+    const total_alerts = await new AlertService().getTotalAlerts();
 
-     res.send(total_alerts)
+    res.send(total_alerts)
   })
 
   fastify.get('/participants/total', async (req, res) => {
@@ -35,5 +36,21 @@ export async function routes(fastify: FastifyInstance) {
     })
   })
 
-  // fastify.get
+  interface SearchRequestBody {
+    origin: string;
+    destination: string;
+    date: {
+      from: string;
+      to: string;
+    };
+    cabin: string;
+  }
+
+  fastify.post('/search', async (req, res) => {
+    const body = req.body as SearchRequestBody;
+
+    const engine_v1 = new engineV1();
+    engine_v1.getTKmilhasEndpoint(body.origin, body.destination, body.date.from, body.date.to, body.cabin)
+    // res.send(alert)
+  })
 }

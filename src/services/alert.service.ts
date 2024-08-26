@@ -50,7 +50,7 @@ class AlertService {
     // Ajusta a data para o final do dia (23:59:59)
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-    const save = await prismaClient.alerts.count({
+    const count = await prismaClient.alerts.count({
       where: {
         trip,
         created_at: {
@@ -60,7 +60,7 @@ class AlertService {
       },
     });
 
-    return save;
+    return count;
   }
 }
 

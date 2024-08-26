@@ -11,6 +11,7 @@ import moment from 'moment';
 import delay from '../../util/delay';
 import 'moment/locale/pt-br'
 import calculateMilesToCurrency from '../../util/conversor';
+import axios from 'axios';
 
 const formatter = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
@@ -53,6 +54,8 @@ class engineV1 {
 💺 Classe: ${alert.type_trip?.trim()}
 🗓️  Alerta de Data : ${alert.remaining}
 
+Link: ${alert.link}
+
 _Não tem milhas ? Nós te ajudamos com essa emissão !_
 `;
 
@@ -68,6 +71,9 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_
 🛫 Companhia Aérea: ${alert.airlines?.trim()}
 💺 Classe: ${alert.type_trip?.trim()}
 🗓️  Alerta de Data : ${alert.remaining}
+
+Link: ${alert.link}
+
 _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
         sendMoneyMessage(formattedText)
@@ -76,55 +82,55 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
 
       /// PRIVADO DO CARA TESTE BR
-      setTimeout(async () => {
-        if ((alert.type_trip?.includes('EXECUTIVA') || alert.type_trip?.includes('Executiva')) && this.count_execution !== 10) {
-          this.count_execution++;
-          const formattedText = `
-⚠️ *OPORTUNIDADE @FLYALERTAS*
+      //       setTimeout(async () => {
+      //         if ((alert.type_trip?.includes('EXECUTIVA') || alert.type_trip?.includes('Executiva')) && this.count_execution !== 10) {
+      //           this.count_execution++;
+      //           const formattedText = `
+      // ⚠️ *OPORTUNIDADE @FLYALERTAS*
 
-🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
-✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
-💰 A partir de ${alert.miles?.trim()} trecho + taxas
-🛫 Companhia Aérea: ${alert.airlines?.trim()}
-💺 Classe: ${alert.type_trip?.trim()}
-🗓️  Alerta de Data : ${alert.remaining}
-_Não tem milhas ? Nós te ajudamos com essa emissão !_`;
+      // 🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
+      // ✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
+      // 💰 A partir de ${alert.miles?.trim()} trecho + taxas
+      // 🛫 Companhia Aérea: ${alert.airlines?.trim()}
+      // 💺 Classe: ${alert.type_trip?.trim()}
+      // 🗓️  Alerta de Data : ${alert.remaining}
+      // _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
 
-          const prompt = 'Retire completamente todo tipo de link e redirecionamento da mensagem.' +
-            'Não altere nada da mensagem, somente retire o que for link e observação do texto, se não houver não mexa em nada, retorne do jeito que foi enviado.' +
-            'Não tire nenhum emoji'
+      //           const prompt = 'Retire completamente todo tipo de link e redirecionamento da mensagem.' +
+      //             'Não altere nada da mensagem, somente retire o que for link e observação do texto, se não houver não mexa em nada, retorne do jeito que foi enviado.' +
+      //             'Não tire nenhum emoji'
 
-          const data_gpt = {
-            "model": "gpt-3.5-turbo",
-            "messages": [
-              {
-                "role": "system",
-                "content": prompt
-              },
-              {
-                "role": "user",
-                "content": formattedText
-              }
-            ]
-          };
+      //           const data_gpt = {
+      //             "model": "gpt-3.5-turbo",
+      //             "messages": [
+      //               {
+      //                 "role": "system",
+      //                 "content": prompt
+      //               },
+      //               {
+      //                 "role": "user",
+      //                 "content": formattedText
+      //               }
+      //             ]
+      //           };
 
-          const messageGPT = await gpt.post('chat/completions', data_gpt);
+      //           const messageGPT = await gpt.post('chat/completions', data_gpt);
 
-          var data = JSON.stringify({
-            "to_number": "+19713406030",
-            "from_number": "+5579920012363",
-            "text": messageGPT.data.choices[0].message.content
-          });
+      //           var data = JSON.stringify({
+      //             "to_number": "+19713406030",
+      //             "from_number": "+5579920012363",
+      //             "text": messageGPT.data.choices[0].message.content
+      //           });
 
-          wpp.post('open/whatsapp/send-message', data)
-            .then(function (response) {
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
-        }
-      }, 4000);
+      //           wpp.post('open/whatsapp/send-message', data)
+      //             .then(function (response) {
+      //             })
+      //             .catch(function (error) {
+      //               console.log(error);
+      //             });
+      //         }
+      //       }, 4000);
 
       await prismaClient.alerts.update({
         where: { id: alert.id },
@@ -314,6 +320,9 @@ _¿QUIERES CONSEGUIR ESTA OFERTA AHORA ANTES DE QUE TERMINE? LLAMA A NUESTRO SOP
 🛫 Companhia Aérea: ${alert.airlines?.trim()}
 💺 Classe: ${alert.type_trip?.trim()}
 🗓️  Alerta de Data : ${alert.remaining}
+
+${alert.link != null ? 'LINK : ' + alert.link : ''}
+
 _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
       console.log(formattedText)
@@ -330,6 +339,9 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 🛫 Companhia Aérea: ${alert.airlines?.trim()}
 💺 Classe: ${alert.type_trip?.trim()}
 🗓️  Alerta de Data : ${alert.remaining}
+
+${alert.link != null ? 'LINK : ' + alert.link : ''}
+
 _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
         sendMoneyMessage(formattedText)
@@ -349,6 +361,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 🛫 Companhia Aérea: ${alert.airlines?.trim()}
 💺 Classe: ${alert.type_trip?.trim()}
 🗓️  Alerta de Data : ${alert.remaining}
+
 _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
 
@@ -399,71 +412,23 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
     }
   }
 
-  async processQueueTK() {
-    const alerts = await prismaClient.alerts.findMany({
-      where: {
-        sent: 'tk'
-      },
-      orderBy: { created_at: 'asc' },
-      take: 1
-    });
-
-    for (const alert of alerts) {
-      console.log(`Enviando alert ID: ${alert.id} - TK milhas`);
-
-      const formattedText = `
-⚠️ *OPORTUNIDADE @FLYALERTAS*
-
-🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
-✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
-💰 ${alert.miles?.trim()}
-🛫 Companhia Aérea: ${alert.airlines?.trim()}
-💺 Classe: ${alert.type_trip?.trim()}
-🗓️  Alerta de Data : ${alert.remaining}
-
-_Não tem milhas ? Nós te ajudamos com essa emissão !_
-`;
-
-      sendDefaultMessage(formattedText)
-
-      setTimeout(() => {
-        const formattedText = `
-⚠️ *OPORTUNIDADE @FLYALERTAS*
-
-🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
-✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
-💰 A partir de ${alert.amount} trecho + taxas
-🛫 Companhia Aérea: ${alert.airlines?.trim()}
-💺 Classe: ${alert.type_trip?.trim()}
-🗓️  Alerta de Data : ${alert.remaining}
-
-_Não tem milhas ? Nós te ajudamos com essa emissão !_`;
-
-        sendMoneyMessage(formattedText)
-
-      }, 4000);
-
-      await prismaClient.alerts.update({
-        where: { id: alert.id },
-        data: {
-          sent: 'sent',
-          sent_date: new Date()
-        }
-      });
-    }
-  }
-
   start() {
     if (!this.is_running) {
       this.is_running = true;
       this.interval = setInterval(() => this.processQueue(), 5000);
       setInterval(() => this.processQueueSeatsAero(), 1800000);
       setInterval(() => this.processQueueSeatsAeroChile(), 1805000);
-      setInterval(() => this.getSeatsAeroBrasil(), 10000);
+      setInterval(() => this.getSeatsAeroBrasil(), 300000);
       setInterval(() => this.getSeatsAeroChile(), 300000);
       // this.getTKmilhas();
       console.log('Fila de alertas iniciada.');
     }
+  }
+
+  async test() {
+    const returnLast = await new AlertService().verifyLast('São Paulo para Dallas');
+
+    console.log(returnLast <= 2)
   }
 
   stop() {
@@ -774,7 +739,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
             affiliates_program: e.Route.Source.toLocaleUpperCase(),
             trip: 'Santiago a ' + airportsCity[e.Route.DestinationAirport],
             route: continentsTranslate[e.Route.OriginRegion] + ' a ' + continentsTranslate[e.Route.DestinationRegion],
-            amount: calculateMilesToCurrency(e.Source, Number(miles), 'CLP'),
+            amount: Math.round(Number(calculateMilesToCurrency(e.Source, Number(miles), 'CLP'))).toString(),
             type_trip,
             airlines,
             remaining: moment(e.Date).format('L'),
@@ -784,22 +749,30 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
             link: null
           };
 
-          if (type_trip == 'Econômica' && Number(json.miles) <= 85000 && !json.airlines?.includes('Sky Airline Chile')) {
-            console.log('SAVED SeatsAero')
-            console.log(json)
-            return new AlertService().createAlert(json)
-          }
 
-          if (type_trip == 'Executiva' && Number(json.miles) <= 140000 && !json.airlines?.includes('Sky Airline Chile')) {
-            console.log('SAVED SeatsAero')
-            console.log(json)
-            return new AlertService().createAlert(json)
-          }
+          if (json.trip !== null) {
 
-          if (json.miles != null && source == 'azul' && !json.airlines?.includes('Sky Airline Chile')) {
-            console.log('SAVED SeatsAero')
-            console.log(json)
-            return new AlertService().createAlert(json)
+            const returnLast = await new AlertService().verifyLast(json.trip);
+
+            if (returnLast <= 2) {
+              if (type_trip == 'Econômica' && Number(json.miles) <= 85000 && !json.airlines?.includes('Sky Airline Chile')) {
+                console.log('SAVED SeatsAero')
+                console.log(json)
+                return new AlertService().createAlert(json)
+              }
+
+              if (type_trip == 'Executiva' && Number(json.miles) <= 140000 && !json.airlines?.includes('Sky Airline Chile')) {
+                console.log('SAVED SeatsAero')
+                console.log(json)
+                return new AlertService().createAlert(json)
+              }
+
+              if (json.miles != null && source == 'azul' && !json.airlines?.includes('Sky Airline Chile')) {
+                console.log('SAVED SeatsAero')
+                console.log(json)
+                return new AlertService().createAlert(json)
+              }
+            }
           }
         }
       }
@@ -1054,7 +1027,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
             affiliates_program: e.Route.Source.toLocaleUpperCase(),
             trip: airportsCity[e.Route.OriginAirport] + ' para ' + airportsCity[e.Route.DestinationAirport],
             route: continentsTranslate[e.Route.OriginRegion] + ' a ' + continentsTranslate[e.Route.DestinationRegion],
-            amount: calculateMilesToCurrency(e.Source, Number(miles), 'BRL'),
+            amount: Math.round(Number(calculateMilesToCurrency(e.Source, Number(miles), 'BRL'))).toString(),
             type_trip,
             airlines,
             remaining: moment(e.Date).format('L'),
@@ -1064,45 +1037,62 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
             link: null
           };
 
-          if (type_trip == 'Econômica' && Number(json.miles) <= 70000 && !json.airlines?.includes('Sky Airline Chile')) {
-            const response = await engine_v1.get(`/trips/${e.ID}`);
+          if (json.trip !== null) {
 
-            const link = response.data
+            const returnLast = await new AlertService().verifyLast(json.trip);
 
-            json.link = link.booking_links[0].link;
+            if (returnLast <= 2) {
 
-            if (json.link != null) {
-              console.log('SAVED SeatsAero')
-              console.log(json)
-              return new AlertService().createAlert(json)
-            }
-          }
+              if (type_trip == 'Econômica' && Number(json.miles) <= 70000 && !json.airlines?.includes('Sky Airline Chile')) {
+                const response = await engine_v1.get(`/trips/${e.ID}`);
 
-          if (type_trip == 'Executiva' && Number(json.miles) <= 120000 && !json.airlines?.includes('Sky Airline Chile')) {
-            const response = await engine_v1.get(`/trips/${e.ID}`);
+                const link = response.data
 
-            const link = response.data
+                json.link = link.booking_links[0].link;
 
-            json.link = link.booking_links[0].link;
+                const response_redirect = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": json.link })
 
-            if (json.link != null) {
-              console.log('SAVED SeatsAero')
-              console.log(json)
-              return new AlertService().createAlert(json)
-            }
-          }
+                if (response_redirect.data) {
+                  console.log('SAVED SeatsAero')
+                  console.log(json)
+                  json.link = response_redirect.data.urlEncurtada
+                  return new AlertService().createAlert(json)
+                }
+              }
 
-          if (json.miles != null && source == 'azul' && !json.airlines?.includes('Sky Airline Chile')) {
-            const response = await engine_v1.get(`/trips/${e.ID}`);
+              if (type_trip == 'Executiva' && Number(json.miles) <= 120000 && !json.airlines?.includes('Sky Airline Chile')) {
+                const response = await engine_v1.get(`/trips/${e.ID}`);
 
-            const link = response.data
+                const link = response.data
 
-            json.link = link.booking_links[0].link;
+                json.link = link.booking_links[0].link;
 
-            if (json.link != null) {
-              console.log('SAVED SeatsAero')
-              console.log(json)
-              return new AlertService().createAlert(json)
+                const response_redirect = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": json.link })
+
+                if (response_redirect.data) {
+                  console.log('SAVED SeatsAero')
+                  console.log(json)
+                  json.link = response_redirect.data.urlEncurtada
+                  return new AlertService().createAlert(json)
+                }
+              }
+
+              if (json.miles != null && source == 'azul' && !json.airlines?.includes('Sky Airline Chile')) {
+                const response = await engine_v1.get(`/trips/${e.ID}`);
+
+                const link = response.data
+
+                json.link = link.booking_links[0].link;
+
+                const response_redirect = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": json.link })
+
+                if (response_redirect.data) {
+                  console.log('SAVED SeatsAero')
+                  console.log(json)
+                  json.link = response_redirect.data.urlEncurtada
+                  return new AlertService().createAlert(json)
+                }
+              }
             }
           }
         }
@@ -1130,13 +1120,6 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
         defaultViewport: null,
         args: [
           '--window-size=1920,1080',
-          // '--disable-gpu',
-          // '--disable-dev-shm-usage',
-          // '--disable-setuid-sandbox',
-          // '--no-first-run',
-          // '--no-sandbox',
-          // '--no-zygote',
-          // '--single-process',
         ],
         executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
         protocolTimeout: 0
@@ -1195,6 +1178,10 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
         this.change_search = 'BR'
       }
+
+      airports_from = [
+        'FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'
+      ];
 
       const airports_to = [
         'LIS', 'WAS', 'PAR', 'SEL',
@@ -1371,37 +1358,49 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
               const date = new Date(year, month - 1, day, hour, minute);
               const millisecondsData = date.getTime();
 
-
               const link = `https://www.smiles.com.br/mfe/emissao-passagem/?adults=1&cabin=${cabinSelected == 'Basic' ? 'ECONOMIC' : 'BUSINESS'}&children=0&infants=0&isElegible=false&isFlexibleDateChecked=false&searchType=g3&segments=1&originAirportIsAny=true&destinAirportIsAny=true&novo-resultado-voos=true&departureDate=${millisecondsData}&tripType=2&originAirport=${from}&destinationAirport=${to}`;
 
+              const response = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": link })
 
-              new AlertService().createAlert({
-                affiliates_program: flightInfo.program,
-                trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
-                route: 'Internacional',
-                miles: Math.round(flightInfo.miles).toString(),
-                amount: Math.round(Number(calculateMilesToCurrency('smiles', Number(flightInfo.miles), from === 'SCL' ? 'CLP' : 'BRL'))).toString(),
-                airlines: flightSegments[0].airline,
-                sent: from === 'SCL' ? 'chile_group' : 'brasil_group',
-                type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
-                remaining: flightInfo.departure,
-                link
-              });
+              if (response.data) {
+                new AlertService().createAlert({
+                  affiliates_program: flightInfo.program,
+                  trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
+                  route: 'Internacional',
+                  miles: Math.round(flightInfo.miles).toString(),
+                  amount: Math.round(Number(calculateMilesToCurrency('smiles', Number(flightInfo.miles), from === 'SCL' ? 'CLP' : 'BRL'))).toString(),
+                  airlines: flightSegments[0].airline,
+                  sent: from === 'SCL' ? 'chile_group' : 'brasil_group',
+                  type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
+                  remaining: flightInfo.departure,
+                  link: response.data.urlEncurtada
+                });
+              }
+
             }
             break;
           case 'multiplus':
             if ((Number(flightInfo.miles) <= 85000 && cabinSelected == 'Basic') || Number(flightInfo.miles) <= 120000 && cabinSelected == 'Executive') {
-              new AlertService().createAlert({
-                affiliates_program: flightInfo.program,
-                trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
-                route: 'Internacional',
-                miles: Math.round(flightInfo.miles).toString(),
-                amount: Math.round(Number(calculateMilesToCurrency('latam', Number(flightInfo.miles), from === 'SCL' ? 'CLP' : 'BRL'))).toString(),
-                airlines: flightSegments[0].airline,
-                sent: from === 'SCL' ? 'chile_group' : 'brasil_group',
-                type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
-                remaining: flightInfo.departure
-              });
+              const departureDate = moment(flightInfo.departure, 'DD/MM/YYYY HH:mm').format('YYYY-MM-DD');
+
+              const link = `https://www.latamairlines.com/br/pt/oferta-voos?origin=${from}&outbound=${departureDate}T00:00:00.000Z&destination=${to}&inbound=undefined&adt=1&chd=0&inf=0&trip=OW&cabin=${cabinSelected == 'Basic' ? 'Economy' : 'Business'}&redemption=true&sort=RECOMMENDED`
+
+              const response = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": link })
+
+              if (response.data) {
+                new AlertService().createAlert({
+                  affiliates_program: flightInfo.program,
+                  trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
+                  route: 'Internacional',
+                  miles: Math.round(flightInfo.miles).toString(),
+                  amount: Math.round(Number(calculateMilesToCurrency('latam', Number(flightInfo.miles), from === 'SCL' ? 'CLP' : 'BRL'))).toString(),
+                  airlines: flightSegments[0].airline,
+                  sent: from === 'SCL' ? 'chile_group' : 'brasil_group',
+                  type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
+                  remaining: flightInfo.departure,
+                  link: response.data.urlEncurtada
+                });
+              }
             }
             break;
 
@@ -1420,6 +1419,196 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
       await delay(5000);
       await browser?.close();
       await this.getTKmilhas();
+    }
+  }
+
+  async getTKmilhasEndpoint(from: string, to: string, cabin: string, date_departure: string, date_return: string) {
+    let browser
+    try {
+      browser = await puppeteer.launch({
+        headless: false,
+        defaultViewport: null,
+        args: [
+          '--window-size=1920,1080',
+          // '--disable-gpu',
+          // '--disable-dev-shm-usage',
+          // '--disable-setuid-sandbox',
+          // '--no-first-run',
+          // '--no-sandbox',
+          // '--no-zygote',
+          // '--single-process',
+        ],
+        executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
+        protocolTimeout: 0
+      });
+
+      const page = await browser.newPage();
+      const client = await page.createCDPSession();
+      await client.send('Browser.grantPermissions', {
+        origin: "https://www.tkmilhas.com/login",
+        permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
+      });
+
+      await page.goto('https://www.tkmilhas.com/login', { timeout: 0 });
+
+      await page.locator('#mui-1').fill('ruan_jtl@hotmail.com');
+      await delay(3000);
+
+      await page.locator('#mui-2').fill('Isabel%2936');
+      await delay(3000);
+
+      await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-fullWidth.MuiButtonBase-root.css-1g8e2pa').click();
+      await delay(3000);
+
+      const buttonsToClick = ['smiles'];
+      const program = this.getRandomElement(buttonsToClick);
+      const selector = `button[value="${program}"]`;
+      await page.locator(selector).click();
+      await delay(1000);
+
+      await page.evaluate(async () => {
+        let scrollPosition = 0;
+        let documentHeight = document.body.scrollHeight;
+
+        while (documentHeight > scrollPosition) {
+          window.scrollBy(0, documentHeight);
+          await new Promise(resolve => {
+            setTimeout(resolve, 1000);
+          });
+          scrollPosition = documentHeight;
+          documentHeight = document.body.scrollHeight;
+        }
+      });
+      console.log('\n\nSaindo de: ' + from);
+      console.log('Para: ' + to);
+      console.log('\nSource: ' + program);
+
+      await page.locator('.MuiInput-root.MuiInput-underline.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.css-3dr76p input[value="5"]').click();
+      await page.keyboard.type('30');
+      await page.keyboard.press('Enter');
+      await delay(1000);
+
+      await page.locator('.MuiAutocomplete-root.airport-input input').fill('');
+      await delay(1000);
+
+      await page.locator('#fromAirport').fill(from);
+      await page.keyboard.press('Enter');
+      await page.keyboard.press('Tab');
+      await delay(1000);
+      await page.keyboard.type('', { delay: 1000 });
+      await delay(3000);
+
+      await page.keyboard.type(to, { delay: 1000 });
+      await page.keyboard.press('Enter');
+      await delay(3000);
+
+      const cabinSelected = cabin == 'economy' ? 'Basic' : 'Executive';
+
+      await page.locator('#mui-7').click();
+      await page.waitForSelector('ul.MuiMenu-list li', { timeout: 0 });
+      await page.click(`ul.MuiMenu-list li[data-value="${cabinSelected}"]`);
+
+      let start_date = new Date();
+      let end_date = new Date(start_date);
+      end_date.setMonth(start_date.getMonth() + 3);
+
+      start_date = randomDate(start_date, end_date, 0, 24);
+      let date = moment(start_date).format('L');
+
+      while (start_date < new Date()) {
+        start_date = randomDate(start_date, end_date, 0, 24);
+        date = moment(start_date).format('L');
+      }
+
+      console.log('Data da Busca: ' + moment(start_date).format('L'));
+
+      await page.locator('#owDate').fill('');
+      await delay(3000);
+      await page.locator('#owDate').fill(date);
+      await delay(3000);
+
+      // await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeSmall.MuiButton-containedSizeSmall.MuiButtonBase-root.searchButton.css-1dpvzvp').click();
+      // console.log('Buscando...');
+
+      await page.waitForFunction(() => !document.querySelector('.MuiSkeleton-root'), { timeout: 0 });
+
+      await page.evaluate(async () => {
+        let scrollPosition = 0;
+        let documentHeight = document.body.scrollHeight;
+
+        while (documentHeight > scrollPosition) {
+          window.scrollBy(0, documentHeight);
+          await new Promise(resolve => {
+            setTimeout(resolve, 1000);
+          });
+          scrollPosition = documentHeight;
+          documentHeight = document.body.scrollHeight;
+        }
+      });
+
+      const mileElements = await page.$$eval('.MuiBox-root.css-1yaucul h4:nth-of-type(2)', elements =>
+        elements.filter(f => f.innerText !== 'Erro').map(el => parseInt(el.innerText.replace(/\D/g, ''), 10))
+      );
+
+      console.log('Fim da busca.');
+
+
+      // Array to store extracted data
+      const flightData = [];
+
+      // Select all result cards
+      const resultCards = await page.$$('.resultCard');
+
+      for (const resultCard of resultCards) {
+        const flightInfo = {
+          airline: '',
+          departureDate: '',
+          arrivalDate: '',
+          origin: '',
+          destination: '',
+          cabinType: '',
+          flightNumber: '',
+          pointsOrPrice: ''
+        };
+
+        // Airline name
+        const airlineName = await resultCard.$eval('h6.MuiTypography-h6.css-12wdfgf', el => el.textContent?.trim() ?? '');
+        flightInfo.airline = airlineName;
+
+        // Departure and arrival dates
+        const badgeElements = await resultCard.$$('.MuiBadge-anchorOriginTopRightRectangular.MuiBadge-overlapRectangular.MuiBadge-badge.MuiBadge-standard.MuiBadge-anchorOriginTopRight');
+
+        flightInfo.departureDate = await badgeElements[0].evaluate(el => el.textContent?.trim() ?? '');
+        flightInfo.arrivalDate = await badgeElements[1].evaluate(el => el.textContent?.trim() ?? '');
+
+        // Travel route (origin and destination)
+        const routeElements = await resultCard.$$('.MuiTypography-button.css-1nncel2');
+        flightInfo.origin = await routeElements[0].evaluate(el => el.textContent?.trim() ?? '');
+        flightInfo.destination = await routeElements[1].evaluate(el => el.textContent?.trim() ?? '');
+
+        // Cabin type
+        const cabinTypeElement = await resultCard.$eval('.MuiTypography-root.MuiTypography-caption.css-wolh4h + .MuiTypography-root.MuiTypography-button.css-1nncel2', el => el.textContent?.trim() ?? '');
+        flightInfo.cabinType = cabinTypeElement;
+
+        // Flight number
+        const flightNumberElement = await resultCard.$eval('.MuiTypography-root.MuiTypography-caption.css-wolh4h:nth-child(5) + .MuiTypography-root.MuiTypography-button.css-1nncel2', el => el.textContent?.trim() ?? '');
+        flightInfo.flightNumber = flightNumberElement;
+
+        // Points or price (depending on Smiles or not)
+        const pointsPriceElement = await resultCard.$eval('.MuiTypography-root.MuiTypography-caption.css-wolh4h:nth-child(6) + .MuiTypography-root.MuiTypography-button.css-1nncel2', el => el.textContent?.trim() ?? '');
+        flightInfo.pointsOrPrice = pointsPriceElement;
+
+        // Add extracted data to the array
+        flightData.push(flightInfo);
+      }
+
+      console.log(flightData);
+
+
+    } catch (error) {
+      console.log('Erro na execução crawler' + error);
+      await delay(5000);
+      await browser?.close();
     }
   }
 }
