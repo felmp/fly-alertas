@@ -63,195 +63,199 @@ async function getSeatsAeroBrasil() {
       seat.YRemainingSeats > 4
     );
 
-    for (let i = 0; i < availability.data.length; i++) {
-      const e = availability.data[i];
+    const batchSize = 1000;
+    for (let i = 0; i < availability.data.length; i += batchSize) {
+      const batch = availability.data.slice(i, i + batchSize);
+      await Promise.all(batch.map(async (e: any) => {
 
-      if (e.Route.DestinationAirport !== 'PTY' && airports_to.includes(e.Route.DestinationAirport) && (e.Source === 'smiles' || e.Source === 'azul')) {
-        console.log(e)
-        let mileageCosts = {
-          Y: parseInt(e.YMileageCost),
-          W: parseInt(e.WMileageCost),
-          J: parseInt(e.JMileageCost),
-          F: parseInt(e.FMileageCost)
-        };
+        if (e.Route.DestinationAirport !== 'PTY' && airports_to.includes(e.Route.DestinationAirport) && (e.Source === 'smiles' || e.Source === 'azul')) {
+          let mileageCosts = {
+            Y: parseInt(e.YMileageCost),
+            W: parseInt(e.WMileageCost),
+            J: parseInt(e.JMileageCost),
+            F: parseInt(e.FMileageCost)
+          };
 
-        let filteredCosts = Object.entries(mileageCosts).filter(([key, value]) => value !== 0);
-        let minCostEntry = filteredCosts.reduce((minEntry, currentEntry) => currentEntry[1] < minEntry[1] ? currentEntry : minEntry);
+          let filteredCosts = Object.entries(mileageCosts).filter(([key, value]) => value !== 0);
+          let minCostEntry = filteredCosts.reduce((minEntry, currentEntry) => currentEntry[1] < minEntry[1] ? currentEntry : minEntry);
 
-        function deleteRelatedKeys(type: any) {
-          for (let key in e) {
-            if (key.startsWith(type)) {
-              delete e[key as keyof AvailabilityData];
-            }
-          }
-        }
-
-        for (let key in mileageCosts) {
-          if (key !== minCostEntry[0]) {
-            deleteRelatedKeys(key);
-          }
-        }
-
-        let miles
-        let type_trip;
-        let airlines;
-
-        if (e.YMileageCost !== undefined) {
-          miles = e.YMileageCost
-          type_trip = 'Econômica'
-          airlines = e.YAirlines;
-        } else if (e.WMileageCost !== undefined) {
-          miles = e.WMileageCost
-          type_trip = 'Premium Economy'
-          airlines = e.WAirlines;
-        } else if (e.JMileageCost !== undefined) {
-          miles = e.JMileageCost
-          type_trip = 'Executiva'
-          airlines = e.JAirlines;
-        } else {
-          miles = e.FMileageCost
-          type_trip = 'Primeira Classe'
-          airlines = e.FAirlines;
-        }
-        const airportsCity: { [key: string]: string } = {
-          'LIS': 'Lisboa',
-          'WAS': 'Washington, D.C.',
-          'PAR': 'Paris',
-          'SEL': 'Seul',
-          'MAD': 'Madri',
-          'HND': 'Tóquio',
-          'CHI': 'Chicago',
-          'LAX': 'Los Angeles',
-          'ORL': 'Orlando',
-          'NYC': 'Nova York',
-          'MIL': 'Milão',
-          'BUE': 'Buenos Aires',
-          'LON': 'Londres',
-          'MIA': 'Miami',
-          'IAH': 'Houston',
-          'LIM': 'Lima',
-          'JFK': 'Nova York',
-          'GIG': 'Rio de Janeiro',
-          'FOR': 'Fortaleza',
-          'NAT': 'Natal',
-          'SAO': 'São Paulo',
-          'REC': 'Recife',
-          'MCZ': 'Maceió',
-          'RIO': 'Rio de Janeiro',
-          'CNF': 'Belo Horizonte',
-          'BSB': 'Brasília',
-          'AJU': 'Aracaju',
-          'GRU': 'São Paulo',
-          'ATL': 'Atlanta',
-          'PEK': 'Pequim',
-          'DXB': 'Dubai',
-          'ORD': 'Chicago',
-          'LHR': 'Londres',
-          'PVG': 'Xangai',
-          'CDG': 'Paris',
-          'DFW': 'Dallas',
-          'CGH': 'São Paulo',
-          'SDU': 'Rio de Janeiro',
-          'POA': 'Porto Alegre',
-          'SSA': 'Salvador',
-          'CWB': 'Curitiba',
-          'BEL': 'Belém',
-          'MAO': 'Manaus',
-          'VIX': 'Vitória',
-          'AMS': 'Amsterdã',
-          'FRA': 'Frankfurt',
-          'IST': 'Istambul',
-          'SIN': 'Singapura',
-          'ICN': 'Incheon',
-          'BKK': 'Bangkok',
-          'HKG': 'Hong Kong'
-        };
-
-        const continentsTranslate: { [key: string]: string } = {
-          'South America': 'América do Sul',
-          'North America': 'América do Norte',
-          'Europe': 'Europa',
-          'Asia': 'Asia',
-          'Africa': 'África',
-          'Oceania': 'Oceanía'
-        };
-
-        let json: Alert = {
-          miles,
-          id: '',
-          original_message: null,
-          affiliates_program: e.Route.Source.toLocaleUpperCase(),
-          trip: airportsCity[e.Route.OriginAirport] + ' para ' + airportsCity[e.Route.DestinationAirport],
-          route: continentsTranslate[e.Route.OriginRegion] + ' a ' + continentsTranslate[e.Route.DestinationRegion],
-          amount: Math.round(Number(calculateMilesToCurrency(e.Source, Number(miles), 'BRL'))).toString(),
-          type_trip,
-          airlines,
-          remaining: moment(e.Date).format('L'),
-          sent: 'brasil_group',
-          sent_date: null,
-          created_at: null,
-          link: null
-        };
-
-        if (json.trip !== null) {
-
-          const returnLast = await new AlertService().verifyLast(json.trip);
-
-          if (returnLast <= 2 && json.miles !== null) {
-            console.log(json)
-            if (json.type_trip == 'Econômica' && json.miles <= '70000' && !json.airlines?.includes('Sky Airline Chile')) {
-              const response = await engine_v1.get(`/trips/${e.ID}`);
-
-              const link = response.data
-
-              json.link = link.booking_links[0].link;
-
-              const response_redirect = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": json.link })
-
-              if (response_redirect.data) {
-                console.log('SAVED SeatsAero')
-                console.log(json)
-                json.link = response_redirect.data.urlEncurtada
-                return new AlertService().createAlert(json)
-              }
-            }
-
-            if (json.type_trip == 'Executiva' && json.miles <= '120000' && !json.airlines?.includes('Sky Airline Chile')) {
-              const response = await engine_v1.get(`/trips/${e.ID}`);
-
-              const link = response.data
-
-              json.link = link.booking_links[0].link;
-
-              const response_redirect = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": json.link })
-
-              if (response_redirect.data) {
-                console.log('SAVED SeatsAero')
-                console.log(json)
-                json.link = response_redirect.data.urlEncurtada
-                return new AlertService().createAlert(json)
-              }
-            }
-
-            if (e.Source == 'azul' && json.miles <= '100000' && !json.airlines?.includes('Sky Airline Chile')) {
-              const response = await engine_v1.get(`/trips/${e.ID}`);
-
-              const link = response.data
-
-              json.link = link.booking_links[0].link;
-
-              const response_redirect = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": json.link })
-
-              if (response_redirect.data) {
-                console.log('SAVED SeatsAero')
-                console.log(json)
-                json.link = response_redirect.data.urlEncurtada
-                return new AlertService().createAlert(json)
+          function deleteRelatedKeys(type: any) {
+            for (let key in e) {
+              if (key.startsWith(type)) {
+                delete e[key as keyof AvailabilityData];
               }
             }
           }
+
+          for (let key in mileageCosts) {
+            if (key !== minCostEntry[0]) {
+              deleteRelatedKeys(key);
+            }
+          }
+
+          let miles
+          let type_trip;
+          let airlines;
+
+          if (e.YMileageCost !== undefined) {
+            miles = e.YMileageCost
+            type_trip = 'Econômica'
+            airlines = e.YAirlines;
+          } else if (e.WMileageCost !== undefined) {
+            miles = e.WMileageCost
+            type_trip = 'Premium Economy'
+            airlines = e.WAirlines;
+          } else if (e.JMileageCost !== undefined) {
+            miles = e.JMileageCost
+            type_trip = 'Executiva'
+            airlines = e.JAirlines;
+          } else {
+            miles = e.FMileageCost
+            type_trip = 'Primeira Classe'
+            airlines = e.FAirlines;
+          }
+          const airportsCity: { [key: string]: string } = {
+            'LIS': 'Lisboa',
+            'WAS': 'Washington, D.C.',
+            'PAR': 'Paris',
+            'SEL': 'Seul',
+            'MAD': 'Madri',
+            'HND': 'Tóquio',
+            'CHI': 'Chicago',
+            'LAX': 'Los Angeles',
+            'ORL': 'Orlando',
+            'NYC': 'Nova York',
+            'MIL': 'Milão',
+            'BUE': 'Buenos Aires',
+            'LON': 'Londres',
+            'MIA': 'Miami',
+            'IAH': 'Houston',
+            'LIM': 'Lima',
+            'JFK': 'Nova York',
+            'GIG': 'Rio de Janeiro',
+            'FOR': 'Fortaleza',
+            'NAT': 'Natal',
+            'SAO': 'São Paulo',
+            'REC': 'Recife',
+            'MCZ': 'Maceió',
+            'RIO': 'Rio de Janeiro',
+            'CNF': 'Belo Horizonte',
+            'BSB': 'Brasília',
+            'AJU': 'Aracaju',
+            'GRU': 'São Paulo',
+            'ATL': 'Atlanta',
+            'PEK': 'Pequim',
+            'DXB': 'Dubai',
+            'ORD': 'Chicago',
+            'LHR': 'Londres',
+            'PVG': 'Xangai',
+            'CDG': 'Paris',
+            'DFW': 'Dallas',
+            'CGH': 'São Paulo',
+            'SDU': 'Rio de Janeiro',
+            'POA': 'Porto Alegre',
+            'SSA': 'Salvador',
+            'CWB': 'Curitiba',
+            'BEL': 'Belém',
+            'MAO': 'Manaus',
+            'VIX': 'Vitória',
+            'AMS': 'Amsterdã',
+            'FRA': 'Frankfurt',
+            'IST': 'Istambul',
+            'SIN': 'Singapura',
+            'ICN': 'Incheon',
+            'BKK': 'Bangkok',
+            'HKG': 'Hong Kong'
+          };
+
+          const continentsTranslate: { [key: string]: string } = {
+            'South America': 'América do Sul',
+            'North America': 'América do Norte',
+            'Europe': 'Europa',
+            'Asia': 'Asia',
+            'Africa': 'África',
+            'Oceania': 'Oceanía'
+          };
+
+          let json: Alert = {
+            miles,
+            id: '',
+            original_message: null,
+            affiliates_program: e.Route.Source.toLocaleUpperCase(),
+            trip: airportsCity[e.Route.OriginAirport] + ' para ' + airportsCity[e.Route.DestinationAirport],
+            route: continentsTranslate[e.Route.OriginRegion] + ' a ' + continentsTranslate[e.Route.DestinationRegion],
+            amount: Math.round(Number(calculateMilesToCurrency(e.Source, Number(miles), 'BRL'))).toString(),
+            type_trip,
+            airlines,
+            remaining: moment(e.Date).format('L'),
+            sent: 'brasil_group',
+            sent_date: null,
+            created_at: null,
+            link: null
+          };
+
+          if (json.trip !== null) {
+
+            const returnLast = await new AlertService().verifyLast(json.trip);
+
+            if (returnLast <= 2 && json.miles !== null) {
+
+              const milesNumber = Number(json.miles); // Converte json.miles para número
+
+              if (json.type_trip == 'Econômica' && milesNumber <= 70000 && !json.airlines?.includes('Sky Airline Chile')) {
+                const response = await engine_v1.get(`/trips/${e.ID}`);
+
+                const link = response.data
+
+                json.link = link.booking_links[0].link;
+
+                const response_redirect = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": json.link })
+
+                if (response_redirect.data) {
+                  console.log('SAVED SeatsAero')
+                  console.log(json)
+                  json.link = response_redirect.data.urlEncurtada
+                  return new AlertService().createAlert(json)
+                }
+              }
+
+              if (json.type_trip == 'Executiva' && milesNumber <= 120000 && !json.airlines?.includes('Sky Airline Chile')) {
+                const response = await engine_v1.get(`/trips/${e.ID}`);
+
+                const link = response.data
+
+                json.link = link.booking_links[0].link;
+
+                const response_redirect = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": json.link })
+
+                if (response_redirect.data) {
+                  console.log('SAVED SeatsAero')
+                  console.log(json)
+                  json.link = response_redirect.data.urlEncurtada
+                  return new AlertService().createAlert(json)
+                }
+              }
+
+              // if (e.Source == 'azul' && json.miles <= '100000' && !json.airlines?.includes('Sky Airline Chile')) {
+              //   const response = await engine_v1.get(`/trips/${e.ID}`);
+
+              //   const link = response.data
+
+              //   json.link = link.booking_links[0].link;
+
+              //   const response_redirect = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": json.link })
+
+              //   if (response_redirect.data) {
+              //     console.log('SAVED SeatsAero')
+              //     console.log(json)
+              //     json.link = response_redirect.data.urlEncurtada
+              //     return new AlertService().createAlert(json)
+              //   }
+              // }
+            }
+          }
         }
-      }
+      }))
     }
 
   } catch (error) {
