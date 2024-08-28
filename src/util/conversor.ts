@@ -1,6 +1,5 @@
 export default function calculateMilesToCurrency(programaAfiliados: string, milhas: number, currency: 'BRL' | 'CLP'): string {
-
-
+  
   const taxaSmilesBRL = 20;  // Valor de 1000 milhas SMILES em CLP
   const taxaTudoAzulBRL = 22;  // Valor de 1000 milhas TudoAzul em CLP
   const taxaLatamBRL = 27.50;  // Valor de 1000 milhas Latam em CLP

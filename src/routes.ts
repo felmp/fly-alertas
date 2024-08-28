@@ -50,7 +50,7 @@ export async function routes(fastify: FastifyInstance) {
     const body = req.body as SearchRequestBody;
 
     const engine_v1 = new engineV1();
-    engine_v1.getTKmilhasEndpoint(body.origin, body.destination, body.date.from, body.date.to, body.cabin)
+    // engine_v1.getTKmilhasEndpoint(body.origin, body.destination, body.cabin, body.date.from, body.date.to)
     // res.send(alert)
   })
 }

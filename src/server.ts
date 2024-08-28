@@ -2,7 +2,7 @@ import fastify from 'fastify';
 import cors from '@fastify/cors'
 import { routes } from './routes';
 import engineV1 from './engine/v1';
-import { AlertService } from './services/alert.service';
+// import { AlertService } from './services/alert.service';
 require('dotenv').config();
 
 const app = fastify();
