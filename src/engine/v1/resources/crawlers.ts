@@ -316,23 +316,18 @@ async function getTKmilhas() {
 }
 
 async function getTKmilhasEndpoint(from: string, to: string, cabin: string, date_departure: string, date_return: string) {
-  let browser
+  moment.locale('pt-br')
+
+  let browser;
   try {
     browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       defaultViewport: null,
       args: [
         '--window-size=1920,1080',
-        // '--disable-gpu',
-        // '--disable-dev-shm-usage',
-        // '--disable-setuid-sandbox',
-        // '--no-first-run',
-        // '--no-sandbox',
-        // '--no-zygote',
-        // '--single-process',
       ],
       executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
-      protocolTimeout: 0
+      protocolTimeout: 0,
     });
 
     const page = await browser.newPage();
@@ -359,19 +354,19 @@ async function getTKmilhasEndpoint(from: string, to: string, cabin: string, date
     await page.locator(selector).click();
     await delay(1000);
 
+    // Scroll down the page to load more content
     await page.evaluate(async () => {
       let scrollPosition = 0;
       let documentHeight = document.body.scrollHeight;
 
       while (documentHeight > scrollPosition) {
         window.scrollBy(0, documentHeight);
-        await new Promise(resolve => {
-          setTimeout(resolve, 1000);
-        });
+        await new Promise(resolve => setTimeout(resolve, 1000));
         scrollPosition = documentHeight;
         documentHeight = document.body.scrollHeight;
       }
     });
+
     console.log('\n\nSaindo de: ' + from);
     console.log('Para: ' + to);
     console.log('\nSource: ' + program);
@@ -395,7 +390,7 @@ async function getTKmilhasEndpoint(from: string, to: string, cabin: string, date
     await page.keyboard.press('Enter');
     await delay(3000);
 
-    const cabinSelected = cabin == 'economy' ? 'Basic' : 'Executive';
+    const cabinSelected = cabin === 'economy' ? 'Basic' : 'Executive';
     console.log('Selecionado: ' + cabin);
 
     await page.locator('#mui-7').click();
@@ -424,41 +419,20 @@ async function getTKmilhasEndpoint(from: string, to: string, cabin: string, date
     await page.locator('#bcd').fill(moment(date_return).format('L'));
     await delay(3000);
 
-
-
     await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeSmall.MuiButton-containedSizeSmall.MuiButtonBase-root.searchButton.css-1dpvzvp').click();
     console.log('Buscando...');
 
     await page.waitForFunction(() => !document.querySelector('.MuiSkeleton-root'), { timeout: 0 });
 
-    await page.evaluate(async () => {
-      let scrollPosition = 0;
-      let documentHeight = document.body.scrollHeight;
-
-      while (documentHeight > scrollPosition) {
-        window.scrollBy(0, documentHeight);
-        await new Promise(resolve => {
-          setTimeout(resolve, 1000);
-        });
-        scrollPosition = documentHeight;
-        documentHeight = document.body.scrollHeight;
-      }
-    });
-
     await page.waitForFunction(() => document.querySelector('.MuiAccordionSummary-gutters.css-1iji0d4'), { timeout: 0 });
 
     const flightSegments = await page.evaluate(async () => {
       const mileElements = document.querySelectorAll('.css-1iji0d4');
-
       const allFlightSegments = [];
 
-      console.log('quantidade : ' + mileElements.length)
-
       for (let mileElement of mileElements) {
-        // Click on the mile element
         (mileElement as HTMLElement).click();
 
-        // Wait for the selector to appear
         const selector = 'div[aria-label="Clique para adicionar no orçamento e emissão."]';
         const addToBudgetButton = await new Promise((resolve) => {
           const interval = setInterval(() => {
@@ -470,15 +444,12 @@ async function getTKmilhasEndpoint(from: string, to: string, cabin: string, date
           }, 100);
         });
 
-        // Click the button inside the selector
         if (addToBudgetButton) {
           (addToBudgetButton as HTMLElement).click();
         } else {
-          console.log('Add to budget button not found');
-          continue; // Skip to the next iteration if the button wasn't found
+          continue;
         }
 
-        // Find and click the "Copiar dados Voo" button
         const buttonClicked = (() => {
           const buttonsOptions = Array.from(document.querySelectorAll('button'));
           for (let button of buttonsOptions) {
@@ -491,14 +462,11 @@ async function getTKmilhasEndpoint(from: string, to: string, cabin: string, date
         })();
 
         if (!buttonClicked) {
-          console.log('Copy flight data button not found');
-          continue; // Skip to the next iteration if the button wasn't found
+          continue;
         }
 
-        // Get the copied data from the clipboard
         const copiedData = await navigator.clipboard.readText();
 
-        // Process the copied data
         const flightDetails = copiedData.split('\n').map(line => line.trim()).filter(line => line);
         const flightSegments = [];
 
@@ -517,17 +485,26 @@ async function getTKmilhasEndpoint(from: string, to: string, cabin: string, date
           }
         }
 
-        allFlightSegments.push(...flightSegments);
+        // Certifique-se de que está criando um novo objeto `flightInfo` para cada iteração
+        const flightInfo = {
+          program: (document.querySelector('.MuiTableHead-root .flight-table-header td:nth-of-type(1)') as any)?.innerText || null,
+          class: (document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(1) .MuiTypography-button') as any)?.innerText || null,
+          departure: (document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(3) .MuiTypography-button') as any)?.innerText || null,
+          flight: (document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(5) .MuiTypography-button') as any)?.innerText || null,
+          miles: mileElement.textContent?.split('2024')[1] || null,
+          flightSegments
+        };
+
+        allFlightSegments.push(flightInfo); // Armazena o objeto clonado em vez de sobrescrever o original
       }
 
       return allFlightSegments;
     });
 
-    console.log(flightSegments)
-
+    return flightSegments
 
   } catch (error) {
-    console.log('Erro na execução crawler' + error);
+    console.log('Erro na execução crawler: ' + error);
     await delay(5000);
     await browser?.close();
   }

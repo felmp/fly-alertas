@@ -4,6 +4,8 @@ import { GroupMessage } from "./models/group-message.model";
 import { AlertService } from "./services/alert.service";
 import { wpp } from "./axios";
 import engineV1 from "./engine/v1";
+import seatsAero from "./engine/v1/resources/seats-aero";
+import crawlers from "./engine/v1/resources/crawlers";
 
 export async function routes(fastify: FastifyInstance) {
   fastify.post('/webhook', async (request, res) => {
@@ -49,8 +51,7 @@ export async function routes(fastify: FastifyInstance) {
   fastify.post('/search', async (req, res) => {
     const body = req.body as SearchRequestBody;
 
-    const engine_v1 = new engineV1();
-    // engine_v1.getTKmilhasEndpoint(body.origin, body.destination, body.cabin, body.date.from, body.date.to)
-    // res.send(alert)
+    const response = await crawlers.getTKmilhasEndpoint(body.origin, body.destination, body.cabin, body.date.from, body.date.to)
+    res.send(response)
   })
 }
