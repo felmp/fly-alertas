@@ -152,12 +152,21 @@ async function getSeatsAeroBrasil() {
         return acc;
       }, { ...alerts[0] });
 
-      setTimeout(() => {
+      setTimeout(async () => {
         const milesNumber = Number(combinedAlert.miles);
+
+        if (combinedAlert.trip === null) return;
 
         if (combinedAlert.affiliates_program == 'AMERICAN') {
           console.log(combinedAlert);
           return new AlertService().createAlert(combinedAlert);
+        }
+
+        const returnLast = await new AlertService().verifyLast(combinedAlert.trip);
+
+        if (returnLast >= 2) {
+          console.log(`Já existem ${returnLast} alertas para a viagem ${combinedAlert.trip} nas últimas 24 horas. Não será criado um novo alerta.`);
+          return;
         }
 
         if (combinedAlert.affiliates_program == 'SMILES') {
