@@ -160,11 +160,6 @@ async function getSeatsAeroBrasil() {
 
         if (combinedAlert.trip === null) return;
 
-        if (combinedAlert.affiliates_program == 'AMERICAN') {
-          console.log(combinedAlert);
-          return new AlertService().createAlert(combinedAlert);
-        }
-
         const returnLast = await new AlertService().verifyLast(combinedAlert.trip);
 
         if (returnLast >= 2) {
