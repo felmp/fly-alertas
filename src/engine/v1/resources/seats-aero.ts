@@ -8,6 +8,7 @@ import axios from "axios";
 import { Alert } from "../../../models/alert.model";
 import { AvailabilityData } from "../../../models/seats-aero.model";
 import { airportsCity, continentsTranslate } from "../util";
+import { randomElement } from "../../../util/random-element";
 
 async function getSeatsAeroBrasil() {
   moment.locale('pt-br')
@@ -31,7 +32,9 @@ async function getSeatsAeroBrasil() {
   }
 
   try {
-    const response = await engine_v1.get(`/search?start_date=${moment().format('YYYY-MM-DD')}&end_date=2025-08-03&origin_airport=${origins_airports}&destination_airport=${destination_airport}&order_by=lowest_mileage&take=${take}&skip=${skip}&cabin=business`);
+    const cabin = ['business', 'economy'];
+    const cabinSelected = randomElement(cabin);
+    const response = await engine_v1.get(`/search?start_date=${moment().format('YYYY-MM-DD')}&end_date=2025-08-03&origin_airport=${origins_airports}&destination_airport=${destination_airport}&order_by=lowest_mileage&take=${take}&skip=${skip}&cabin=${cabinSelected}`);
 
     let availability;
 
@@ -53,8 +56,8 @@ async function getSeatsAeroBrasil() {
     const alertGroups: { [key: string]: Alert[] } = {};
 
     availability.data.forEach(async (e: any) => {
-      //|| e.Source === 'american'
-      if (e.Source === 'smiles' || e.Source === 'azul') {
+      //
+      if (e.Source === 'smiles' || e.Source === 'azul' || e.Source === 'american') {
         let mileageCosts = {
           Y: parseInt(e.YMileageCost),
           W: parseInt(e.WMileageCost),
@@ -198,6 +201,11 @@ async function getSeatsAeroBrasil() {
         }
 
         if (combinedAlert.affiliates_program == 'AZUL' && milesNumber <= 80000) {
+          console.log(combinedAlert);
+          return new AlertService().createAlert(combinedAlert);
+        }
+
+        if (combinedAlert.affiliates_program == 'AMERICAN' && combinedAlert.type_trip == 'Executiva') {
           console.log(combinedAlert);
           return new AlertService().createAlert(combinedAlert);
         }
