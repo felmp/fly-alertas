@@ -39,7 +39,7 @@ async function getTKmilhas() {
     await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-fullWidth.MuiButtonBase-root.css-1g8e2pa').click();
     await delay(3000);
 
-    const buttonsToClick = ['smiles'];
+    const buttonsToClick = ['multiplus', 'smiles'];
     const program = randomElement(buttonsToClick);
     const selector = `button[value="${program}"]`;
     await page.locator(selector).click();
@@ -61,19 +61,23 @@ async function getTKmilhas() {
 
     let airports_from: string[] = []
 
-    if (change_search == 'BR') {
-      airports_from = [
-        'FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'
-      ];
+    // airports_from = [
+    //       'CWB', 
+    //     ];
 
-      change_search = 'CH'
-    } else if (change_search == 'CH') {
-      airports_from = [
-        'SCL'
-      ];
+    // if (change_search == 'BR') {
+    //   airports_from = [
+    //     'FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'
+    //   ];
 
-      change_search = 'BR'
-    }
+    //   change_search = 'CH'
+    // } else if (change_search == 'CH') {
+    //   airports_from = [
+    //     'SCL'
+    //   ];
+
+    //   change_search = 'BR'
+    // }
 
     airports_from = [
       'FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU', 'GIG'
@@ -86,7 +90,11 @@ async function getTKmilhas() {
       'IAH', 'LIM', 'JFK', 'GIG'
     ];
 
-    const cabin = ['Executive'];
+    // const airports_to = [
+    //   'SJO'
+    // ];
+
+    const cabin = ['Executive', 'Basic'];
 
     const from: string = randomElement(airports_from);
     const to: string = randomElement(airports_to);
@@ -251,11 +259,11 @@ async function getTKmilhas() {
             const date = new Date(year, month - 1, day, hour, minute);
             const millisecondsData = date.getTime();
 
-            const link = `https://www.smiles.com.br/mfe/emissao-passagem/?adults=1&cabin=${cabinSelected == 'Basic' ? 'ECONOMIC' : 'BUSINESS'}&children=0&infants=0&isElegible=false&isFlexibleDateChecked=false&searchType=g3&segments=1&originAirportIsAny=true&destinAirportIsAny=true&novo-resultado-voos=true&departureDate=${millisecondsData}&tripType=2&originAirport=${from}&destinationAirport=${to}`;
+            // const link = `https://www.smiles.com.br/mfe/emissao-passagem/?adults=1&cabin=${cabinSelected == 'Basic' ? 'ECONOMIC' : 'BUSINESS'}&children=0&infants=0&isElegible=false&isFlexibleDateChecked=false&searchType=g3&segments=1&originAirportIsAny=true&destinAirportIsAny=true&novo-resultado-voos=true&departureDate=${millisecondsData}&tripType=2&originAirport=${from}&destinationAirport=${to}`;
 
-            const response = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": link })
+            // const response = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": link })
 
-            if (response.data) {
+            // if (response.data) {
               new AlertService().createAlert({
                 affiliates_program: flightInfo.program,
                 trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
@@ -266,21 +274,21 @@ async function getTKmilhas() {
                 sent: from === 'SCL' ? 'chile_group' : 'brasil_group',
                 type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
                 remaining: flightInfo.departure,
-                link: response.data.urlEncurtada
+                link: ''
               });
-            }
+            // }
 
           }
           break;
         case 'multiplus':
           if ((Number(flightInfo.miles) <= 85000 && cabinSelected == 'Basic') || Number(flightInfo.miles) <= 120000 && cabinSelected == 'Executive') {
-            const departureDate = moment(flightInfo.departure, 'DD/MM/YYYY HH:mm').format('YYYY-MM-DD');
+            // const departureDate = moment(flightInfo.departure, 'DD/MM/YYYY HH:mm').format('YYYY-MM-DD');
 
-            const link = `https://www.latamairlines.com/br/pt/oferta-voos?origin=${from}&outbound=${departureDate}T00:00:00.000Z&destination=${to}&inbound=undefined&adt=1&chd=0&inf=0&trip=OW&cabin=${cabinSelected == 'Basic' ? 'Economy' : 'Business'}&redemption=true&sort=RECOMMENDED`
+            // const link = `https://www.latamairlines.com/br/pt/oferta-voos?origin=${from}&outbound=${departureDate}T00:00:00.000Z&destination=${to}&inbound=undefined&adt=1&chd=0&inf=0&trip=OW&cabin=${cabinSelected == 'Basic' ? 'Economy' : 'Business'}&redemption=true&sort=RECOMMENDED`
 
-            const response = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": link })
+            // const response = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": link })
 
-            if (response.data) {
+            // if (response.data) {
               new AlertService().createAlert({
                 affiliates_program: flightInfo.program,
                 trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
@@ -291,9 +299,9 @@ async function getTKmilhas() {
                 sent: from === 'SCL' ? 'chile_group' : 'brasil_group',
                 type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
                 remaining: flightInfo.departure,
-                link: response.data.urlEncurtada
+                link: ''
               });
-            }
+            // }
           }
           break;
 

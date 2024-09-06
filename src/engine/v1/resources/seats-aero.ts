@@ -7,6 +7,7 @@ import { AlertService } from "../../../services/alert.service";
 import axios from "axios";
 import { Alert } from "../../../models/alert.model";
 import { AvailabilityData } from "../../../models/seats-aero.model";
+import { airportsCity, continentsTranslate } from "../util";
 
 async function getSeatsAeroBrasil() {
   moment.locale('pt-br')
@@ -30,7 +31,7 @@ async function getSeatsAeroBrasil() {
   }
 
   try {
-    const response = await engine_v1.get(`/search?start_date=${moment().format('YYYY-MM-DD')}&end_date=2025-08-03&origin_airport=${origins_airports}&destination_airport=${destination_airport}&order_by=lowest_mileage&take=${take}&skip=${skip}`);
+    const response = await engine_v1.get(`/search?start_date=${moment().format('YYYY-MM-DD')}&end_date=2025-08-03&origin_airport=${origins_airports}&destination_airport=${destination_airport}&order_by=lowest_mileage&take=${take}&skip=${skip}&cabin=business`);
 
     let availability;
 
@@ -49,8 +50,11 @@ async function getSeatsAeroBrasil() {
       skip = 0;
     }
 
+    const alertGroups: { [key: string]: Alert[] } = {};
+
     availability.data.forEach(async (e: any) => {
-      if (e.Source === 'smiles' || e.Source === 'azul' || e.Source === 'american') {
+      //|| e.Source === 'american'
+      if (e.Source === 'smiles' || e.Source === 'azul') {
         let mileageCosts = {
           Y: parseInt(e.YMileageCost),
           W: parseInt(e.WMileageCost),
@@ -111,76 +115,6 @@ async function getSeatsAeroBrasil() {
           remainingSeats = e.FRemainingSeats;
         }
 
-        const airportsCity: { [key: string]: string } = {
-          'LIS': 'Lisboa',
-          'WAS': 'Washington, D.C.',
-          'PAR': 'Paris',
-          'SEL': 'Seul',
-          'MAD': 'Madri',
-          'HND': 'Tóquio',
-          'CHI': 'Chicago',
-          'LAX': 'Los Angeles',
-          'ORL': 'Orlando',
-          'NYC': 'Nova York',
-          'MIL': 'Milão',
-          'BUE': 'Buenos Aires',
-          'LON': 'Londres',
-          'MIA': 'Miami',
-          'IAH': 'Houston',
-          'LIM': 'Lima',
-          'JFK': 'Nova York',
-          'GIG': 'Rio de Janeiro',
-          'FOR': 'Fortaleza',
-          'NAT': 'Natal',
-          'SAO': 'São Paulo',
-          'REC': 'Recife',
-          'MCZ': 'Maceió',
-          'RIO': 'Rio de Janeiro',
-          'CNF': 'Belo Horizonte',
-          'BSB': 'Brasília',
-          'AJU': 'Aracaju',
-          'GRU': 'São Paulo',
-          'ATL': 'Atlanta',
-          'PEK': 'Pequim',
-          'DXB': 'Dubai',
-          'ORD': 'Chicago',
-          'LHR': 'Londres',
-          'PVG': 'Xangai',
-          'CDG': 'Paris',
-          'DFW': 'Dallas',
-          'CGH': 'São Paulo',
-          'SDU': 'Rio de Janeiro',
-          'POA': 'Porto Alegre',
-          'SSA': 'Salvador',
-          'CWB': 'Curitiba',
-          'BEL': 'Belém',
-          'MAO': 'Manaus',
-          'VIX': 'Vitória',
-          'AMS': 'Amsterdã',
-          'FRA': 'Frankfurt',
-          'IST': 'Istambul',
-          'SIN': 'Singapura',
-          'ICN': 'Incheon',
-          'BKK': 'Bangkok',
-          'HKG': 'Hong Kong',
-          'EZE': 'Buenos Aires', // Adicionado
-          'MXP': 'Milão',        // Adicionado
-          'ORY': 'Paris',        // Adicionado
-          'AUH': 'Abu Dhabi',    // Adicionado
-          'LAS': 'Las Vegas',    // Adicionado
-          'YYZ': 'Toronto',      // Adicionado
-          'YUL': 'Montreal'      // Adicionado
-        };
-
-        const continentsTranslate: { [key: string]: string } = {
-          'South America': 'América do Sul',
-          'North America': 'América do Norte',
-          'Europe': 'Europa',
-          'Asia': 'Asia',
-          'Africa': 'África',
-          'Oceania': 'Oceanía'
-        };
-
         let json: Alert = {
           miles,
           id: '',
@@ -188,37 +122,79 @@ async function getSeatsAeroBrasil() {
           affiliates_program: e.Route.Source.toLocaleUpperCase(),
           trip: airportsCity[e.Route.OriginAirport] + ' para ' + airportsCity[e.Route.DestinationAirport],
           route: continentsTranslate[e.Route.OriginRegion] + ' a ' + continentsTranslate[e.Route.DestinationRegion],
-          amount: '',
-          // Math.round(Number(calculateMilesToCurrency(e.Source, Number(miles), 'BRL'))).toString()
+          amount: Math.round(Number(calculateMilesToCurrency(e.Source, Number(miles), 'BRL'))).toString(),
           type_trip,
           airlines,
-          remaining: moment(e.Date).format('L') + '\n\n' + 'Assentos restantes: ' + remainingSeats,
+          remaining: '\n' + moment(e.Date).format('L') + ' -> ' + 'Assentos restantes: ' + remainingSeats,
           sent: 'brasil_group',
           sent_date: null,
           created_at: null,
           link: null
         };
 
-        if (json.trip !== null && remainingSeats > 0) {
-          const returnLast = await new AlertService().verifyLast(json.trip);
+        if (json.trip !== null && remainingSeats > 0 && json.miles !== null && json.type_trip !== 'Premium Economy') {
+          const groupKey = `${json.trip}-${json.miles}-${json.airlines}`;
 
-          if (returnLast >= 2) {
-            console.log(`Já existem ${returnLast} alertas para a viagem ${json.trip} nas últimas 24 horas. Não será criado um novo alerta.`);
-            return; 
+          if (!alertGroups[groupKey]) {
+            alertGroups[groupKey] = [];
           }
 
-          setTimeout(() => {
-            if (json.miles !== null) {
-              const milesNumber = Number(json.miles);
-
-              if (json.type_trip == 'Executiva' && milesNumber <= 120000) {
-                return new AlertService().createAlert(json);
-              }
-            }
-          }, 2000);
+          alertGroups[groupKey].push(json);
         }
       }
     })
+
+    Object.keys(alertGroups).forEach(async (groupKey) => {
+      const alerts = alertGroups[groupKey];
+
+      const combinedAlert = alerts.reduce((acc, curr) => {
+        acc.remaining += `\n${curr.remaining}`;
+        return acc;
+      }, { ...alerts[0] });
+
+      setTimeout(() => {
+        const milesNumber = Number(combinedAlert.miles);
+
+        if (combinedAlert.affiliates_program == 'AMERICAN') {
+          console.log(combinedAlert);
+          return new AlertService().createAlert(combinedAlert);
+        }
+
+        if (combinedAlert.affiliates_program == 'SMILES') {
+          switch (combinedAlert.trip) {
+            case 'São Paulo para Buenos Aires':
+              if (milesNumber <= 60000) {
+                new AlertService().createAlert(combinedAlert);
+              }
+              break;
+            case 'Belo Horizonte para Panamá':
+              if (milesNumber <= 125000) {
+                new AlertService().createAlert(combinedAlert);
+              }
+              break;
+            case 'Rio de Janeiro para Miami':
+              if (milesNumber <= 270000) {
+                new AlertService().createAlert(combinedAlert);
+              }
+              break;
+            case 'São Paulo para Dallas':
+              if (milesNumber <= 211000) {
+                new AlertService().createAlert(combinedAlert);
+              }
+              break;
+            default:
+              new AlertService().createAlert(combinedAlert);
+              break;
+          }
+        }
+
+        if (combinedAlert.affiliates_program == 'AZUL' && milesNumber <= 80000) {
+          console.log(combinedAlert);
+          return new AlertService().createAlert(combinedAlert);
+        }
+      }, 2000);
+    });
+
   } catch (error) {
     console.error('Error fetching data:', error);
   }

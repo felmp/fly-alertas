@@ -60,56 +60,56 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
     }, 4000);
 
-    /// PRIVADO DO CARA TESTE BR
-    setTimeout(async () => {
-      if ((alert.type_trip?.includes('EXECUTIVA') || alert.type_trip?.includes('Executiva'))) {
-        const formattedText = `
-⚠️ *OPORTUNIDADE @FLYALERTAS*
+    //     /// PRIVADO DO CARA TESTE BR
+    //     setTimeout(async () => {
+    //       if ((alert.type_trip?.includes('EXECUTIVA') || alert.type_trip?.includes('Executiva'))) {
+    //         const formattedText = `
+    // ⚠️ *OPORTUNIDADE @FLYALERTAS*
 
-🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
-✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
-💰 ${miles} + taxas
-🛫 Companhia Aérea: ${alert.airlines?.trim()}
-💺 Classe: ${alert.type_trip?.trim()}
-🗓️  Alerta de Data : ${alert.remaining}
+    // 🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
+    // ✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
+    // 💰 ${miles} + taxas
+    // 🛫 Companhia Aérea: ${alert.airlines?.trim()}
+    // 💺 Classe: ${alert.type_trip?.trim()}
+    // 🗓️  Alerta de Data : ${alert.remaining}
 
-_Não tem milhas ? Nós te ajudamos com essa emissão !_`;
+    // _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
-        const prompt = 'Retire completamente todo tipo de link e redirecionamento da mensagem.' +
-          'Não altere nada da mensagem, somente retire o que for link e observação do texto, se não houver não mexa em nada, retorne do jeito que foi enviado.' +
-          'Não tire nenhum emoji'
+    //         const prompt = 'Retire completamente todo tipo de link e redirecionamento da mensagem.' +
+    //           'Não altere nada da mensagem, somente retire o que for link e observação do texto, se não houver não mexa em nada, retorne do jeito que foi enviado.' +
+    //           'Não tire nenhum emoji'
 
-        const data_gpt = {
-          "model": "gpt-3.5-turbo",
-          "messages": [
-            {
-              "role": "system",
-              "content": prompt
-            },
-            {
-              "role": "user",
-              "content": formattedText
-            }
-          ]
-        };
+    //         const data_gpt = {
+    //           "model": "gpt-3.5-turbo",
+    //           "messages": [
+    //             {
+    //               "role": "system",
+    //               "content": prompt
+    //             },
+    //             {
+    //               "role": "user",
+    //               "content": formattedText
+    //             }
+    //           ]
+    //         };
 
-        const messageGPT = await gpt.post('chat/completions', data_gpt);
+    //         const messageGPT = await gpt.post('chat/completions', data_gpt);
 
-        var data = JSON.stringify({
-          // "to_group_uuid": group_id,
-          "to_number": "+19713406030",
-          "from_number": "+5579920012363",
-          "text": messageGPT.data.choices[0].message.content
-        });
+    //         var data = JSON.stringify({
+    //           // "to_group_uuid": group_id,
+    //           "to_number": "+19713406030",
+    //           "from_number": "+5579920012363",
+    //           "text": messageGPT.data.choices[0].message.content
+    //         });
 
-        wpp.post('open/whatsapp/send-message', data)
-          .then(function (response) {
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-      }
-    }, 4000);
+    //         wpp.post('open/whatsapp/send-message', data)
+    //           .then(function (response) {
+    //           })
+    //           .catch(function (error) {
+    //             console.log(error);
+    //           });
+    //       }
+    //     }, 4000);
 
 
     await prismaClient.alerts.update({
@@ -144,8 +144,6 @@ async function processQueueSeatsAero() {
 💺 Classe: ${alert.type_trip?.trim()}
 🗓️  Alerta de Data : ${alert.remaining}
 
-Link: ${alert.link}
-
 _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
     sendDefaultMessage(formattedText)
@@ -156,12 +154,10 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
 🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
 ✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
-💰 A partir de ${alert.amount} trecho + taxas
+💰 A partir de R$ ${formatter.format(Number(alert.amount))} trecho + taxas
 🛫 Companhia Aérea: ${alert.airlines?.trim()}
 💺 Classe: ${alert.type_trip?.trim()}
 🗓️  Alerta de Data : ${alert.remaining}
-
-Link: ${alert.link}
 
 _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 

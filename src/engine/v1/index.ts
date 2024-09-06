@@ -23,26 +23,29 @@ class engineV1 {
       this.is_running = true;
       this.interval = setInterval(() => queues.processQueue(), 5000);
       setInterval(() => queues.processQueueSeatsAero(), 300000);
-      // setInterval(() => queues.processQueueSeatsAeroChile(), 1805000);
-
       setInterval(() => seatsAero.getSeatsAeroBrasil(), 300000);
-      // setInterval(() => seatsAero.getSeatsAeroChile(), 300000);
-
       // seatsAero.getSeatsAeroBrasil()
-
       // crawlers.getTKmilhas();
 
       // seatsAero.getSeatsAeroBrasil()
       // seatsAero.teste()
-
       console.log('Fila de alertas iniciada.');
     }
   }
 
   async test() {
-    const returnLast = await new AlertService().verifyLast('São Paulo para Dallas');
-
-    console.log(returnLast <= 2)
+    new AlertService().createAlert({
+      affiliates_program: 'Aeroplan',
+      trip: 'Belo Horizonte para Curacao',
+      route: 'Internacional',
+      miles: '50000',
+      amount: '',
+      airlines: 'Air Canada',
+      sent: 'brasil_group',
+      type_trip: 'Executiva',
+      remaining: '21/12/2024',
+      link: 'link'
+    });
   }
 
   stop() {

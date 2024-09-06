@@ -1,12 +1,13 @@
 export default function calculateMilesToCurrency(programaAfiliados: string, milhas: number, currency: 'BRL' | 'CLP'): string {
-  
-  const taxaSmilesBRL = 20;  // Valor de 1000 milhas SMILES em CLP
-  const taxaTudoAzulBRL = 22;  // Valor de 1000 milhas TudoAzul em CLP
-  const taxaLatamBRL = 27.50;  // Valor de 1000 milhas Latam em CLP
 
-  const taxaSmilesCLP = (taxaSmilesBRL / 5.85) * 1000;  
-  const taxaTudoAzulCLP = (taxaTudoAzulBRL / 5.85) * 1000; 
-  const taxaLatamCLP = (taxaLatamBRL / 5.85) * 1000; 
+  const taxaSmilesBRL = 20;
+  const taxaTudoAzulBRL = 22;
+  const taxaLatamBRL = 27.50;
+  const taxaAmericanBRL = 120.50;
+
+  const taxaSmilesCLP = (taxaSmilesBRL / 5.85) * 1000;
+  const taxaTudoAzulCLP = (taxaTudoAzulBRL / 5.85) * 1000;
+  const taxaLatamCLP = (taxaLatamBRL / 5.85) * 1000;
 
   let valor: number = 0;
 
@@ -22,7 +23,8 @@ export default function calculateMilesToCurrency(programaAfiliados: string, milh
     case 'latam':
       if (currency == 'CLP') valor = (milhas / 1000) * taxaLatamCLP;
       if (currency == 'BRL') valor = (milhas / 1000) * taxaLatamBRL;
-
+    case 'american':
+      if (currency == 'BRL') valor = (milhas / 1000) * taxaAmericanBRL;
       break;
     default:
       throw new Error('Programa de afiliados desconhecido');
