@@ -56,8 +56,8 @@ async function getSeatsAeroBrasil() {
     const alertGroups: { [key: string]: Alert[] } = {};
 
     availability.data.forEach(async (e: any) => {
-      //
-      if (e.Source === 'smiles' || e.Source === 'azul' || e.Source === 'american') {
+      // || e.Source === 'american'
+      if (e.Source === 'smiles' || e.Source === 'azul') {
         let mileageCosts = {
           Y: parseInt(e.YMileageCost),
           W: parseInt(e.WMileageCost),
