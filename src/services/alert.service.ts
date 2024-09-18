@@ -5,9 +5,28 @@ class AlertService {
   async getAlerts() {
     const alerts = await prismaClient.alerts.findMany({
       orderBy: {
-        sent_date: "desc"
+        created_at: "desc"
+      },
+      where: {
+        sent: {
+          not: 'semi_automatic_brasil_group'
+        }
       },
       take: 10,
+    })
+
+    return alerts
+  }
+
+  async getAlertsSemiAutomatic() {
+    const alerts = await prismaClient.alerts.findMany({
+      orderBy: {
+        created_at: "desc"
+      },
+      where: {
+        sent: 'semi_automatic_brasil_group'
+      },
+      take: 5,
     })
 
     return alerts
@@ -33,7 +52,7 @@ class AlertService {
         type_trip,
         airlines,
         remaining,
-        amount, 
+        amount,
         link
       }
     })

@@ -10,8 +10,9 @@ const port = process.env.PORT ? Number(process.env.PORT) : 3333;
 
 app.register(routes)
 app.register(cors, {
-  allowedHeaders: ['*'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   origin: '*',
+  methods: ['POST']
 })
 app.get('/', function (req, reply) {
   reply.send('API Running');
@@ -28,4 +29,4 @@ const engine_v1 = new engineV1();
 
 
 // engine_v1.test();
-engine_v1.start();
+// engine_v1.start();
