@@ -87,12 +87,9 @@ async function getTKmilhas() {
       'LIS', 'WAS', 'PAR', 'SEL',
       'MAD', 'HND', 'CHI', 'LAX', 'ORL',
       'NYC', 'MIL', 'BUE', 'LON',
-      'IAH', 'LIM', 'JFK', 'GIG'
+      'IAH', 'LIM', 'JFK', 'GIG',
+      'FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU'
     ];
-
-    // const airports_to = [
-    //   'SJO'
-    // ];
 
     const cabin = ['Executive', 'Basic'];
 
@@ -264,18 +261,18 @@ async function getTKmilhas() {
             // const response = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": link })
 
             // if (response.data) {
-              new AlertService().createAlert({
-                affiliates_program: flightInfo.program,
-                trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
-                route: 'Internacional',
-                miles: Math.round(flightInfo.miles).toString(),
-                amount: Math.round(Number(calculateMilesToCurrency('smiles', Number(flightInfo.miles), from === 'SCL' ? 'CLP' : 'BRL'))).toString(),
-                airlines: flightSegments[0].airline,
-                sent: from === 'SCL' ? 'chile_group' : 'brasil_group',
-                type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
-                remaining: flightInfo.departure,
-                link: ''
-              });
+            new AlertService().createAlert({
+              affiliates_program: flightInfo.program,
+              trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
+              route: 'Internacional',
+              miles: Math.round(flightInfo.miles).toString(),
+              amount: Math.round(Number(calculateMilesToCurrency('smiles', Number(flightInfo.miles), from === 'SCL' ? 'CLP' : 'BRL'))).toString(),
+              airlines: flightSegments[0].airline,
+              sent: from === 'SCL' ? 'chile_group' : 'brasil_group',
+              type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
+              remaining: flightInfo.departure,
+              link: ''
+            });
             // }
 
           }
@@ -289,18 +286,18 @@ async function getTKmilhas() {
             // const response = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": link })
 
             // if (response.data) {
-              new AlertService().createAlert({
-                affiliates_program: flightInfo.program,
-                trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
-                route: 'Internacional',
-                miles: Math.round(flightInfo.miles).toString(),
-                amount: Math.round(Number(calculateMilesToCurrency('latam', Number(flightInfo.miles), from === 'SCL' ? 'CLP' : 'BRL'))).toString(),
-                airlines: flightSegments[0].airline,
-                sent: from === 'SCL' ? 'chile_group' : 'brasil_group',
-                type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
-                remaining: flightInfo.departure,
-                link: ''
-              });
+            new AlertService().createAlert({
+              affiliates_program: flightInfo.program,
+              trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
+              route: 'Internacional',
+              miles: Math.round(flightInfo.miles).toString(),
+              amount: Math.round(Number(calculateMilesToCurrency('latam', Number(flightInfo.miles), from === 'SCL' ? 'CLP' : 'BRL'))).toString(),
+              airlines: flightSegments[0].airline,
+              sent: from === 'SCL' ? 'chile_group' : 'brasil_group',
+              type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
+              remaining: flightInfo.departure,
+              link: ''
+            });
             // }
           }
           break;
