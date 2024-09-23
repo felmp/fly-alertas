@@ -10,17 +10,19 @@ import { AvailabilityData } from "../../../models/seats-aero.model";
 import { airportsCity, continentsTranslate } from "../util";
 import { randomElement } from "../../../util/random-element";
 
+let take = 5000;
+let skip = 0;
+
+const origins_airports = "GRU,GIG,CNF,BSB,FOR,MAO,POA";
+const destination_airport = "ATL,PEK,LAX,DXB,HND,ORD,LHR,PVG,CDG,AMS,FRA,IST,SIN,ICN,BKK,JFK,HKG,EZE,LIS,MAD,MXP,ORY,AUH,MIA,LAS,YYZ,YUL";
+
+let url = `/search?start_date=${moment().format('YYYY-MM-DD')}&end_date=2025-09-19&origin_airport=${origins_airports}&destination_airport=${destination_airport}&order_by=lowest_mileage&take=${take}&skip=${skip}&cabin=business`;
 async function getSeatsAeroBrasil() {
   moment.locale('pt-br')
 
-  const origins_airports = "GRU,GIG,CNF,BSB,FOR,MAO,POA";
-  const destination_airport = "ATL,PEK,LAX,DXB,HND,ORD,LHR,PVG,CDG,AMS,FRA,IST,SIN,ICN,BKK,JFK,HKG,EZE,LIS,MAD,MXP,ORY,AUH,MIA,LAS,YYZ,YUL";
-
-  let take = 5000;
-  let skip = 0;
-
   let start_date = new Date();
   let end_date = new Date(start_date);
+
   end_date.setFullYear(start_date.getFullYear() + 1);
   start_date = randomDate(start_date, end_date, 0, 24);
   end_date = randomDate(start_date, end_date, 0, 24);
@@ -32,13 +34,18 @@ async function getSeatsAeroBrasil() {
   }
 
   try {
-    const cabin = ['business', 'economy'];
-    const cabinSelected = randomElement(cabin);
-    const response = await engine_v1.get(`/search?start_date=${moment().format('YYYY-MM-DD')}&end_date=2025-08-03&origin_airport=${origins_airports}&destination_airport=${destination_airport}&order_by=lowest_mileage&take=${take}&skip=${skip}&cabin=${cabinSelected}`);
+    const response = await engine_v1.get(url);
+
+    console.log(url);
+
+    skip = take + 5000;
 
     let availability;
 
     availability = response.data
+
+    if (availability.moreURL)
+      url = availability.moreURL.split('/partnerapi/')[1];
 
     availability.data = availability.data.filter((seat: any) =>
       seat.WRemainingSeats > 0 ||
@@ -47,11 +54,6 @@ async function getSeatsAeroBrasil() {
       seat.YRemainingSeats > 0
     );
     console.log(availability.data.length)
-
-    if (availability.data.length === 0) {
-      console.log('No more data available. Restarting...');
-      skip = 0;
-    }
 
     const alertGroups: { [key: string]: Alert[] } = {};
 
@@ -136,7 +138,7 @@ async function getSeatsAeroBrasil() {
         };
 
         if (json.trip !== null && remainingSeats > 0 && json.miles !== null && json.type_trip !== 'Premium Economy') {
-          const groupKey = `${json.trip}-${json.miles}-${json.airlines}`;
+          const groupKey = `${json.trip}-${json.affiliates_program}`;
 
           if (!alertGroups[groupKey]) {
             alertGroups[groupKey] = [];
@@ -159,10 +161,12 @@ async function getSeatsAeroBrasil() {
         const milesNumber = Number(combinedAlert.miles);
 
         if (combinedAlert.trip === null) return;
+        if (combinedAlert.miles === null) return;
+        if (combinedAlert.affiliates_program === null) return;
 
-        const returnLast = await new AlertService().verifyLast(combinedAlert.trip);
+        const returnLast = await new AlertService().verifyLast(combinedAlert.trip, combinedAlert.miles, combinedAlert.affiliates_program);
 
-        if (returnLast >= 2) {
+        if (returnLast >= 1) {
           console.log(`Já existem ${returnLast} alertas para a viagem ${combinedAlert.trip} nas últimas 24 horas. Não será criado um novo alerta.`);
           return;
         }

@@ -60,7 +60,7 @@ class AlertService {
     return save.id
   }
 
-  async verifyLast(trip: string) {
+  async verifyLast(trip: string, miles: string, affiliates_program: string) {
     const today = new Date();
 
     // Pega a data atual, mas ajusta para o início do dia (meia-noite)
@@ -72,6 +72,8 @@ class AlertService {
     const count = await prismaClient.alerts.count({
       where: {
         trip,
+        miles,
+        affiliates_program,
         created_at: {
           gte: startOfDay,
           lte: endOfDay
