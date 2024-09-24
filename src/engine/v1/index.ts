@@ -22,7 +22,7 @@ class engineV1 {
     if (!this.is_running) {
       this.is_running = true;
       this.interval = setInterval(() => queues.processQueue(), 5000);
-      setInterval(() => queues.processQueueSeatsAero(), 600000);
+      setInterval(() => queues.processQueueSeatsAero(), 900000);
       setInterval(() => seatsAero.getSeatsAeroBrasil(), 12000000);
 
       crawlers.getTKmilhas();
