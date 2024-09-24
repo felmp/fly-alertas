@@ -91,7 +91,8 @@ async function getTKmilhas() {
       'FOR', 'NAT', 'SAO', 'REC', 'MCZ', 'RIO', 'CNF', 'BSB', 'AJU', 'GRU'
     ];
 
-    const cabin = ['Executive', 'Basic'];
+    const cabin = ['Executive'];
+    // , 'Basic'
 
     const from: string = randomElement(airports_from);
     const to: string = randomElement(airports_to);
@@ -256,15 +257,10 @@ async function getTKmilhas() {
             const date = new Date(year, month - 1, day, hour, minute);
             const millisecondsData = date.getTime();
 
-            // const link = `https://www.smiles.com.br/mfe/emissao-passagem/?adults=1&cabin=${cabinSelected == 'Basic' ? 'ECONOMIC' : 'BUSINESS'}&children=0&infants=0&isElegible=false&isFlexibleDateChecked=false&searchType=g3&segments=1&originAirportIsAny=true&destinAirportIsAny=true&novo-resultado-voos=true&departureDate=${millisecondsData}&tripType=2&originAirport=${from}&destinationAirport=${to}`;
-
-            // const response = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": link })
-
-            // if (response.data) {
             new AlertService().createAlert({
               affiliates_program: flightInfo.program,
               trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
-              route: 'Internacional',
+              route: from + ' - ' + to,
               miles: Math.round(flightInfo.miles).toString(),
               amount: Math.round(Number(calculateMilesToCurrency('smiles', Number(flightInfo.miles), from === 'SCL' ? 'CLP' : 'BRL'))).toString(),
               airlines: flightSegments[0].airline,
@@ -273,23 +269,15 @@ async function getTKmilhas() {
               remaining: flightInfo.departure,
               link: ''
             });
-            // }
-
           }
           break;
         case 'multiplus':
-          if ((Number(flightInfo.miles) <= 85000 && cabinSelected == 'Basic') || Number(flightInfo.miles) <= 120000 && cabinSelected == 'Executive') {
-            // const departureDate = moment(flightInfo.departure, 'DD/MM/YYYY HH:mm').format('YYYY-MM-DD');
-
-            // const link = `https://www.latamairlines.com/br/pt/oferta-voos?origin=${from}&outbound=${departureDate}T00:00:00.000Z&destination=${to}&inbound=undefined&adt=1&chd=0&inf=0&trip=OW&cabin=${cabinSelected == 'Basic' ? 'Economy' : 'Business'}&redemption=true&sort=RECOMMENDED`
-
-            // const response = await axios.post('https://api.encurtador.dev/encurtamentos', { "url": link })
-
-            // if (response.data) {
+          if ((Number(flightInfo.miles) <= 44000 && cabinSelected == 'Basic') || Number(flightInfo.miles) <= 120000 && cabinSelected == 'Executive') {
+           
             new AlertService().createAlert({
               affiliates_program: flightInfo.program,
               trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
-              route: 'Internacional',
+              route: from + ' - ' + to,
               miles: Math.round(flightInfo.miles).toString(),
               amount: Math.round(Number(calculateMilesToCurrency('latam', Number(flightInfo.miles), from === 'SCL' ? 'CLP' : 'BRL'))).toString(),
               airlines: flightSegments[0].airline,
@@ -298,7 +286,6 @@ async function getTKmilhas() {
               remaining: flightInfo.departure,
               link: ''
             });
-            // }
           }
           break;
 
