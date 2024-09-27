@@ -260,7 +260,7 @@ async function getTKmilhas() {
             new AlertService().createAlert({
               affiliates_program: flightInfo.program,
               trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
-              route: from + ' - ' + to,
+              route: from + ' -> ' + to,
               miles: Math.round(flightInfo.miles).toString(),
               amount: Math.round(Number(calculateMilesToCurrency('smiles', Number(flightInfo.miles), from === 'SCL' ? 'CLP' : 'BRL'))).toString(),
               airlines: flightSegments[0].airline,
@@ -277,7 +277,7 @@ async function getTKmilhas() {
             new AlertService().createAlert({
               affiliates_program: flightInfo.program,
               trip: flightSegments[0].origin.split('/')[1] + ' a ' + flightSegments[flightSegments.length - 1].destination.split('/')[1],
-              route: from + ' - ' + to,
+              route: from + ' -> ' + to,
               miles: Math.round(flightInfo.miles).toString(),
               amount: Math.round(Number(calculateMilesToCurrency('latam', Number(flightInfo.miles), from === 'SCL' ? 'CLP' : 'BRL'))).toString(),
               airlines: flightSegments[0].airline,
