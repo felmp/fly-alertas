@@ -38,7 +38,7 @@ async function getSeatsAeroBrasil() {
 
     console.log(url);
 
-    skip = take + 5000;
+    skip += take;
 
     let availability;
 
