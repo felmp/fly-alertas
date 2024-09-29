@@ -59,7 +59,7 @@ async function getSeatsAeroBrasil() {
 
     availability.data.forEach(async (e: any) => {
       // || e.Source === 'american'
-      if (e.Source === 'smiles' || e.Source === 'azul') {
+      if (e.Source === 'smiles' || e.Source === 'azul' || e.Source === 'american') {
         let mileageCosts = {
           Y: parseInt(e.YMileageCost),
           W: parseInt(e.WMileageCost),
@@ -205,8 +205,14 @@ async function getSeatsAeroBrasil() {
         }
 
         if (combinedAlert.affiliates_program == 'AMERICAN' && combinedAlert.type_trip == 'Executiva') {
-          console.log(combinedAlert);
-          return new AlertService().createAlert(combinedAlert);
+
+          if (combinedAlert.airlines?.includes('QR') && milesNumber <= 90000) {
+            return new AlertService().createAlert(combinedAlert);
+          }
+
+          if (milesNumber <= 50000) {
+            return new AlertService().createAlert(combinedAlert);
+          }
         }
       }, 2000);
     });
