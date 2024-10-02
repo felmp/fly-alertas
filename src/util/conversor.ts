@@ -1,5 +1,4 @@
 export default function calculateMilesToCurrency(programaAfiliados: string, milhas: number, currency: 'BRL' | 'CLP'): string {
-
   const taxaSmilesBRL = 20;
   const taxaTudoAzulBRL = 22;
   const taxaLatamBRL = 27.50;
@@ -20,7 +19,7 @@ export default function calculateMilesToCurrency(programaAfiliados: string, milh
       if (currency == 'CLP') valor = (milhas / 1000) * taxaTudoAzulCLP;
       if (currency == 'BRL') valor = (milhas / 1000) * taxaTudoAzulBRL;
       break;
-    case 'latam':
+    case 'latam' || 'multiplus':
       if (currency == 'CLP') valor = (milhas / 1000) * taxaLatamCLP;
       if (currency == 'BRL') valor = (milhas / 1000) * taxaLatamBRL;
     case 'american':

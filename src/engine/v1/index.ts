@@ -27,8 +27,10 @@ class engineV1 {
       seatsAero.getSeatsAeroBrasil()
       // crawlers.getTKmilhas();
 
+      crawlers.getTKmilhasNordeste();
       console.log('Fila de alertas iniciada.');
     }
+    
   }
 
   async test() {
