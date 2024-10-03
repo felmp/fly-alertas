@@ -16,7 +16,7 @@ let skip = 0;
 const origins_airports = "GRU,GIG,CNF,BSB,FOR,MAO,POA";
 const destination_airport = "ATL,PEK,LAX,DXB,HND,ORD,LHR,PVG,CDG,AMS,FRA,IST,SIN,ICN,BKK,JFK,HKG,EZE,LIS,MAD,MXP,ORY,AUH,MIA,LAS,YYZ,YUL";
 
-let url = `/search?start_date=${moment().format('YYYY-MM-DD')}&end_date=2025-09-19&origin_airport=${origins_airports}&destination_airport=${destination_airport}&order_by=lowest_mileage&take=${take}&skip=${skip}&cabin=business`;
+let url = `/search?take=${take}&skip=${skip}&start_date=${moment().format('YYYY-MM-DD')}&end_date=2025-10-03&origin_airport=${origins_airports}&destination_airport=${destination_airport}&order_by=lowest_mileage&cabin=business`;
 async function getSeatsAeroBrasil() {
   moment.locale('pt-br')
 
@@ -33,19 +33,24 @@ async function getSeatsAeroBrasil() {
     end_date = tempDate;
   }
 
+
   try {
     const response = await engine_v1.get(url);
+    skip = skip + take;
 
     console.log(url);
-
-    skip += take;
 
     let availability;
 
     availability = response.data
 
-    if (availability.moreURL)
+    if (availability.hasMore !== false) {
       url = availability.moreURL.split('/partnerapi/')[1];
+    } else {
+      take = 5000;
+      skip = 0;
+      url = `/search?take=${take}&skip=${skip}&start_date=${moment().format('YYYY-MM-DD')}&end_date=2025-10-03&origin_airport=${origins_airports}&destination_airport=${destination_airport}&order_by=lowest_mileage&cabin=business`;
+    }
 
     availability.data = availability.data.filter((seat: any) =>
       seat.WRemainingSeats > 0 ||
@@ -58,7 +63,6 @@ async function getSeatsAeroBrasil() {
     const alertGroups: { [key: string]: Alert[] } = {};
 
     availability.data.forEach(async (e: any) => {
-      // || e.Source === 'american'
       if (e.Source === 'smiles' || e.Source === 'azul' || e.Source === 'american') {
         let mileageCosts = {
           Y: parseInt(e.YMileageCost),
@@ -66,6 +70,11 @@ async function getSeatsAeroBrasil() {
           J: parseInt(e.JMileageCost),
           F: parseInt(e.FMileageCost)
         };
+
+        if (e.Source === 'azul') {
+          console.log(e)
+          return
+        }
 
         let filteredCosts = Object.entries(mileageCosts)
           .filter(([key, value]) => key !== "Y" && value !== 0);
@@ -194,8 +203,10 @@ async function getSeatsAeroBrasil() {
               }
               break;
             default:
-              new AlertService().createAlert(combinedAlert);
-              break;
+              if (milesNumber <= 300000) {
+                new AlertService().createAlert(combinedAlert);
+                break;
+              }
           }
         }
 

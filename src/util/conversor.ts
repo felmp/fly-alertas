@@ -19,7 +19,10 @@ export default function calculateMilesToCurrency(programaAfiliados: string, milh
       if (currency == 'CLP') valor = (milhas / 1000) * taxaTudoAzulCLP;
       if (currency == 'BRL') valor = (milhas / 1000) * taxaTudoAzulBRL;
       break;
-    case 'latam' || 'multiplus':
+    case 'latam':
+      if (currency == 'CLP') valor = (milhas / 1000) * taxaLatamCLP;
+      if (currency == 'BRL') valor = (milhas / 1000) * taxaLatamBRL;
+    case 'multiplus':
       if (currency == 'CLP') valor = (milhas / 1000) * taxaLatamCLP;
       if (currency == 'BRL') valor = (milhas / 1000) * taxaLatamBRL;
     case 'american':
