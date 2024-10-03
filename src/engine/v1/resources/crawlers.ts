@@ -296,7 +296,7 @@ async function getTKmilhasNordeste() {
 
   try {
     browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       defaultViewport: null,
       args: [
         '--window-size=1920,1080',
@@ -323,258 +323,264 @@ async function getTKmilhasNordeste() {
     await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-fullWidth.MuiButtonBase-root.css-1g8e2pa').click();
     await delay(3000);
 
-    const buttonsToClick = ['multiplus', 'smiles'];
-    const program = randomElement(buttonsToClick);
-    const selector = `button[value="${program}"]`;
-    await page.locator(selector).click();
-    await delay(1000);
+    const buttonsToClick = ['azul', 'multiplus', 'smiles'];
 
-    await page.evaluate(async () => {
-      let scrollPosition = 0;
-      let documentHeight = document.body.scrollHeight;
+    for (const program of buttonsToClick) {
+      const selector = `button[value="${program}"]`;
+      await page.locator(selector).click();
 
-      while (documentHeight > scrollPosition) {
-        window.scrollBy(0, documentHeight);
-        await new Promise(resolve => {
-          setTimeout(resolve, 1000);
-        });
-        scrollPosition = documentHeight;
-        documentHeight = document.body.scrollHeight;
-      }
-    });
+      await delay(1000);
 
-    const airports_from = [
-      'FOR', 'NAT', 'REC', 'CPV', 'MCZ', 'SLZ', 'THE', 'AJU', 'FEN', 'SSA', 'JPA'
-    ]
+      await page.evaluate(async () => {
+        let scrollPosition = 0;
+        let documentHeight = document.body.scrollHeight;
 
-    const cabin = ['Basic'];
-    const from: string = randomElement(airports_from);
-    const to: string = randomElement(brasilAeroportos);
-
-    console.log('\n\nSaindo de: ' + from);
-    console.log('Para: ' + to);
-    console.log('\nSource: ' + program);
-
-    await page.locator('.MuiInput-root.MuiInput-underline.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.css-3dr76p input[value="5"]').click();
-    await page.keyboard.type('30');
-    await page.keyboard.press('Enter');
-    await delay(1000);
-
-    await page.locator('.MuiAutocomplete-root.airport-input input').fill('');
-    await delay(1000);
-
-    await page.locator('#fromAirport').fill(from);
-    await page.keyboard.press('Enter');
-    await page.keyboard.press('Tab');
-    await delay(1000);
-    await page.keyboard.type('', { delay: 1000 });
-    await delay(3000);
-
-    await page.keyboard.type(to, { delay: 1000 });
-    await page.keyboard.press('Enter');
-    await delay(3000);
-
-    const cabinSelected = randomElement(cabin);
-
-    await page.locator('#mui-7').click();
-    await page.waitForSelector('ul.MuiMenu-list li', { timeout: 0 });
-    await page.click(`ul.MuiMenu-list li[data-value="${cabinSelected}"]`);
-
-
-    const month = randomElement([10, 11, 12, 1, 2, 3])
-
-    const firstDayOfMonth = startOfMonth(new Date(month < 10 ? 2025 : 2024, month));
-
-    const startFirstWeek = startOfWeek(firstDayOfMonth, { weekStartsOn: 1 });
-    const endFirstWeek = endOfWeek(firstDayOfMonth, { weekStartsOn: 1 });
-    console.log('Data da Busca: ' + format(startFirstWeek, 'dd/MM/yyyy', { locale: ptBR }) + ' até ' + format(endFirstWeek, 'dd/MM/yyyy', { locale: ptBR }))
-
-    await page.evaluate(() => {
-      const buttons = document.querySelectorAll('.MuiToggleButtonGroup-root button');
-      for (let button of buttons) {
-        if (button.textContent?.trim() === 'ida e volta') {
-          (button as HTMLElement).click();
-          break;
+        while (documentHeight > scrollPosition) {
+          window.scrollBy(0, documentHeight);
+          await new Promise(resolve => {
+            setTimeout(resolve, 1000);
+          });
+          scrollPosition = documentHeight;
+          documentHeight = document.body.scrollHeight;
         }
+      });
+
+      const airports_from = [
+        'FOR', 'NAT', 'REC', 'CPV', 'MCZ', 'SLZ', 'THE', 'AJU', 'FEN', 'SSA', 'JPA'
+      ]
+
+      const cabin = ['Basic'];
+      const from: string = randomElement(airports_from);
+      const to: string = randomElement(brasilAeroportos);
+
+      console.log('\n\nSaindo de: ' + from);
+      console.log('Para: ' + to);
+      console.log('\nSource: ' + program);
+
+      await page.locator('.MuiInput-root.MuiInput-underline.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.css-3dr76p input[value="5"]').click();
+      await page.keyboard.type('5');
+      await page.keyboard.press('Enter');
+      await delay(1000);
+
+      await page.locator('.MuiAutocomplete-root.airport-input input').fill('');
+      await delay(1000);
+
+      await page.locator('#fromAirport').fill(from);
+      await page.keyboard.press('Enter');
+      await page.keyboard.press('Tab');
+      await delay(1000);
+      await page.keyboard.type('', { delay: 1000 });
+      await delay(3000);
+
+      await page.keyboard.type(to, { delay: 1000 });
+      await page.keyboard.press('Enter');
+      await delay(3000);
+
+      const cabinSelected = randomElement(cabin);
+
+      await page.locator('#mui-7').click();
+      await page.waitForSelector('ul.MuiMenu-list li', { timeout: 0 });
+      await page.click(`ul.MuiMenu-list li[data-value="${cabinSelected}"]`);
+
+
+      const month = randomElement([10, 11, 12, 1, 2, 3])
+
+      const firstDayOfMonth = startOfMonth(new Date(month < 10 ? 2025 : 2024, month));
+
+      const startFirstWeek = startOfWeek(firstDayOfMonth, { weekStartsOn: 1 });
+      const endFirstWeek = endOfWeek(firstDayOfMonth, { weekStartsOn: 1 });
+      console.log('Data da Busca: ' + format(startFirstWeek, 'dd/MM/yyyy', { locale: ptBR }) + ' até ' + format(endFirstWeek, 'dd/MM/yyyy', { locale: ptBR }))
+
+      await page.evaluate(() => {
+        const buttons = document.querySelectorAll('.MuiToggleButtonGroup-root button');
+        for (let button of buttons) {
+          if (button.textContent?.trim() === 'ida e volta') {
+            (button as HTMLElement).click();
+            break;
+          }
+        }
+      });
+      await delay(3000);
+
+      await page.locator('#abc').fill('');
+      await delay(3000);
+      await page.locator('#abc').fill(format(startFirstWeek, 'dd/MM/yyyy', { locale: ptBR }));
+      await delay(3000);
+      await page.locator('#bcd').fill('');
+      await delay(3000);
+      await page.locator('#bcd').fill(format(endFirstWeek, 'dd/MM/yyyy', { locale: ptBR }));
+      await delay(3000);
+
+      await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeSmall.MuiButton-containedSizeSmall.MuiButtonBase-root.searchButton.css-1dpvzvp').click();
+      console.log('Buscando...');
+
+      await page.waitForFunction(() => !document.querySelector('.MuiSkeleton-root'), { timeout: 0 });
+
+      const noFlightsFound = await page.evaluate(() => {
+        const element = document.querySelector('.jss1') || document.querySelector('.jss49') || document.querySelector('.jss25');
+        return element && element.textContent?.includes('Nenhum voo encontrado.');
+      });
+
+      if (noFlightsFound) {
+        console.log('Nenhum voo encontrado para ' + program);
+        await page.locator(`button[value="${program}"]`).click();
+        await delay(1000);
+        continue;
       }
-    });
-    await delay(3000);
 
-    await page.locator('#abc').fill('');
-    await delay(3000);
-    await page.locator('#abc').fill(format(startFirstWeek, 'dd/MM/yyyy', { locale: ptBR }));
-    await delay(3000);
-    await page.locator('#bcd').fill('');
-    await delay(3000);
-    await page.locator('#bcd').fill(format(endFirstWeek, 'dd/MM/yyyy', { locale: ptBR }));
-    await delay(3000);
+      await page.waitForFunction(() => document.querySelector('.MuiAccordionSummary-gutters.css-1iji0d4'), { timeout: 0 });
 
-    await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeSmall.MuiButton-containedSizeSmall.MuiButtonBase-root.searchButton.css-1dpvzvp').click();
-    console.log('Buscando...');
+      const mileElements = await page.$$eval('.MuiBox-root.css-1yaucul h4:nth-of-type(2)', (elements: any) =>
+        elements.filter((f: any) => f.innerText !== 'Erro').map((el: any) => parseInt(el.innerText.replace(/\D/g, ''), 10))
+      );
 
-    await page.waitForFunction(() => !document.querySelector('.MuiSkeleton-root'), { timeout: 0 });
-    
-    const noFlightsFound = await page.evaluate(() => {
-      const element = document.querySelector('.jss1');
-      return element && element.textContent?.includes('Nenhum voo encontrado.');
-    });
+      console.log('Fim da busca.');
 
-    console.log(noFlightsFound)
-    if (noFlightsFound) {
-      console.log('Nenhum voo encontrado. Reiniciando navegador...');
-      await browser.close();
-      await delay(5000);
-      await getTKmilhasNordeste(); // Reinicia o processo
-    }
+      if (mileElements.length == 0) {
+        console.log('Nenhum voo encontrado para ' + program);
+        await page.locator(`button[value="${program}"]`).click();
+        await delay(1000);
+        continue;
+      }
 
-    await page.waitForFunction(() => document.querySelector('.MuiAccordionSummary-gutters.css-1iji0d4'), { timeout: 0 });
+      const flightSegments = await page.evaluate(async () => {
+        const delay = (ms: any) => new Promise(resolve => setTimeout(resolve, ms));
 
-    const mileElements = await page.$$eval('.MuiBox-root.css-1yaucul h4:nth-of-type(2)', (elements: any) =>
-      elements.filter((f: any) => f.innerText !== 'Erro').map((el: any) => parseInt(el.innerText.replace(/\D/g, ''), 10))
-    );
+        const mileElements = document.querySelectorAll('.css-1iji0d4');
+        const allFlightSegments = [];
 
-    console.log('Fim da busca.');
+        for (let mileElement of mileElements) {
+          await delay(2000);
 
-    if (mileElements.length == 0) {
-      console.log('Fim da busca, nada encontrado. Chamando próxima execução');
-      await browser.close();
-      await delay(2500);
-      await getTKmilhasNordeste();
-    }
+          (mileElement as HTMLElement).click();
 
-    const flightSegments = await page.evaluate(async () => {
-      const delay = (ms: any) => new Promise(resolve => setTimeout(resolve, ms));
+          console.log(mileElement)
+          const selector = 'div[aria-label="Clique para adicionar no orçamento e emissão."]';
+          const addToBudgetButton = await new Promise((resolve) => {
+            const interval = setInterval(() => {
+              const button = document.querySelector(selector);
+              if (button) {
+                clearInterval(interval);
+                resolve(button);
+              }
+            }, 100);
+          });
 
-      const mileElements = document.querySelectorAll('.css-1iji0d4');
-      const allFlightSegments = [];
+          if (addToBudgetButton) {
+            (addToBudgetButton as HTMLElement).click();
+          } else {
+            continue;
+          }
 
-      for (let mileElement of mileElements) {
-        await delay(2000);
 
-        (mileElement as HTMLElement).click();
-
-        console.log(mileElement)
-        const selector = 'div[aria-label="Clique para adicionar no orçamento e emissão."]';
-        const addToBudgetButton = await new Promise((resolve) => {
-          const interval = setInterval(() => {
-            const button = document.querySelector(selector);
-            if (button) {
-              clearInterval(interval);
-              resolve(button);
+          const buttonClicked = (() => {
+            const buttonsOptions = Array.from(document.querySelectorAll('button'));
+            for (let button of buttonsOptions) {
+              if (button.textContent?.includes('Copiar dados Voo')) {
+                (button as HTMLElement).click();
+                return true;
+              }
             }
-          }, 100);
-        });
+            return false;
+          })();
 
-        if (addToBudgetButton) {
-          (addToBudgetButton as HTMLElement).click();
+
+          if (!buttonClicked) {
+            continue;
+          }
+
+          const copiedData = await navigator.clipboard.readText();
+
+          const flightDetails = copiedData.split('\n').map(line => line.trim()).filter(line => line);
+          const flightSegments = [];
+
+          for (let i = 0; i < flightDetails.length; i++) {
+            if (flightDetails[i].startsWith('Partida:')) {
+              const segment = {
+                departureTime: flightDetails[i].replace('Partida:', '').trim(),
+                arrivalTime: flightDetails[++i].replace('Chegada:', '').trim(),
+                airline: flightDetails[++i].replace('Cia:', '').trim(),
+                flightNumber: flightDetails[++i].replace('Nº Voo:', '').trim(),
+                origin: flightDetails[++i].replace('Origem:', '').trim(),
+                destination: flightDetails[++i].replace('Destino:', '').trim(),
+                cabin: flightDetails[++i].replace('Cabine:', '').trim(),
+              };
+              flightSegments.push(segment);
+            }
+          }
+
+          const flightInfo = {
+            program: (document.querySelector('.MuiTableHead-root .flight-table-header td:nth-of-type(1)') as any)?.innerText || null,
+            class: (document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(1) .MuiTypography-button') as any)?.innerText || null,
+            departure: (document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(3) .MuiTypography-button') as any)?.innerText || null,
+            flight: (document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(5) .MuiTypography-button') as any)?.innerText || null,
+            miles: mileElement.textContent?.split('2024')[1] || mileElement.textContent?.split('2025')[1] || null,
+            flightSegments
+          };
+
+          allFlightSegments.push(flightInfo);
+
+          (mileElement as HTMLElement).click();
+        }
+
+        return allFlightSegments;
+      });
+
+      console.log(flightSegments)
+
+      let dateFrom = 'IDA: \n\n';
+      let dateTo = 'VOLTA: \n\n';
+
+      let smallestElement = flightSegments[0];
+
+      for (let index = 0; index < flightSegments.length; index++) {
+        const element = flightSegments[index];
+
+
+        const miles = element.miles.replace('.', '')
+
+        if (index <= 5) {
+          if (Number(miles) <= 20000) {
+            dateFrom += `${element.departure} (${element.miles} milhas)\n`
+          }
         } else {
-          continue;
-        }
-
-
-        const buttonClicked = (() => {
-          const buttonsOptions = Array.from(document.querySelectorAll('button'));
-          for (let button of buttonsOptions) {
-            if (button.textContent?.includes('Copiar dados Voo')) {
-              (button as HTMLElement).click();
-              return true;
-            }
-          }
-          return false;
-        })();
-
-
-        if (!buttonClicked) {
-          continue;
-        }
-
-        const copiedData = await navigator.clipboard.readText();
-
-        const flightDetails = copiedData.split('\n').map(line => line.trim()).filter(line => line);
-        const flightSegments = [];
-
-        for (let i = 0; i < flightDetails.length; i++) {
-          if (flightDetails[i].startsWith('Partida:')) {
-            const segment = {
-              departureTime: flightDetails[i].replace('Partida:', '').trim(),
-              arrivalTime: flightDetails[++i].replace('Chegada:', '').trim(),
-              airline: flightDetails[++i].replace('Cia:', '').trim(),
-              flightNumber: flightDetails[++i].replace('Nº Voo:', '').trim(),
-              origin: flightDetails[++i].replace('Origem:', '').trim(),
-              destination: flightDetails[++i].replace('Destino:', '').trim(),
-              cabin: flightDetails[++i].replace('Cabine:', '').trim(),
-            };
-            flightSegments.push(segment);
+          if (Number(miles) <= 20000) {
+            dateTo += `${element.departure} (${element.miles} milhas)\n`
           }
         }
 
-        const flightInfo = {
-          program: (document.querySelector('.MuiTableHead-root .flight-table-header td:nth-of-type(1)') as any)?.innerText || null,
-          class: (document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(1) .MuiTypography-button') as any)?.innerText || null,
-          departure: (document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(3) .MuiTypography-button') as any)?.innerText || null,
-          flight: (document.querySelector('.MuiTableBody-root .MuiTableRow-root .MuiTableCell-root:nth-of-type(5) .MuiTypography-button') as any)?.innerText || null,
-          miles: mileElement.textContent?.split('2024')[1] || mileElement.textContent?.split('2025')[1] || null,
-          flightSegments
-        };
-
-        allFlightSegments.push(flightInfo);
-
-        (mileElement as HTMLElement).click();
+        if (element.miles && smallestElement.miles && parseInt(element.miles) < parseInt(smallestElement.miles)) {
+          smallestElement = element;
+        }
       }
+      if (smallestElement.miles) {
 
-      return allFlightSegments;
-    });
+        const miles = smallestElement.miles.replace('.', '')
 
-    console.log(flightSegments)
-
-    let dateFrom = 'IDA: \n\n';
-    let dateTo = 'VOLTA: \n\n';
-
-    let smallestElement = flightSegments[0];
-
-    for (let index = 0; index < flightSegments.length; index++) {
-      const element = flightSegments[index];
-
-
-      const miles = element.miles.replace('.', '')
-
-      if (index <= 15) {
         if (Number(miles) <= 20000) {
-          dateFrom += `${element.departure} (${element.miles} milhas)\n`
-        }
-      } else {
-        if (Number(miles) <= 20000) {
-          dateTo += `${element.departure} (${element.miles} milhas)\n`
+          const json = {
+            affiliates_program: smallestElement.program,
+            trip: from + ' -> ' + to,
+            route: 'Nacional',
+            miles: smallestElement.miles,
+            amount: Math.round(Number(calculateMilesToCurrency(program, Number(smallestElement.miles), 'BRL'))).toString(),
+            airlines: smallestElement.flightSegments[0].airline,
+            sent: 'brasil_group',
+            type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
+            remaining: dateFrom + '\n' + dateTo,
+            link: ''
+          }
+          new AlertService().createAlert(json);
+
+          console.log(json)
         }
       }
 
-      if (element.miles && smallestElement.miles && parseInt(element.miles) < parseInt(smallestElement.miles)) {
-        smallestElement = element;
-      }
+
+      await page.locator(`button[value="${program}"]`).click();
+
+      await delay(1000);
     }
-    if (smallestElement.miles) {
-
-      const miles = smallestElement.miles.replace('.', '')
-
-      if (Number(miles) <= 20000) {
-        const json = {
-          affiliates_program: smallestElement.program,
-          trip: from + ' -> ' + to,
-          route: 'Nacional',
-          miles: smallestElement.miles,
-          amount: Math.round(Number(calculateMilesToCurrency(program, Number(smallestElement.miles), 'BRL'))).toString(),
-          airlines: smallestElement.flightSegments[0].airline,
-          sent: 'brasil_group',
-          type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
-          remaining: dateFrom + '\n' + dateTo,
-          link: ''
-        }
-        new AlertService().createAlert(json);
-
-        console.log(json)
-      }
-    }
-
 
     await browser.close();
     await delay(5000);

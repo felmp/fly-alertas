@@ -53,6 +53,7 @@ async function getSeatsAeroBrasil() {
     }
 
     availability.data = availability.data.filter((seat: any) =>
+      seat.Source === 'azul' ||
       seat.WRemainingSeats > 0 ||
       seat.JRemainingSeats > 0 ||
       seat.FRemainingSeats > 0 ||
