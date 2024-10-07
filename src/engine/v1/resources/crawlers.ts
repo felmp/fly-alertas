@@ -290,13 +290,34 @@ async function getTKmilhas() {
   }
 }
 
+function gerarPeriodoAleatorio() {
+  // Data atual
+  const hoje = new Date();
+
+  // Adicionar 5 meses à data atual
+  const dataLimite = new Date();
+  dataLimite.setMonth(hoje.getMonth() + 5);
+
+  // Gerar uma data aleatória entre hoje e a data limite
+  const dataInicioAleatoria = new Date(hoje.getTime() + Math.random() * (dataLimite.getTime() - hoje.getTime()));
+
+  // Adicionar 15 dias à data de início
+  const dataFimAleatoria = new Date(dataInicioAleatoria);
+  dataFimAleatoria.setDate(dataFimAleatoria.getDate() + 15);
+
+  return {
+    inicio: dataInicioAleatoria.toISOString().split('T')[0], // Retorna no formato YYYY-MM-DD
+    fim: dataFimAleatoria.toISOString().split('T')[0]        // Retorna no formato YYYY-MM-DD
+  };
+}
+
 
 async function getTKmilhasNordeste() {
   let browser: any; // Declara o tipo de 'browser'
 
   try {
     browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       defaultViewport: null,
       args: [
         '--window-size=1920,1080',
@@ -353,9 +374,10 @@ async function getTKmilhasNordeste() {
       const from: string = randomElement(airports_from);
       const to: string = randomElement(brasilAeroportos);
 
+      console.log('-------------------------------');
       console.log('\n\nSaindo de: ' + from);
       console.log('Para: ' + to);
-      console.log('\nSource: ' + program);
+      console.log('Source: ' + program);
 
       await page.locator('.MuiInput-root.MuiInput-underline.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.css-3dr76p input[value="5"]').click();
       await page.keyboard.type('5');
@@ -387,9 +409,10 @@ async function getTKmilhasNordeste() {
 
       const firstDayOfMonth = startOfMonth(new Date(month < 10 ? 2025 : 2024, month));
 
-      const startFirstWeek = startOfWeek(firstDayOfMonth, { weekStartsOn: 1 });
-      const endFirstWeek = endOfWeek(firstDayOfMonth, { weekStartsOn: 1 });
-      console.log('Data da Busca: ' + format(startFirstWeek, 'dd/MM/yyyy', { locale: ptBR }) + ' até ' + format(endFirstWeek, 'dd/MM/yyyy', { locale: ptBR }))
+      const { inicio, fim } = gerarPeriodoAleatorio();
+      // const endFirstWeek = endOfWeek(firstDayOfMonth, { weekStartsOn: 1 });
+      console.log('Periodo de viagem: ' + format(inicio, 'dd/MM/yyyy', { locale: ptBR }) + ' até ' + format(fim, 'dd/MM/yyyy', { locale: ptBR }))
+      console.log('Data da busca: ' + format(new Date(), 'dd/MM/yyyy HH:mm:ss', { locale: ptBR }))
 
       await page.evaluate(() => {
         const buttons = document.querySelectorAll('.MuiToggleButtonGroup-root button');
@@ -404,11 +427,11 @@ async function getTKmilhasNordeste() {
 
       await page.locator('#abc').fill('');
       await delay(3000);
-      await page.locator('#abc').fill(format(startFirstWeek, 'dd/MM/yyyy', { locale: ptBR }));
+      await page.locator('#abc').fill(format(inicio, 'dd/MM/yyyy', { locale: ptBR }));
       await delay(3000);
       await page.locator('#bcd').fill('');
       await delay(3000);
-      await page.locator('#bcd').fill(format(endFirstWeek, 'dd/MM/yyyy', { locale: ptBR }));
+      await page.locator('#bcd').fill(format(fim, 'dd/MM/yyyy', { locale: ptBR }));
       await delay(3000);
 
       await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeSmall.MuiButton-containedSizeSmall.MuiButtonBase-root.searchButton.css-1dpvzvp').click();
@@ -447,9 +470,16 @@ async function getTKmilhasNordeste() {
         const delay = (ms: any) => new Promise(resolve => setTimeout(resolve, ms));
 
         const mileElements = document.querySelectorAll('.css-1iji0d4');
+
+        const filteredElements = Array.from(mileElements).filter((element) => {
+          const h4Elements = element.querySelectorAll('h4');
+          
+          return h4Elements[1]?.textContent !== 'Erro';
+        });
+        
         const allFlightSegments = [];
 
-        for (let mileElement of mileElements) {
+        for (let mileElement of filteredElements) {
           await delay(2000);
 
           (mileElement as HTMLElement).click();
@@ -536,17 +566,42 @@ async function getTKmilhasNordeste() {
       for (let index = 0; index < flightSegments.length; index++) {
         const element = flightSegments[index];
 
-
         const miles = element.miles.replace('.', '')
 
-        if (index <= 5) {
-          if (Number(miles) <= 20000) {
-            dateFrom += `${element.departure} (${element.miles} milhas)\n`
-          }
-        } else {
-          if (Number(miles) <= 20000) {
-            dateTo += `${element.departure} (${element.miles} milhas)\n`
-          }
+        switch (program) {
+          case 'azul':
+            if (Number(miles) <= 8000) {
+              if (index <= 5) {
+                dateFrom += `${element.departure} (${element.miles} milhas)\n`
+              } else {
+                dateTo += `${element.departure} (${element.miles} milhas)\n`
+              }
+            }
+
+            break;
+          case 'multiplus':
+            if (Number(miles) <= 10000) {
+              if (index <= 5) {
+                dateFrom += `${element.departure} (${element.miles} milhas)\n`
+              } else {
+                dateTo += `${element.departure} (${element.miles} milhas)\n`
+              }
+            }
+
+            break;
+          case 'smiles':
+            if (Number(miles) <= 18000) {
+              if (index <= 5) {
+                dateFrom += `${element.departure} (${element.miles} milhas)\n`
+              } else {
+                dateTo += `${element.departure} (${element.miles} milhas)\n`
+              }
+            }
+
+            break;
+
+          default:
+            break;
         }
 
         if (element.miles && smallestElement.miles && parseInt(element.miles) < parseInt(smallestElement.miles)) {
@@ -557,23 +612,72 @@ async function getTKmilhasNordeste() {
 
         const miles = smallestElement.miles.replace('.', '')
 
-        if (Number(miles) <= 20000) {
-          const json = {
-            affiliates_program: smallestElement.program,
-            trip: from + ' -> ' + to,
-            route: 'Nacional',
-            miles: smallestElement.miles,
-            amount: Math.round(Number(calculateMilesToCurrency(program, Number(smallestElement.miles), 'BRL'))).toString(),
-            airlines: smallestElement.flightSegments[0].airline,
-            sent: 'brasil_group',
-            type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
-            remaining: dateFrom + '\n' + dateTo,
-            link: ''
-          }
-          new AlertService().createAlert(json);
+        switch (program) {
+          case 'azul':
+            if (Number(miles) <= 8000) {
+              const json = {
+                affiliates_program: program,
+                trip: from + ' -> ' + to,
+                route: 'Nacional',
+                miles: smallestElement.miles,
+                amount: Math.round(Number(calculateMilesToCurrency(program, Number(miles), 'BRL'))).toString(),
+                airlines: smallestElement.flightSegments[0].airline,
+                sent: 'brasil_group',
+                type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
+                remaining: dateFrom + '\n' + dateTo,
+                link: ''
+              }
+              new AlertService().createAlert(json);
 
-          console.log(json)
+              console.log(json)
+            }
+
+            break;
+          case 'multiplus':
+            if (Number(miles) <= 10000) {
+              const json = {
+                affiliates_program: program,
+                trip: from + ' -> ' + to,
+                route: 'Nacional',
+                miles: smallestElement.miles,
+                amount: Math.round(Number(calculateMilesToCurrency(program, Number(miles), 'BRL'))).toString(),
+                airlines: smallestElement.flightSegments[0].airline,
+                sent: 'brasil_group',
+                type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
+                remaining: dateFrom + '\n' + dateTo,
+                link: ''
+              }
+              new AlertService().createAlert(json);
+
+              console.log(json)
+            }
+
+            break;
+          case 'smiles':
+            if (Number(miles) <= 18000) {
+              const json = {
+                affiliates_program: program,
+                trip: from + ' -> ' + to,
+                route: 'Nacional',
+                miles: smallestElement.miles,
+                amount: Math.round(Number(calculateMilesToCurrency(program, Number(miles), 'BRL'))).toString(),
+                airlines: smallestElement.flightSegments[0].airline,
+                sent: 'brasil_group',
+                type_trip: cabinSelected == 'Basic' ? 'Econômica' : 'Executiva',
+                remaining: dateFrom + '\n' + dateTo,
+                link: ''
+              }
+              new AlertService().createAlert(json);
+
+              console.log(json)
+            }
+
+            break;
+
+          default:
+            break;
         }
+
       }
 
 
@@ -595,18 +699,6 @@ async function getTKmilhasNordeste() {
   }
 }
 
-async function play() {
-
-
-  // getTKmilhasEndpoint(from, to, 'economy', format(startFirstWeek, 'yyyy-MM-dd'), format(endFirstWeek, 'yyyy-MM-dd'));
-
-  // setInterval(() => {
-  //   const startThirdWeek = startOfWeek(addWeeks(firstDayOfMonth, 2), { weekStartsOn: 1 });
-  //   const endThirdWeek = endOfWeek(addWeeks(firstDayOfMonth, 2), { weekStartsOn: 1 });
-  //   getTKmilhasEndpoint(from, to, 'economy', format(startThirdWeek, 'yyyy-MM-dd'), format(endThirdWeek, 'yyyy-MM-dd'));
-  // }, 300000)
-
-}
 
 async function getTKmilhasEndpoint(from: string, to: string, cabin: string, date_departure: string, date_return: string) {
   moment.locale('pt-br')

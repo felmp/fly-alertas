@@ -22,12 +22,13 @@ class engineV1 {
     if (!this.is_running) {
       this.is_running = true;
       // this.interval = setInterval(() => queues.processQueue(), 5000);
-      // setInterval(() => queues.processQueueSeatsAero(), 3600000);
-      // setInterval(() => seatsAero.getSeatsAeroBrasil(), 2200000);
+      setInterval(() => queues.processQueueSeatsAero(), 3600000);
+      setInterval(() => seatsAero.getSeatsAeroBrasil(), 2200000);
       // queues.processQueueSeatsAero()
 
 
       crawlers.getTKmilhasNordeste();
+      // this.maintenance()
       console.log('Fila de alertas iniciada.');
     }
     
@@ -58,9 +59,19 @@ class engineV1 {
 
   maintenance() {
     var data = JSON.stringify({
-      "to_group_uuid": "WAG21643897-66e9-45a7-8886-7040c803db73",
+      "to_group_uuid": "WAG2a2d7898-305f-4b21-8528-b26f36f3a342",
       "from_number": "+5579920012363",
-      "text": `NO TE PIERDAS NADA SIGUE TODAS LAS OFERTAS QUE SUELTAREMOS AQUÍ ES EXCLUSIVO Y TEMPORAL, COMPÁRTELO CON TU AMIGO QUE VIAJA, ¡LAS VACANTES AQUÍ GRATIS SON LIMITADAS!`
+      "text": `🚨 Aviso de Manutenção 🚨
+Olá, viajantes!
+
+Só um aviso rápido: estamos preparando algumas melhorias no nosso sistema de alertas de milhas para trazer novidades incríveis! Por isso, teremos uma manutenção, a partir das 16:00. Durante esse tempinho, os alertas de milhas podem dar uma pausa, mas fique tranquilo(a), será por uma boa causa! 😉
+
+Assim que terminarmos, você pode esperar por excelentes alertas de viagens que estamos preparando especialmente para você.
+
+Obrigado pela paciência e continue de olho para não perder as melhores oportunidades! ✈️
+
+Abraços,
+Equipe FlyAlertas`
     });
 
     wpp.post('open/whatsapp/send-message', data)

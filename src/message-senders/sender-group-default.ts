@@ -9,7 +9,7 @@ export async function sendDefaultMessage(message: string, group_id: string = 'WA
     'Não tire nenhum emoji'
 
   const data_gpt = {
-    "model": "gpt-3.5-turbo",
+    "model": "gpt-4",
     "messages": [
       {
         "role": "system",
