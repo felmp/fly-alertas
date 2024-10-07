@@ -154,7 +154,7 @@ _Não tem milhas ? Nós te ajudamos com essa emissão !_`;
 
 🚨 Programa de Afiliados: ${alert.affiliates_program?.trim()}
 ✈️  Rota: ${alert.trip?.trim()} / ${alert.route?.trim()}
-💰 A partir de R$ ${formatter.format(Number(alert.amount))} trecho + taxas
+💰 A partir de ${formatter.format(Number(alert.amount))} trecho + taxas
 🛫 Companhia Aérea: ${alert.airlines?.trim()}
 💺 Classe: ${alert.type_trip?.trim()}
 🗓️  Alerta de Data : ${alert.remaining}
