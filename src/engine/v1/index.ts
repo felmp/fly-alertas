@@ -3,6 +3,8 @@ import { AlertService } from '../../services/alert.service';
 import seatsAero from './resources/seats-aero';
 import queues from './resources/queues';
 import crawlers from './resources/crawlers';
+import latam from './resources/crawlers/latam';
+import config from './resources/crawlers/latam/config';
 
 class engineV1 {
   interval: any;
@@ -22,16 +24,21 @@ class engineV1 {
     if (!this.is_running) {
       this.is_running = true;
       // this.interval = setInterval(() => queues.processQueue(), 5000);
-      setInterval(() => queues.processQueueSeatsAero(), 3600000);
-      setInterval(() => seatsAero.getSeatsAeroBrasil(), 2200000);
+      // setInterval(() => queues.processQueueSeatsAero(), 3600000);
+      // setInterval(() => seatsAero.getSeatsAeroBrasil(), 2200000);
       // queues.processQueueSeatsAero()
 
 
-      crawlers.getTKmilhasNordeste();
+      // crawlers.getTKmilhasNordeste();
+
+      const intenerario = { origem: "NAT", destino: "ANF", data: "2025-02-05" }
+      let url2 = "https://matrix.itasoftware.com/";
+
+      latam.iceBerg(intenerario.origem, intenerario.destino, intenerario.data, url2, config.proxiesLista, 1);
       // this.maintenance()
       console.log('Fila de alertas iniciada.');
     }
-    
+
   }
 
   async test() {
