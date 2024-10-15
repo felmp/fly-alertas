@@ -9,6 +9,7 @@ import { brasilAeroportos } from "../util";
 import { formatDate } from "../../../util/format-date";
 import { addWeeks, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { proxiesLista } from '../config/latam.config';
 
 async function getTKmilhas() {
   let browser
@@ -473,10 +474,10 @@ async function getTKmilhasNordeste() {
 
         const filteredElements = Array.from(mileElements).filter((element) => {
           const h4Elements = element.querySelectorAll('h4');
-          
+
           return h4Elements[1]?.textContent !== 'Erro';
         });
-        
+
         const allFlightSegments = [];
 
         for (let mileElement of filteredElements) {
@@ -946,4 +947,218 @@ async function getTKmilhasEndpoint(from: string, to: string, cabin: string, date
   }
 }
 
-export default { getTKmilhas, getTKmilhasEndpoint, getTKmilhasNordeste }
+async function getAzul() {
+  const browser = await puppeteer.launch({
+    headless: false,
+    defaultViewport: null,
+    args: [
+      '--window-size=1920,1080',
+    ],
+    executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
+    protocolTimeout: 0
+  });
+
+  const page = await browser.newPage();
+  const client = await page.createCDPSession();
+  await client.send('Browser.grantPermissions', {
+    origin: "https://passagens.voeazul.com.br/pt/buscador-de-precos#comparador",
+    permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
+  });
+
+  await page.goto('https://passagens.voeazul.com.br/pt/buscador-de-precos#comparador', { timeout: 0 });
+
+  await page.waitForSelector('#sfm-origin-667b2ae631c61602ee016857-input');
+  await page.type('#sfm-origin-667b2ae631c61602ee016857-input', 'NAT');
+  await page.keyboard.press("Enter")
+
+  // await page.waitForSelector('#sfm-destination-667b2ae631c61602ee016857-input');
+  // await page.type('#sfm-destination-667b2ae631c61602ee016857-input', 'GRU');
+  await page.waitForSelector('div[data-test="card-container"]');
+
+  const flightData = await page.$$eval('div[data-test="card-container"]', cards => {
+    return cards.map(card => {
+      const origin = (card.querySelector('p[data-test="origin-text"]') as any)?.innerText || '';
+      const destination = (card.querySelector('div[data-test="destination-text"]') as any)?.innerText || '';
+      const date = (card.querySelector('div[data-test="dates"]') as any)?.innerText.trim() || '';
+      const flightType = (card.querySelector('p[data-test="flight-type"]') as any)?.innerText || '';
+      const travelClass = (card.querySelector('p[data-test="travel-class"]') as any)?.innerText || '';
+      const price = (card.querySelector('div[data-test="price"]') as any)?.innerText.replace('*', '').trim() || '';
+      const lastSeen = (card.querySelector('div[data-test="last-seen"]') as any)?.innerText.replace('Visto:', '').trim() || '';
+
+      return {
+        origin,
+        destination,
+        date,
+        flightType,
+        travelClass,
+        price,
+        lastSeen
+      };
+    });
+  });
+
+  console.log(flightData);
+
+}
+
+// async function getLatam() {
+
+//   let dadosFinais = [];
+
+//   let maxTentativas = proxiesLista.length;
+//   let tentativas = 0;
+//   let deuCerto = false;
+
+
+//   while (!deuCerto && tentativas < maxTentativas) {
+
+//     try {
+
+//       const proxy = proxiesLista[tentativas];
+//       tentativas++;
+//       const result = await this.consultaVoos(origem, destino, data, url, proxy, index_voo);
+
+//       if (result.status === "Ok") {
+//         deuCerto = true;
+//         dadosFinais.push(result.dados);
+//         return await this.formatar(dadosFinais[0]);
+//       }
+
+//     } catch (erro) {
+//       console.error(`Tentativa ${tentativas} falhou: ${erro.message}`);
+//       if (tentativas >= maxTentativas) {
+//         return { erro: 'Falha ao consultar voos após várias tentativas.', code: 500 };
+//       }
+//     }
+//   }
+// }
+
+// async function consultaVoosLatam(aero1: string, aero2: string, data: string, url: string, proxy: string, index = 0) {
+//   let browser;
+
+//   try {
+
+//     browser = await puppeteer.launch({ headless: false, args: [`${proxy}`] });
+//     const page = await browser.newPage();
+
+//     await page.goto(url);
+
+//     await page.waitForSelector("#mat-tab-label-0-1", { timeout: 2000 })
+
+//     await page.click("#mat-tab-label-0-1");
+
+
+//     await new Promise(resolve => setTimeout(resolve, 2000));
+//     await page.type('#mat-mdc-chip-list-input-2', aero1); // Origem
+//     await page.keyboard.press("ArrowDown")
+//     await page.keyboard.press("Enter")
+//     await new Promise(resolve => setTimeout(resolve, 2000));
+//     await page.type('#mat-mdc-chip-list-input-3', aero2); // Destino
+//     await page.keyboard.press("ArrowDown")
+//     await page.keyboard.press("Enter")
+//     await new Promise(resolve => setTimeout(resolve, 2000));
+//     await page.type('#mat-input-12', data);
+//     await page.keyboard.press("Enter")
+
+//     await page.waitForSelector('mat-select[formcontrolname="cabin"]');
+
+//     await page.click('mat-select[formcontrolname="cabin"]');
+
+
+//     await page.waitForSelector('mat-option');
+
+
+//     const options = await page.$$('mat-option');
+
+//     let contador = 0;
+
+
+//     for (let option of options) {
+
+//       if (contador === index) {
+
+//         await option.click();
+
+//         const selectedValue = await page.$eval('.mat-mdc-select-value-text span', el => el.textContent);
+//         console.log("Valor selecionado: ", selectedValue);
+
+//         await page.click('mat-select[formcontrolname="cabin"]');
+
+
+
+//         await page.waitForSelector('mat-option');
+//       }
+
+//       contador++;
+
+//     }
+
+//     await page.keyboard.press("Enter")
+//     await new Promise(resolve => setTimeout(resolve, 2000));
+
+//     await page.click('button[type="submit"]');
+
+//     await page.waitForSelector("table tr", { timeout: 60000 })
+//     await new Promise(resolve => setTimeout(resolve, 1000));
+
+//     //const classes = ["Econômica", "Econômica Premium", "Executiva", "Primeira Classe"];
+
+//     const tabelaDados = await page.evaluate((indexNum, date, classe) => {
+
+//       const rows = document.querySelectorAll("table tr");
+//       let dados = [];
+
+
+//       rows.forEach(row => {
+
+//         const cells = row.querySelectorAll("td");
+//         let rowDados = {};
+
+//         if (cells.length > 0) {
+
+
+//           if (cells[0].innerText != "" && cells[1].innerText === "LATAM") {
+//             rowDados.price = cells[0].innerText;
+//             rowDados.airline = cells[1].innerText;
+//             rowDados.depart = cells[2].innerText;
+//             rowDados.arrive = cells[3].innerText;
+//             rowDados.duration = cells[4].innerText;
+//             rowDados.fromTo = cells[5].innerText;
+//             rowDados.stops = cells[6].innerText;
+//             rowDados.advisory = cells[7].innerText;
+//             rowDados.classe = classe[indexNum];
+//             rowDados.data = date
+//             //rowDados.teste = `${classes[indexNum]}-`
+
+
+
+//             dados.push(rowDados);
+
+//           }
+//         }
+//       });
+
+//       return dados;
+//     }, index, data, classes);
+
+//     //console.log(tabelaDados);
+
+//     await browser.close()
+
+
+
+//     return { dados: tabelaDados, status: "Ok", mensage: "Tudo_OK", code: 200 };
+
+//   } catch (Oerro) {
+
+//     console.log(Oerro)
+
+//     return { dados: 0, status: "ERRO", mensage: Oerro, code: 500 }
+
+//   } finally {
+//     if (browser) await browser.close()
+
+//   }
+// }
+
+export default { getTKmilhas, getTKmilhasEndpoint, getTKmilhasNordeste, getAzul }
