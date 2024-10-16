@@ -13,7 +13,7 @@ import { randomElement } from "../../../util/random-element";
 let take = 5000;
 let skip = 0;
 
-const origins_airports = "GRU,GIG,CNF,BSB,FOR,MAO,POA";
+const origins_airports = "GRU,GIG,BSB,CGH,SDU,VCP,POA,CNF,REC,SSA,FOR,CWB,FLN,MAO,NAT,BEL,MCZ,SLZ,CGB,AJU,VIX,JPA,IGU,STM,TFF,THE,MCP,BVB,PVH,RBR,PPB,UDI,LDB,MGF,SJP,VDC,IOS,CPV,RAO,CAW,XAP";
 const destination_airport = "ATL,PEK,LAX,DXB,HND,ORD,LHR,PVG,CDG,AMS,FRA,IST,SIN,ICN,BKK,JFK,HKG,EZE,LIS,MAD,MXP,ORY,AUH,MIA,LAS,YYZ,YUL";
 
 let url = `/search?take=${take}&skip=${skip}&start_date=${moment().format('YYYY-MM-DD')}&end_date=2025-10-03&origin_airport=${origins_airports}&destination_airport=${destination_airport}&order_by=lowest_mileage&cabin=business`;

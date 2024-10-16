@@ -22,13 +22,13 @@ class engineV1 {
     if (!this.is_running) {
       this.is_running = true;
       // this.interval = setInterval(() => queues.processQueue(), 5000);
-      // setInterval(() => queues.processQueueSeatsAero(), 3600000);
+      setInterval(() => queues.processQueueSeatsAero(), 3600000);
       // setInterval(() => seatsAero.getSeatsAeroBrasil(), 2200000);
-      // queues.processQueueSeatsAero()
+      queues.processQueueSeatsAero()
+      // seatsAero.getSeatsAeroBrasil()
 
-
-      // crawlers.getTKmilhasNordeste();
-      crawlers.getAzul();
+      crawlers.getTKmilhasNordeste();
+      // crawlers.getAzul();
       // this.maintenance()
       console.log('Fila de alertas iniciada.');
     }

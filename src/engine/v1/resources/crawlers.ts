@@ -297,7 +297,7 @@ function gerarPeriodoAleatorio() {
 
   // Adicionar 5 meses à data atual
   const dataLimite = new Date();
-  dataLimite.setMonth(hoje.getMonth() + 5);
+  dataLimite.setMonth(hoje.getMonth() + 10);
 
   // Gerar uma data aleatória entre hoje e a data limite
   const dataInicioAleatoria = new Date(hoje.getTime() + Math.random() * (dataLimite.getTime() - hoje.getTime()));
@@ -336,10 +336,10 @@ async function getTKmilhasNordeste() {
 
     await page.goto('https://www.tkmilhas.com/login', { timeout: 0 });
 
-    await page.locator('#mui-1').fill('ruan_jtl@hotmail.com');
+    await page.locator('#mui-1').fill('potiguar.passagens@gmail.com');
     await delay(3000);
 
-    await page.locator('#mui-2').fill('Isabel%2936');
+    await page.locator('#mui-2').fill('#Bob1234');
     await delay(3000);
 
     await page.locator('.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-fullWidth.MuiButtonBase-root.css-1g8e2pa').click();
@@ -372,13 +372,19 @@ async function getTKmilhasNordeste() {
       ]
 
       const cabin = ['Basic'];
-      const from: string = randomElement(airports_from);
+      const from: string = randomElement(brasilAeroportos);
       const to: string = randomElement(brasilAeroportos);
 
       console.log('-------------------------------');
       console.log('\n\nSaindo de: ' + from);
       console.log('Para: ' + to);
       console.log('Source: ' + program);
+
+      if(from == to) {
+        await page.locator(`button[value="${program}"]`).click();
+        await delay(1000);
+        continue;
+      }
 
       await page.locator('.MuiInput-root.MuiInput-underline.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.css-3dr76p input[value="5"]').click();
       await page.keyboard.type('5');
