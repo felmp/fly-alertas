@@ -18,16 +18,21 @@ class engineV1 {
     this.change_search = 'BR';
   }
 
+  // await page.locator('#mui-1').fill('ruan_jtl@hotmail.com');
+  // await page.locator('#mui-1').fill('potiguar.passagens@gmail.com');
+
+  // await page.locator('#mui-2').fill('Isabel%2936');
+  // await page.locator('#mui-2').fill('#Bob1234');
+
   start() {
     if (!this.is_running) {
       this.is_running = true;
       // this.interval = setInterval(() => queues.processQueue(), 5000);
       setInterval(() => queues.processQueueSeatsAero(), 3600000);
-      // setInterval(() => seatsAero.getSeatsAeroBrasil(), 2200000);
+      setInterval(() => seatsAero.getSeatsAeroBrasil(), 2200000);
       queues.processQueueSeatsAero()
-      // seatsAero.getSeatsAeroBrasil()
 
-      crawlers.getTKmilhasNordeste();
+      // crawlers.getTKmilhasNordeste();
       // crawlers.getAzul();
       // this.maintenance()
       console.log('Fila de alertas iniciada.');
