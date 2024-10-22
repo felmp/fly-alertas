@@ -69,7 +69,7 @@ export async function routes(fastify: FastifyInstance) {
             });
         }
 
-        if (mediaControl === 3) {
+        if (mediaCount === 3) {
           const data = JSON.stringify({
             "to_number": phoneNumber,
             "from_number": payload.channel_phone_number,
