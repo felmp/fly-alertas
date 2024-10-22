@@ -5,6 +5,20 @@ import { AlertService } from "./services/alert.service";
 import { gpt, wpp } from "./axios";
 import crawlers from "./engine/v1/resources/crawlers";
 
+import fs from 'fs';
+import path from 'path';
+
+const mediaControlFilePath = path.join(__dirname, 'mediaControl.json');
+
+function readMediaControl() {
+  try {
+    const data = fs.readFileSync(mediaControlFilePath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    return {};
+  }
+}
+
 export async function routes(fastify: FastifyInstance) {
   fastify.post('/webhook', async (request, res) => {
     const payload = request.body as GroupMessage;
@@ -20,19 +34,72 @@ export async function routes(fastify: FastifyInstance) {
 
     //AUTOMAÇÃO PARA DANIEL 
     if (payload.contact.friendly_name == 'TESTE CONTROLE DE MENSAGENS E MÍDIA') {
-      var data = JSON.stringify({
-        "to_number": '+5585991694005',
-        "from_number": "+5584999271649",
-        "text": 'TESTE\n\n\n' + JSON.stringify(payload)
-      });
+      const phoneNumber = payload.participant.phone_number;
+      const currentDate = new Date().toISOString().split('T')[0]; // Data no formato YYYY-MM-DD
+      const message = payload.message;
 
-      wpp.post('open/whatsapp/send-message', data)
-        .then(function (response) {
-          console.log(response);
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
+      if (message.media) {
+        const mediaControl = readMediaControl();
+
+        if (!mediaControl[phoneNumber]) {
+          mediaControl[phoneNumber] = {};
+        }
+
+        if (!mediaControl[phoneNumber][currentDate]) {
+          mediaControl[phoneNumber][currentDate] = 0;
+        }
+
+        const mediaCount = mediaControl[phoneNumber][currentDate];
+
+        if (mediaCount >= 5) {
+          console.log(`Usuário ${phoneNumber} já enviou 5 mídias hoje. Bloqueando novos envios.`);
+
+          const data = JSON.stringify({
+            "to_number": phoneNumber,
+            "from_number": payload.channel_phone_number,
+            "text": 'Você atingiu o limite de 5 mídias por hoje. Tente novamente amanhã.'
+          });
+
+          wpp.post('open/whatsapp/send-message', data)
+            .then(function (response) {
+              console.log('Mensagem de bloqueio enviada com sucesso:', response);
+            })
+            .catch(function (error) {
+              console.log('Erro ao enviar mensagem de bloqueio:', error);
+            });
+        }
+
+        if (mediaControl === 3) {
+          const data = JSON.stringify({
+            "to_number": phoneNumber,
+            "from_number": payload.channel_phone_number,
+            "text": `Pessoal, para manter a organização e facilitar a leitura das mensagens importantes, estamos limitando o envio de imagens da seguinte forma:
+
+✅ Máximo de 3 imagens por vez (por mensagem ou envio consecutivo)
+✅ No maximo 5 imagens por dia( 24 hrs )
+✅ Evitar imagens repetidas ou irrelevantes
+✅ Sempre que possível, usar links ou PDFs compactos para evitar excesso de arquivos
+✅ Foco no conteúdo relevante para todos os membros
+
+⚠️ Mensagens com grande volume de imagens poderão ser removidas para evitar sobrecarga no grupo.
+
+Contamos com a colaboração de todos para manter o grupo organizado e funcional!`});
+
+          wpp.post('open/whatsapp/send-message', data)
+            .then(function (response) {
+              console.log('Mensagem de bloqueio enviada com sucesso:', response);
+            })
+            .catch(function (error) {
+              console.log('Erro ao enviar mensagem de bloqueio:', error);
+            });
+        } else {
+          mediaControl[phoneNumber][currentDate]++;
+
+          fs.writeFileSync(mediaControlFilePath, JSON.stringify(mediaControl, null, 2), 'utf8');
+
+          console.log(`Mídia recebida do usuário ${phoneNumber}. Total de mídias hoje: ${mediaControl[phoneNumber][currentDate]}`);
+        }
+      }
     }
   })
 
