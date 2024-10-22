@@ -30,7 +30,7 @@ class engineV1 {
       // this.interval = setInterval(() => queues.processQueue(), 5000);
       setInterval(() => queues.processQueueSeatsAero(), 3600000);
       setInterval(() => seatsAero.getSeatsAeroBrasil(), 2200000);
-      queues.processQueueSeatsAero()
+      // queues.processQueueSeatsAero()
 
       // crawlers.getTKmilhasNordeste();
       // crawlers.getAzul();

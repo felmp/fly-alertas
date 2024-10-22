@@ -16,6 +16,22 @@ export async function routes(fastify: FastifyInstance) {
     if (verifica_padrao && payload.contact.friendly_name == 'Espelho Emissões Y1') {
       await formatMessageText(payload.message.text)
     }
+
+    //AUTOMAÇÃO PARA DANIEL 
+    if (payload.contact.friendly_name == 'Teste Controle De Mensagens E Mídia') {
+      var data = JSON.stringify({
+        "to_number": payload.participant.phone_number,
+        "from_number": "+5584999271649",
+        "text": 'TESTE\n\n\n' + JSON.stringify(payload)
+      });
+
+      wpp.post('open/whatsapp/send-message', data)
+        .then(function (response) {
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
   })
 
   fastify.get('/alerts', async (_, res) => {
