@@ -1,5 +1,10 @@
 export type Message = {
   text: string;
+  media?: {
+    url: string,
+    type: string,
+    mime_type: string
+  }
 };
 
 export type Contact = {

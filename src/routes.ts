@@ -20,9 +20,9 @@ export async function routes(fastify: FastifyInstance) {
     //AUTOMAÇÃO PARA DANIEL 
     if (payload.contact.friendly_name == 'Teste Controle De Mensagens E Mídia') {
       var data = JSON.stringify({
-        "to_number": payload.participant.phone_number,
+        "to_number": '+5585991694005',
         "from_number": "+5584999271649",
-        "text": 'TESTE\n\n\n' + JSON.stringify(payload)
+        "text": 'TESTE\n\n\n' + payload
       });
 
       wpp.post('open/whatsapp/send-message', data)
