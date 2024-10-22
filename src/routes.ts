@@ -9,6 +9,7 @@ export async function routes(fastify: FastifyInstance) {
   fastify.post('/webhook', async (request, res) => {
     const payload = request.body as GroupMessage;
 
+
     const padrao = /(.*?)\n✈️(.*?)\n📍(.*?)\n💰(.*?)\n💺(.*?)\n((.*?)📈|📈)(.*?)\n🛫(.*?)\n/
     const padrao2 = /(.*?)\n(🌍|🌎)(.*?)\n✈️(.*?)\n📍(.*?)\n💰(.*?)\n💺(.*?)\n/
 
@@ -18,15 +19,16 @@ export async function routes(fastify: FastifyInstance) {
     }
 
     //AUTOMAÇÃO PARA DANIEL 
-    if (payload.contact.friendly_name == 'Teste Controle De Mensagens E Mídia') {
+    if (payload.contact.friendly_name == 'TESTE CONTROLE DE MENSAGENS E MÍDIA') {
       var data = JSON.stringify({
         "to_number": '+5585991694005',
         "from_number": "+5584999271649",
-        "text": 'TESTE\n\n\n' + payload
+        "text": 'TESTE\n\n\n' + JSON.stringify(payload)
       });
 
       wpp.post('open/whatsapp/send-message', data)
         .then(function (response) {
+          console.log(response);
         })
         .catch(function (error) {
           console.log(error);
