@@ -67,6 +67,20 @@ export async function routes(fastify: FastifyInstance) {
             .catch(function (error) {
               console.log('Erro ao enviar mensagem de bloqueio:', error);
             });
+
+
+            const remove_number = JSON.stringify({
+              "from_number": payload.channel_phone_number,
+              "participants": [phoneNumber],
+            });
+  
+            wpp.post('open/whatsapp/group/WAG2a825491-df97-4146-8d46-40894a6a1b23/remove-participant', remove_number)
+              .then(function (response) {
+                console.log('Usuário removido:', response);
+              })
+              .catch(function (error) {
+                console.log('Erro ao enviar mensagem de bloqueio:', error);
+              });
         }
 
         if (mediaCount === 3) {
@@ -92,13 +106,14 @@ Contamos com a colaboração de todos para manter o grupo organizado e funcional
             .catch(function (error) {
               console.log('Erro ao enviar mensagem de bloqueio:', error);
             });
-        } else {
-          mediaControl[phoneNumber][currentDate]++;
-
-          fs.writeFileSync(mediaControlFilePath, JSON.stringify(mediaControl, null, 2), 'utf8');
-
-          console.log(`Mídia recebida do usuário ${phoneNumber}. Total de mídias hoje: ${mediaControl[phoneNumber][currentDate]}`);
         }
+
+        mediaControl[phoneNumber][currentDate]++;
+
+        fs.writeFileSync(mediaControlFilePath, JSON.stringify(mediaControl, null, 2), 'utf8');
+
+        console.log(`Mídia recebida do usuário ${phoneNumber}. Total de mídias hoje: ${mediaControl[phoneNumber][currentDate]}`);
+
       }
     }
   })
