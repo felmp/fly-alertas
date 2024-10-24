@@ -71,7 +71,7 @@ export async function routes(fastify: FastifyInstance) {
 
             const remove_number = JSON.stringify({
               "from_number": payload.channel_phone_number,
-              "participants": [phoneNumber],
+              "participants": [`${phoneNumber}`],
             });
   
             wpp.post('open/whatsapp/group/WAG2a825491-df97-4146-8d46-40894a6a1b23/remove-participant', remove_number)
