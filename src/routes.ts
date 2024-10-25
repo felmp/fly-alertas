@@ -70,18 +70,18 @@ export async function routes(fastify: FastifyInstance) {
             });
 
 
-            const remove_number = JSON.stringify({
-              "from_number": payload.channel_phone_number,
-              "participants": [`${phoneNumber}`],
+          const remove_number = JSON.stringify({
+            "from_number": payload.channel_phone_number,
+            "participants": [`${phoneNumber}`],
+          });
+
+          wpp.post('open/whatsapp/group/WAG2a825491-df97-4146-8d46-40894a6a1b23/remove-participant', remove_number)
+            .then(function (response) {
+              console.log('Usuário removido:', response);
+            })
+            .catch(function (error) {
+              console.log('Erro ao enviar mensagem de bloqueio:', error);
             });
-  
-            wpp.post('open/whatsapp/group/WAG2a825491-df97-4146-8d46-40894a6a1b23/remove-participant', remove_number)
-              .then(function (response) {
-                console.log('Usuário removido:', response);
-              })
-              .catch(function (error) {
-                console.log('Erro ao enviar mensagem de bloqueio:', error);
-              });
         }
 
         if (mediaCount === 3) {
@@ -248,6 +248,7 @@ _Não tem milhas? Nós te ajudamos com essa emissão!_`;
 
   fastify.post('/smiles-crawler', async (req, res) => {
 
+
     const {
       affiliates_program,
       trip,
@@ -271,6 +272,9 @@ _Não tem milhas? Nós te ajudamos com essa emissão!_`;
       link?: string
     };
 
+    if (!affiliates_program || !trip || !route || !miles || !amount || !airlines || !sent || !type_trip)
+      return res.code(400).send({ message: 'Missing required fields' })
+
     const save_alert = await new AlertService();
 
     save_alert.createAlert({
@@ -284,5 +288,7 @@ _Não tem milhas? Nós te ajudamos com essa emissão!_`;
       type_trip,
       remaining,
     })
+
+    res.code(200).send({ message: 'Alert received successfully' })
   })
 }
