@@ -7,6 +7,7 @@ import crawlers from "./engine/v1/resources/crawlers";
 
 import fs from 'fs';
 import path from 'path';
+import calculateMilesToCurrency from "./util/conversor";
 
 const mediaControlFilePath = path.join(__dirname, 'mediaControl.json');
 
@@ -90,7 +91,7 @@ export async function routes(fastify: FastifyInstance) {
             "text": `Pessoal, para manter a organização e facilitar a leitura das mensagens importantes, estamos limitando o envio de imagens da seguinte forma:
 
 ✅ Máximo de 3 imagens por vez (por mensagem ou envio consecutivo)
-✅ No maximo 5 imagens por dia( 24 hrs )
+✅ No maximo 5 imagens por dia ( 24 hrs )
 ✅ Evitar imagens repetidas ou irrelevantes
 ✅ Sempre que possível, usar links ou PDFs compactos para evitar excesso de arquivos
 ✅ Foco no conteúdo relevante para todos os membros
@@ -214,5 +215,74 @@ _Não tem milhas? Nós te ajudamos com essa emissão!_`;
 
       res.send(alert)
     }
+  })
+
+  // fastify.get('/send-crawler-alert', async (req, res) => {
+  //   const { } = req.body
+
+  //   alerts.forEach(async (e) => {
+  //     const save_alert = await new AlertService();
+
+  //     let dates: any;
+
+  //     if (Array.isArray(e.dates)) {
+  //       dates = 'IDA: \n' + e.dates.join('\n');
+  //     } else {
+  //       dates = '\nIDA: \n' + e.dates.departure.join('\n') + "\n\nVOLTA: \n" + e.dates.return.join('\n');
+  //     }
+
+  //     save_alert.createAlert({
+  //       affiliates_program: e.,
+  //       trip: e.origin + ' -> ' + e.destination,
+  //       route: 'Nacional',
+  //       miles: e.price,
+  //       amount: Math.round(Number(calculateMilesToCurrency('azul', Number(e.price.replace('.', '')), 'BRL'))).toString(),
+  //       airlines: 'Azul',
+  //       sent: 'brasil_group',
+  //       type_trip: e.type_trip,
+  //       remaining: dates,
+  //       link: ''
+  //     })
+  //   })
+  // })
+
+  fastify.post('/smiles-crawler', async (req, res) => {
+
+    const {
+      affiliates_program,
+      trip,
+      route,
+      miles,
+      amount,
+      airlines,
+      sent,
+      type_trip,
+      remaining
+    } = req.body as {
+      affiliates_program?: string,
+      trip?: string,
+      route?: string,
+      miles?: string,
+      amount?: string,
+      airlines?: string,
+      sent?: string,
+      type_trip?: string,
+      remaining?: string,
+      link?: string
+    };
+
+    const save_alert = await new AlertService();
+
+    save_alert.createAlert({
+      affiliates_program,
+      trip,
+      route,
+      miles,
+      amount,
+      airlines,
+      sent,
+      type_trip,
+      remaining,
+    })
   })
 }
